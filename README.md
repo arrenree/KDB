@@ -1,2 +1,6 @@
-# q
-Notes for KDB
+# Allen's Notes for KDB+ / Q
+
+Tables example
+
+'test test est'
+
