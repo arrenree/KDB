@@ -1,0 +1,2 @@
+# q
+Notes for KDB
