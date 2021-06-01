@@ -1,9 +1,9 @@
 # Allen's Notes for KDB+ / Q
 
-Tables example
+Tables example 
 
-```a:0 / intedned to be a comment 
-```
+### 9. Queries: q-SQL
 
-```q
-```
+Append using Assign ,:
+
+```t:([] name:`symbol$(); iq:`int$()) / create empty table
