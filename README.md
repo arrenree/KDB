@@ -13,6 +13,10 @@
 8. [Exec query](#exec)
 9. [Update](#update_statement)
 10. [Delete columns](#delete_columns)
+11. [Delete rows](#delete_rows)
+12. [Sort Ascending / Descending](#sort_asc_desc)
+13. [Renaming / Reordering Columns](#rename_reorder_columns)
+
 # [q-SQL Problem Set](#qsql_problem_set)
 
 
@@ -346,8 +350,151 @@ date|time|sym|price|size | cond| maxprice
 
 <a name="delete_columns"></a>
 ### Delete Columns
+* cannot have by or where clause
 
+Given table tt
 
+date|time|sym|price|size | cond| maxprice
+-|-|-|-|-|-|-
+2021.01.01 | 15:10:01| BAC | 70| 42.2| D | 104
+2021.03.01 | 15:09:01| JPM | 74| 41.2| D | 102
+2021.03.01 | 15:09:01| UBS | 41| 31.2| D | 91
+
+```q
+delete maxprice from tt
+```
+date|time|sym|price|size | cond
+-|-|-|-|-|-
+2021.01.01 | 15:10:01| BAC | 70| 42.2| D
+2021.03.01 | 15:09:01| JPM | 74| 41.2| D
+2021.03.01 | 15:09:01| UBS | 41| 31.2| D
+
+* removes maxprice column
+
+```q
+delete date, time from tt
+```
+sym|price|size | cond
+-|-|-|-
+BAC | 70| 42.2| D
+JPM | 74| 41.2| D
+UBS | 41| 31.2| D
+
+* deletes multiple columns from the table
+
+<a name="delete_rows"></a>
+### Delete Rows
+Given table tt
+
+date|time|sym|price|size | cond| maxprice
+-|-|-|-|-|-|-
+2021.01.01 | 15:10:01| BAC | 70| 42.2| A | 104
+2021.03.01 | 15:09:01| JPM | 74| 41.2| B | 102
+2021.03.01 | 15:09:01| UBS | 41| 31.2| C | 91
+
+```q
+delete from tt where cond="A"
+```
+date|time|sym|price|size | cond| maxprice
+-|-|-|-|-|-|-
+2021.03.01 | 15:09:01| JPM | 74| 41.2| B | 102
+2021.03.01 | 15:09:01| UBS | 41| 31.2| C | 91
+
+* deletes row where cond=A
+
+```q
+delete from tt
+```
+date|time|sym|price|size | cond| maxprice
+-|-|-|-|-|-|-
+
+* deletes all rows
+
+<a name="sort_asc_desc"></a>
+### Sort Ascending / Descending 
+
+```q
+`sym`price xasc tt
+```
+date|time|sym|price|size | cond
+-|-|-|-|-|-
+2021.01.01 | 15:10:01| A | 70| 42.2| D
+2021.03.01 | 15:09:01| B | 73| 41.2| E
+2021.03.01 | 15:09:01| C | 79| 31.2| F
+
+* first sorts ascending by sym, then by price
+
+```q
+`sym`price xdesc tt
+```
+date|time|sym|price|size | cond
+-|-|-|-|-|-
+2021.01.01 | 15:10:01| C | 79| 42.2| D
+2021.03.01 | 15:09:01| B | 73| 41.2| E
+2021.03.01 | 15:09:01| A | 70| 31.2| F
+
+* first sorts descending by sym, then by price
+
+<a name="rename_reorder_columns"></a>
+### Renaming / Reordering Columns
+
+```q
+`new1`new2 xcol tt
+```
+new1|new2|sym|price|size | cond
+-|-|-|-|-|-
+2021.01.01 | 15:10:01| C | 79| 42.2| D
+2021.03.01 | 15:09:01| B | 73| 41.2| E
+2021.03.01 | 15:09:01| A | 70| 31.2| F
+
+* renames first 2 columns to new1 and new 2
+
+```q
+`cond`size xcols tt
+```
+cond|size|date|time|sym|price
+-|-|-|-|-|-
+D| 79| 2021.01.01 | 15:10:01| C | 42.2
+E| 73| 2021.03.01 | 15:09:01| B | 41.2
+F| 70| 2021.03.01 | 15:09:01| A | 31.2
+
+* reorders columns cond and size to beginning
+
+```q
+`sym xgroup tt
+```
+sym| date
+-|-
+BAC | 2021.01.01
+RBS | 2021.01.23
+
+(sym is a keyed column)
+
+* group by column sym
+
+```q
+`date`sym xgroup tt
+```
+date| sym| time
+-|-|-
+2021.01.01 | BAC | 1:12
+2021.01.02 | JPM | 1:45
+
+(date and sym are keyed columns)
+
+* group and key by 2 columns (date and sym)
+
+```q
+`date`sym xkey tt
+```
+date| sym| time | price | size | cond
+-|-|-|-|-|-
+2021.01.01 | BAC | 1:12 | 83 | 834 | B
+2021.01.02 | JPM | 1:45 | 34 | 342 | A
+
+(date and sym are keyed columns)
+
+* make date and sym key columns
 
 
 
