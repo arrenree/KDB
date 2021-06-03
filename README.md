@@ -10,6 +10,9 @@
 5. [In function](#in_function)
 6. [Within function](#within_function)
 7. [xbar function](#xbar_function)
+8. [Exec query](#exec)
+9. [Update](#update_statement)
+10. [Delete columns](#delete_columns)
 # [q-SQL Problem Set](#qsql_problem_set)
 
 
@@ -217,6 +220,139 @@ date|time|x|price
 
 (date and time are keyed columns)
 
+<a name="exec"></a>
+### Exec Query
+
+```q
+exec price from trade where date=.z.d, sym=`AAPL
+```
+62 59 13
+
+* exec = single list returned
+
+```q
+select price from trade where date=.z.d, sym=`AAPL
+```
+price|
+-|
+62|
+59|
+13|
+
+* select = single column returned
+
+```q
+exec first price from trade where date=.z.d, sym=`AAPL
+```
+62
+
+```q
+exec price by sym from trade where date=.z.d, sym=`AAPL
+```
+AAPL | 62 59 13
+
+* retrieve price as values and specify the where expressions (date and sym)
+* sets sym as keys
+
+```q
+exec price by sym from trade where date=.z.d
+```
+sym| price
+-|-
+A | 108 77 88
+AA| 33 45 23
+AAPL| 34 56 23
+
+```q
+exec first price by sym, cond from trade where date=.z.d, sym in `KX`AAPL
+```
+
+sym | cond | price
+-|-|-
+AAPL | | 95
+AAPL | A | 43
+KX | C | 32
+
+<a name="update_statement"></a>
+### Update
+
+```q
+tt:100?trade
+```
+date|time|sym|price|size | cond
+-|-|-|-|-|-
+2021.01.01 | 15:10:01| BAC | 70| 422| B
+2021.03.01 | 15:09:01| JPM | 74| 412| C
+
+* randomly select 100 rows
+
+```q
+update cond: "D" from tt
+```
+date|time|sym|price|size | cond
+-|-|-|-|-|-
+2021.01.01 | 15:10:01| BAC | 70| 422| D
+2021.03.01 | 15:09:01| JPM | 74| 412| D
+2021.03.01 | 15:09:01| UBS | 41| 312| D
+
+* updates cond to "D"
+
+```q
+update size%100 from tt
+```
+date|time|sym|price|size | cond
+-|-|-|-|-|-
+2021.01.01 | 15:10:01| BAC | 70| 42.2| D
+2021.03.01 | 15:09:01| JPM | 74| 41.2| D
+2021.03.01 | 15:09:01| UBS | 41| 31.2| D
+
+* can perform function on entire column. size divided by 100
+
+```q
+update advice:`sell from tt
+```
+date|time|sym|price|size | cond| advice
+-|-|-|-|-|-|-
+2021.01.01 | 15:10:01| BAC | 70| 42.2| D | sell
+2021.03.01 | 15:09:01| JPM | 74| 41.2| D | sell
+2021.03.01 | 15:09:01| UBS | 41| 31.2| D | sell
+
+* if you update a column that doesnt exist, it will add the column
+* new column added called advice and populates with sell
+* notice it has to be backtick sell
+
+```q
+update advice: `buy from tt where price < 70
+```
+date|time|sym|price|size | cond| advice
+-|-|-|-|-|-|-
+2021.01.01 | 15:10:01| BAC | 70| 42.2| D | 
+2021.03.01 | 15:09:01| JPM | 74| 41.2| D | 
+2021.03.01 | 15:09:01| UBS | 41| 31.2| D | buy
+
+* if price less than 70, advice becomes buy
+* if not, then null value returned
+
+```q
+update maxprice: max price by sym from tt
+```
+date|time|sym|price|size | cond| maxprice
+-|-|-|-|-|-|-
+2021.01.01 | 15:10:01| BAC | 70| 42.2| D | 104
+2021.03.01 | 15:09:01| JPM | 74| 41.2| D | 102
+2021.03.01 | 15:09:01| UBS | 41| 31.2| D | 91
+
+* adds new column max price
+
+<a name="delete_columns"></a>
+### Delete Columns
+
+
+
+
+
+
+
 <a name="qsql_problem_set"></a>
 # q-SQL Problem Set
 [Top](#top)
@@ -385,3 +521,10 @@ minute|numbertrades|totalsize
 
 * 30 xbar time.minute = rounds minutes by 30; groups together and is set as key
 
+<hr>
+
+**10. Find all trades for `A where the price was cheaper than the average for that day**
+
+```q
+a: update avgPrice: avg price by date from select from trade where sym=`A
+```
