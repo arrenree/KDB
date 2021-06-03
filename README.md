@@ -1,4 +1,6 @@
 # Allen's Notes for KDB+ / Q
+<a name="top"></a>
+
 
 # q-SQL
 1. [Select from where](#select_from_where)
@@ -8,6 +10,7 @@
 5. [In function](#in_function)
 6. [Within function](#within_function)
 7. [xbar function](#xbar_function)
+# [q-SQL Problem Set](#qsql_problem_set)
 
 
 <a name="select_from_where"></a>
@@ -214,9 +217,11 @@ date|time|x|price
 
 (date and time are keyed columns)
 
+<a name="qsql_problem_set"></a>
 # q-SQL Problem Set
+[Top](#top)
 
-1. Extract from trade table, trades for MS greater than 1,000 in size
+**1. Extract from trade table, trades for MS greater than 1,000 in size**
 
 ```q
 select from trade where sym=`MS, size >1000
@@ -228,8 +233,111 @@ dt|sym|price|size
 2021.01.01 | MS |234 | 400
 
 * multiple where expressions separated by commas
-* sym has to be (`MS)
+* sym has to be back tick MS
+<hr>
+
+**2. From the trade table, find the total size of all trades and the average price paid per sym**
+
+```q
+select total: sum size, avg price by sym from trade
+```
+
+sym|total | price
+-|-|-
+AAPL | 320 | 1015
+C | 310 | 100
+MS | 740 | 234
+
+* "price paid per sym" = we need to set sym as a keyed colummn (by sym)
+* select + conditions = columns retrieved
+* total: renames column, sum size = sums sizes together
+* avg price = retains the price column header, just averages prices
+
+<hr>
+
+**3. From the trade table, find the trade that was largest size for each sym**
+
+```q
+select from (update mx:max size by sym from trade) where size = mx
+```
+
+date|time|sym|price|size|cond|mx
+-|-|-|-|-|-|-
+2021-05-30|	09:30:21.256|	B	|100.04|	99900	| 	|99900
+2021-05-30|	09:31:20.975	|AA|	67.30|	99900|	C|	99900
+2021-05-30|	09:43:47.816	|GOOG|	72.42|	99900|	A|	99900
+
+* add new column mx which is the max size by sym
+* where size = filter size to max size
+* this is using a nested query to filter only the max size for their sym
+
+Alternative solution
+
+```q
+select from trade where size=(max;size) fby sym
+```
+
+date|time|sym|price|size|cond
+-|-|-|-|-|-
+2021-05-30|	09:30:21.256|	B|	100.04 |	99900|	 
+2021-05-30|	09:31:20.975|	AA|	67.30	|99900|	C
+2021-05-30|	09:43:47.816|	GOOG|	72.42	|99900|	A
+2021-05-30|	09:46:44.690|	F	|73.22	|99900|	B
+
+* fby = allows performing filters on agg queries
+* fby has to go at the end of your query
+
+<hr>
+
+**4. From the trade table, select the latest trade for each sym, and include all details**
+
+```q
+select last date, last price, last size by sym from trade
+```
+sym|date|price|size
+-|-|-|-
+A|	2021-06-03|	87.54| 49100
+AA|	2021-06-03|	68.09| 88100
 
 
+Alternative Solution
 
+```q
+select by sym from trade
+```
+sym|date|price|size|cond
+-|-|-|-|-
+AMZN|	2021-06-03|	87.54| 49100 | B
+AAPL|	2021-06-03|	87.54| 49100 | C
+
+* table is already sorted by time, KDB is based on ordered lists
+
+<hr>
+
+**5. Find all trades that have sym GOOG**
+
+```q
+select from trade where sym=`GOOG
+```
+sym|date|price|size|cond
+-|-|-|-|-
+GOOG|	2021-06-03|	87.54| 49100 | B
+GOOG|	2021-06-03|	87.54| 49100 | C
+
+<hr>
+
+**6. Find all trades that have sym GOOG or RBS or A**
+
+```q
+select from trade where sym in `GOOG`RBS`A
+```
+sym|date|price|size|cond
+-|-|-|-|-
+GOOG|	2021-06-03|	87.54| 49100 | B
+RBS|	2021-06-03|	87.54| 49100 | C
+A|	2021-06-03|	87.54| 49100 | C
+
+<hr>
+
+**7. Find all trades for google that had a price between 70 and 80**
 
