@@ -341,3 +341,47 @@ A|	2021-06-03|	87.54| 49100 | C
 
 **7. Find all trades for google that had a price between 70 and 80**
 
+```q
+select from trade where sym=`GOOG, price within 70 80
+```
+
+sym|date|price|size|cond
+-|-|-|-|-
+GOOG|	2021-06-03|	72 | 49100 | B
+GOOG|	2021-06-03|	75| 49100 | C
+GOOG|	2021-06-03|	78 | 49100 | C
+
+<hr>
+
+**8. Count the number of trades and total size of trades per hour for sym RBS**
+
+```q
+select NumberTrades: count i, totalSize: sum size by time.hh from trade where sym=`RBS
+```
+hh|NumberTrades|totalSize
+-|-|-
+9|	3186|	159063500
+10|	6544|	321195100
+11|	6280|	315284200
+
+* NumberTrades + TotalSize = new column names
+* count i = virtual column. Counts agg number of horizontal rows
+* by time.hh = sets hour as the key column and groups results by hour
+* sum size = gives you total size
+
+<hr>
+
+**9. Select the number of trades and total size of trades every 30 mins for the sym RBS**
+
+```q
+select numbertrades: count i, totalsize: sum size by 30 xbar time.minute from trade where sym=`RBS
+```
+
+minute|numbertrades|totalsize
+-|-|-
+09:30|	3186|	159063500
+10:00|	3271|	162197000
+10:30|	3273|	158998100
+
+* 30 xbar time.minute = rounds minutes by 30; groups together and is set as key
+
