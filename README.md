@@ -2,7 +2,7 @@
 <a name="top"></a>
 
 
-# Tables
+# [Tables](#tables_header)
 1. [Flipping Dictionary to Table](#dict_to_table)
 2. [Simple Table](#simple_table)
 3. [Single Row Table](#single_row_table)
@@ -10,14 +10,14 @@
 5. [Meta / Data Type Table](#meta_datatypes_table)
 6. [Count Row Table](#countrowsimple_table)
 7. [Rename Column Table](#rename_column_table)
-8. [Add Column Table](#rename_column_table)
+8. [Add Column Table](#add_column_table)
 9. [Sort Column Table](#sort_column_table)
 10. [Union Table](#union_table)
 11. [Except Table](#except_table)
 12. [Inter Table](#inter_table)
 13. [Distinct Table](#distinct_table)
-14. [Retrieve Table](#retrieve_table)
-15. 
+14. [Retrieve From Table](#retrieve_table)
+15. [Insert Table](#insert_table)
 
 # [Tables Problem Set](#tables_problem_set)
 
@@ -49,11 +49,371 @@
 
 
 
+<a name="tables_header"></a>
+# Tables
+[Top](#top)
+
+<a name="dict_to_table"></a>
+### Flipping Dictionary to Table
+
+```q
+d: `company`employees`! (`ford`bmw; 300 100)
+```
+key|Value
+-|-
+company	|`ford`bmw
+employees|	300 100
+
+* dictionary d
+
+```q
+flip d
+```
+company | employees
+-|-
+ford |	300
+bmw	| 100
+
+* when you flip a dictionary, you get a table
+
+<a name="simple_table"></a>
+### Simple Table
+
+```q
+( [] company: `ford`bmw; employees: 300 100)
+```
+company | employees
+-|-
+ford |	300
+bmw	| 100
+
+* have to define a table within parathesis ( )
+* tables must have [] which are for key columns
+* semi colon ; separates next column
+
+<a name="single_row_table"></a>
+### Single Row Table
+
+```q
+( [] company: enlist `ford; employees: enlist 300)
+```
+company | employees
+-|-
+ford |	300
+
+* have to use enlist for atoms and single row tables
+
+<a name="mixed_table"></a>
+### Mixed Table
+
+```q
+( [] syms:`a`b`c; floats: 1.1 2.2 3.3; strings: ("bob"; "jim"; "john"))
+```
+syms|floats|strings
+-|-|-
+a|	1.1 |	bob
+b|	2.2	|jim
+c|	3.3	|john
+
+* syms have to have backtick+sym
+* strings have to enclose within (" ")
+
+<a name="meta_datatypes_table"></a>
+### Meta / Data Type Table
+
+* meta returns a table where each row is a column
+
+```q
+( [] company:(); employees:() )
+meta t
+```
+c|t|f|a
+-|-|-|-
+company|	|	|
+employees|	|	|
+
+* create empty table with no types
+* t = type (s = symbol, j = long)
+* f = foreign key
+* a = attributes
+
+```q
+( [] company: `symbol$(); employees: `int$())
+```
+c|t|f|a
+-|-|-|-
+company|	s	|	|
+employees|	j	|	|
+
+* changed type to s symbol and i integer
+
+<a name="countrowsimple_table"></a>
+### Count Row Table
+
+Given:
+
+company | employees
+-|-
+ford |	300
+bmw	| 100
+
+```q
+count t
+```
+2
+
+* returns number of rows in table
+
+```q
+cols t
+```
+`company`employee
+
+* returns symbol list of columns
+
+<a name="rename_column_table"></a>
+### Rename Column Table xcol
+
+```q
+`a`b xcol t
+```
+
+a | b
+-|-
+ford |	300
+bmw	| 100
+
+<a name="add_column_table"></a>
+### Add Column Table
+
+```q
+select company, employees, newval: 101 from t
+```
+company | employees | newval
+-|-|-
+ford |	300 | 101
+bmw	| 100 | 101
+
+* select will retrieve columns as values
+* if you select a column that doesnt exist, it will add it (newval)
+
+<a name="sort_column_table"></a>
+### Sort Column Table (xasc)
+
+```q
+`employees xasc t
+```
+company | employees | newval
+-|-|-
+bmw	| 100 | 101
+ford |	300 | 101
+
+* will sort ascending by employees
+
+<a name="union_table"></a>
+### Union Table
+
+Given
+
+table t
+
+company | employees
+-|-
+ferrari| 100
+ford |	100 
+rover| 100
+
+table t
+
+company | employees
+-|-
+ferrari| 100
+bmw |	5 
+ford| 5
+
+```q
+t union u
+```
+company | employees
+-|-
+ferrari| 100
+ford | 100 
+rover| 100
+bmw |	5 
+ford| 5
+
+* returns values that are same (ferrari 100). does not dupe same values.
+* any values that do NOT equal, adds as new row
+
+<a name="except_table"></a>
+### Except Table
+
+```q
+t except u
+```
+company | employees
+-|-
+ford| 100
+rover | 100 
+
+* checks for any matches, and removes them (ferrari 100)
+* returns remaining rows in table t
+
+<a name="inter_table"></a>
+### Inter Table
+
+```q
+t inter u
+```
+company | employees
+-|-
+ferrari| 100
+
+* only returns rows that match
+
+<a name="distinct_table"></a>
+### Distinct Table
+
+```q
+([] a: 1 1 2; b: 1 1 3)
+```
+a|b
+-|-
+1|	1
+1	|1
+2	|3
+
+```q
+distinct ([] a: 1 1 2; b: 1 1 3)
+```
+a|b
+-|-
+1|	1
+2	|3
+
+* will return distinct values per row
+
+<a name="retrieve_table"></a>
+### Retrieve From Table
+
+Given
+
+company | employees
+-|-
+ferrari| 100
+ford | 100 
+rover| 100
+bmw |	5 
+ford| 5
+
+```q
+select from t
+```
+company | employees
+-|-
+ferrari| 100
+ford | 100 
+rover| 100
+bmw |	5 
+ford| 5
+
+* retrieves all columns from table t
+
+```q
+select company from t
+```
+
+company | 
+-|
+ferrari| 
+ford |  
+rover| 
+bmw |	 
+ford| 
+
+* only retrieves the company column
+
+```q
+select from t where company = `ford
+```
+
+company | employees
+-|-
+ford | 100 
+
+* retrieves rows that meet the specific where requirement (ford)
+
+```q
+t [`employees]
+```
+100 100 100 5 5 
+
+* retrieves column= employee as a row
+
+```q
+t [`employees] - : 100
+```
+company | employees
+-|-
+ferrari| 0
+ford | 0 
+rover| 0
+bmw |	-105 
+ford| -105
+
+* you can manipulate all the values in a column (employees)
+
+```q
+t [ 0 1]
+```
+company | employees
+-|-
+ferrari| 0
+ford | 0 
+
+* returns first 2 rows
+
+alternatively
+
+```q
+2#t
+```
+
+```q
+-3#t
+```
+
+company | employees
+-|-
+rover| 0
+bmw |	-105 
+ford| -105
+
+* returns last 3 rows 
+
+```q
+2 ? t
+```
+
+company | employees
+-|-
+rover| 0
+ford| -105
+
+* randomly select 2 from table
+
+<a name="insert_table"></a>
+### Insert Table
+
+
+
+
+
 
 
 <a name="qsql_header"></a>
 # qSQL
-
+[Top](#top)
 
 <a name="select_from_where"></a>
 ### Select from where
