@@ -463,7 +463,7 @@ t:t,x
 # Tables Problem Set
 [Top](#top)
 
-Given the following table:
+**1. Given:**
 
 ```q
 stock: ( [] sym: `MS`C`AAPL; sector:`Financial`Financial`Tech; employees: 100 100 100)
@@ -558,7 +558,7 @@ GOOG | Tech | 100
 
 <hr>
 
-Given:
+**6. Given:**
 
 ```q
 boss: ( [] name:`bob`bill`belinda; height: 188 186 174)
@@ -612,9 +612,105 @@ john|	170
 
 * take 2 from employees table, sorted descending by height
 
+<hr>
 
+**8. Given the 2 tables:**
 
+```q
+stock: ( [sym:`MS`C`AAPL] sector:`Fin`Fin`Tech; employees: 100 100 100)
+trade: ( [] dt: 2021.01.01+til 5; sym:`C`C`MS`C`AAPL; price: 10 20 30 40 50; size: 100 200 300 400 500)
+```
+stock:
+sym|sector|employees
+-|-|-
+MS|	Fin|	100
+C	|Fin	|100
+AAPL	|Tech|	100
 
+trade:
+dt|sym|price|size
+-|-|-|-
+2021-01-01|	C	|10	|100
+2021-01-02|	C	|20	|200
+2021-01-03|	MS|	30|	300
+2021-01-04|	C	|40	|400
+2021-01-05|	AAPL	|50|	500
+
+**8. Insert the following rows into trade table**
+dt|sym|price|size
+-|-|-|-
+2021-11-01|	JPM	|1	|100
+2021-11-02|	UBS	|2	|200
+
+```q
+`trade insert( [] dt:2021.11.01+1 ; sym:`JPM`UBS; price:1 2; size: 100 200) 
+```
+or
+```q
+insert [`trade; ([] dt:2021.11.01+1 ; sym:`JPM`UBS; price:1 2; size: 100 200)]
+```
+dt|sym|price|size
+-|-|-|-
+2021-01-01|	C	|10	|100
+2021-01-02|	C	|20	|200
+2021-01-03|	MS|	30|	300
+2021-01-04|	C	|40	|400
+2021-01-05|	AAPL	|50|	500
+2021-11-01|	JPM	|1	|100
+2021-11-02|	UBS	|2	|200
+
+* have to use backtick table in order to amend the underly table
+
+<hr>
+
+**9. Insert the following record into stock**
+sym|sector|employees
+-|-|-
+FB|	Tech|	100
+
+```q
+`stock insert [`FB; `Tech; 100]
+```
+sym|sector|employees
+-|-|-
+MS|	Fin|	100
+C	|Fin	|100
+AAPL	|Tech|	100
+FB | Tech | 100
+
+* table name + insert (value1, value 2, value 3)
+
+<hr>
+
+**10. In the stock table, change the number of employees for C to 300**
+
+```q
+stock upsert (`C;`Fin;300)
+```
+or
+```q
+stock upsert ([sym: enlist`C] employees: enlist 300)
+```
+sym|sector|employees
+-|-|-
+C	|Fin	|300
+
+* have to use enlist to create a vector for an atom
+
+**11. Sort the stock table by sym**
+
+```q
+`sym xasc `stock
+```
+sym|sector|employees
+-|-|-
+AAPL|	Tech|	100
+C	|Fin|	100
+MS|	Fin|	100
+
+* `column name + xasc + `table name
+
+<hr>
 
 <a name="qsql_header"></a>
 # qSQL
