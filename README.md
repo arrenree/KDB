@@ -21,9 +21,6 @@
 
 # [Tables Problem Set](#tables_problem_set)
 
-
-
-
 # [qSQL](#qsql_header)
 1. [Select from where](#select_from_where)
 2. [Select by](#select_by)
@@ -405,7 +402,215 @@ ford| -105
 <a name="insert_table"></a>
 ### Insert Table
 
+```q
+t: ( [] company: (); employees: () )
+```
+company|employees
+-|-
 
+* empty table
+
+```q
+insert [`t; (`Ferrari; 8)]
+```
+company|employees
+-|-
+Ferrari | 8
+
+* backtick t to update underlying table
+* first argument is table name, second argument are the values to be inserted
+* semi colon separate columns for the values
+
+```q
+insert [`t; (Ferrari`bmw; 9 7)]
+```
+company|employees
+-|-
+Ferrari | 8
+Ferrari | 9
+bmw | 7
+
+* insert will append to the table each time (ferrari repeated)
+
+```q
+x: ( [] company: `Subaru`Hyundai; employees: 55 56)
+```
+company|employees
+-|-
+Subaru | 55
+Hyundai | 56
+
+```q
+`t insert x
+```
+company|employees
+-|-
+Ferrari | 8
+Ferrari | 9
+bmw | 7
+Subaru | 8
+Hyundai | 56
+
+* table x inserted into table t
+
+alternatively:
+```q
+t:t,x
+```
+<hr>
+
+<a name="tables_problem_set"></a>
+# Tables Problem Set
+[Top](#top)
+
+Given the following table:
+
+```q
+stock: ( [] sym: `MS`C`AAPL; sector:`Financial`Financial`Tech; employees: 100 100 100)
+```
+sym|sector|employees
+-|-|-
+MS	|Financial|	100
+C	|Financial	|100
+AAPL|	Tech	|100
+
+**1. Extract the employees numbers (without the header)**
+
+```q
+stock [ ; `employees]
+```
+
+```q
+stock[`employees]
+```
+
+```q
+stock.employees
+```
+
+```q
+stock`employees
+```
+100
+
+<hr>
+
+**2. Key the first column in stock table (above)**
+
+```q
+1!stock
+```
+
+sym|sector|employees
+-|-|-
+MS	|Financial|	100
+C	|Financial	|100
+AAPL|	Tech	|100
+
+* you can't tell cuz of formatting, but sym is now keyed
+
+<hr>
+
+**3. Display only the first and second rows of the stock table**
+
+```q
+2#stock
+```
+or
+
+```q
+stock [0 1]
+```
+sym|sector|employees
+-|-|-
+MS	|Financial|	100
+C	|Financial	|100
+
+<hr>
+
+**4. Select the last row of stock table as a dictionary**
+
+```q
+last stock
+```
+key |value
+-|-
+sym |`AAPL
+sector | `Tech
+employees | 100
+
+<hr>
+
+**5. Insert GOOG in the tech sector with 100 employees**
+
+```q
+insert [`stock; ([] sym: enlist `GOOG; sector: enlist `tech; employees: enlist 100)]
+```
+sym|sector|employees
+-|-|-
+MS	|Financial|	100
+C	|Financial	|100
+AAPL|	Tech	|100
+GOOG | Tech | 100
+
+* syntax is insert + [table name; table with corresponding columns]
+* must use enlist when adding single row!!
+
+<hr>
+
+Given:
+
+```q
+boss: ( [] name:`bob`bill`belinda; height: 188 186 174)
+employees: ( [] name:`jim`jane`john; height: 180 160 170)
+```
+boss:
+name|height
+-|-
+bob|	188
+bill |	186
+belinda |174
+
+employees:
+
+name|height
+-|-
+jim|	180
+jane|	160
+john|	170
+
+**6. Find the average height of the bosses, the employees, and both the bosses and employees**
+
+```q
+avg boss `height
+```
+182.667
+
+```q
+avg employees `height
+```
+170f
+
+```q
+avg (employees, boss) `height
+```
+176.33
+
+* joins the 2 tables together
+* calculate the average height from joined table
+
+<hr>
+
+**7. Find the 2 tallest employees**
+```q
+2#`height xdesc employees
+```
+name|height
+-|-
+jim	|180
+john|	170
+
+* take 2 from employees table, sorted descending by height
 
 
 
