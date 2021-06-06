@@ -19,6 +19,8 @@
 14. [Retrieve From Table](#retrieve_table)
 15. [Insert Table](#insert_table)
 
+<hr>
+
 ## [Tables Problem Set](#tables_problem_set)
 
 ## [Keyed Tables](#keyed_tables)
@@ -32,7 +34,23 @@
 8. [Upsert Multi Row/Keys](#upsert_multi_rowkeys)
 9. [Retrieving Values from Keyed Table](#retrieve_value_keys)
 
+<hr>
+
 ## [Keyed Table Problem Set](#keyed_table_problem_set)
+
+## [Table Attributes](#table_attributes)
+1. [Setting Attributes During Creation](#set_attribute_creation)
+2. [Applying Attribute to Existing Data](#apply_attribute_data)
+3. [Updating Attribute to Existing Data](#update_attribute_data)
+4. [Clear Attributes](#clear_attribute)
+5. [Attributes Benefits](#fast_attribute)
+6. [Sorted Attribute](#sort_attribute)
+7. [Unique Attribute](#unique_attribute)
+8. [Grouped Attribute](#group_attribute)
+9. [Parted Attribute](#parted_attribute)
+
+
+<hr>
 
 ## [qSQL](#qsql_header)
 1. [Select from where](#select_from_where)
@@ -48,6 +66,8 @@
 11. [Delete rows](#delete_rows)
 12. [Sort Ascending / Descending](#sort_asc_desc)
 13. [Renaming / Reordering Columns](#rename_reorder_columns)
+
+<hr>
 
 ## [q-SQL Problem Set](#qsql_problem_set)
 
@@ -922,7 +942,7 @@ jim|	citi|	22
 * retrieves rows based on the values in column id (a and b)
 or
 ```q
-( [] id:`a`b) # kt)
+( [] id:`a`b) # kt
 ```
 id|name|employer|age
 -|-|-|-
@@ -967,11 +987,320 @@ size|area
 ## Keyed Tables Problem Set
 [Top](#top)
 
+**1. Create the following keyed table**
 
+table p
+`book` | `ticker`|size
+-|-|-
+`A`| `MS`| 100
+`B`| `AAPL`| 200
+`B`| `MS`| 300
+`C`| `C`| 400
 
+```Q
+p: ( [book:`A`B`B`C; ticker:`MS`AAPL`MS`C] size:100 200 300 400)
+```
+* book and ticker are keys
+* must use backtick for values
+* no ; after the []
+* no commas between values
 
+<hr>
 
+**2. Retrieve entries where book is B, using select**
+```q
+select from p where book=`B
+```
+book | ticker|size
+-|-|-
+`B`| `AAPL`| 200
+`B`| `MS`| 300
 
+<hr>
+
+**3. Retrieve entries where book is C and ticker is c, using take**
+```q
+( [book:enlist`C; ticker:enlist`C]) # p
+```
+book | ticker|size
+-|-|-
+`C`| `C`| 400
+
+* underlying table p has 2 keyed columns (book and ticker)
+* you cannot retrieve 2 keyed columns if underlying table only has 1 key column
+
+**4. Upsert the following values**
+
+table p
+
+`book` | `ticker`|size
+-|-|-
+`A`| `MS`| 100
+`B`| `AAPL`| 200
+`B`| `MS`| 300
+`C`| `C`| **400**
+**`D`**|**`MS`**|**500**
+
+```q
+upsert [p; ([book:`C`D; ticker:`C`MS]size:400 500)]
+```
+`book` | `ticker`|size
+-|-|-
+`A`| `MS`| 100
+`B`| `AAPL`| 200
+`B`| `MS`| 300
+`C`| `C`| 400
+`D`|`MS`|500
+
+<hr>
+
+<a name="table_attributes"></a>
+## Table Attributes
+[Top](#top)
+
+<a name="set_attribute_creation"></a>
+### Setting Attributes During Creation
+```q
+l:`s# 1 2 3 4 5 
+```
+1 2 3 4 5
+* applies the sorted attribute during creation of the list
+
+```q
+attr l
+```
+'s
+
+* checks what attributes are applied to list l
+* 's means sorted attribute applied
+
+<a name="apply_attribute_data"></a>
+### Applying Attribute to Existing Data
+```q
+k: 1 2 3 4 5
+```
+```q
+@ [ `.; `k;`s#]
+```
+* @ = apply
+* `. = within the default name space
+* within the default name space, apply the sorted attribute to list k
+
+```q
+attr k
+```
+`s
+* confirms list k now has the `s# sorted attribute
+
+<a name="update_attribute_data"></a>
+### Updating Attribute to Existing Data
+
+Given:
+
+table t
+
+time|name|val
+-|-|-
+08:00:00.000 |	joe|	10
+08:30:00.000|	jim|	20
+09:10:00.000|	bob|	30
+
+```q
+meta t
+```
+c|t|f|a
+-|-|-|-
+time|	t	|	
+name|	s|		
+val	|j|		
+
+* a = attributes = currently nothing
+
+```q
+update `s#time from `t
+```
+* update column time from table t with the sorted attribute
+
+c|t|f|a
+-|-|-|-
+time|	t	|	|a
+name|	s|		
+val	|j|		
+
+* under attributes for column time, s sorted has been applied
+
+<a name="clear_attribute"></a>
+### Clear Attributes
+```q
+@ [`.;`k;`#]
+```
+
+```q
+attr k
+```
+`
+<a name="fast_attribute"></a>
+### Attribute Benefits
+Given:
+```q
+k: til 1000000
+```
+0 1 2 3...999,999
+
+```q
+\t do[1000; k?500000]
+```
+* time 1,000 lookups for the number 500,000 in list k
+130
+* it took 130 miliseconds
+
+```q
+`s#k
+```
+* appy the sorted attribute to list k
+
+```q
+\t do[1000; k?500000]
+```
+0
+* after applying sort attribute, only took 0 miliseconds
+* applying sort applies a binary search. start in the middle, (ex 5), less than that, so checks mid (ex 3), more, so 4
+
+<a name="sort_attribute"></a>
+### Sorted Attribute
+* sorted attribute applied to list or column to specify data is sorted in ascending order
+* the underlying list must already be in ascending order, otherwise error
+* `s# attribute only maintained during append that maintain the sort requirement, otherwise lost
+
+```q
+list: 1 2 3 4 5
+```
+```q
+`s#list
+```
+* apply sorted attribute to list
+```q
+attr list
+```
+* checks what attributes are applied to list; confirms sorted attributed applied
+`s
+```q
+list,: 6
+```
+* add 6 to list
+```q
+attr list
+```
+* checks attributes for list
+* the sort attribute maintained since 6 is in ascending order to list
+`s
+
+```q
+list,:3
+```
+* adds 3 to list
+
+```q
+attr list
+```
+* sort attribute LOST because 3 is not ascending to existing list
+
+```q
+`s#list
+```
+* cannot apply sort attribute because underlying list is NOT ascending
+s-fail
+
+<a name="unique_attribute"></a>
+### Unique Attribute
+* unique attribute applied to a list where all values must be unique (no same values)
+
+```q
+lu:`u#1 2 3 4 5
+```
+`u
+
+```q
+lu,:7
+```
+* appends 7 to list lu
+
+```q
+attr lu
+```
+`u
+* lu still has unique attribute
+
+```q
+lu,:4
+```
+* adds 4 to list lu
+
+```q
+attr lu
+```
+`
+* loses unique attribute since 4 already exists
+
+<a name="group_attribute"></a>
+### Grouped Attribute
+* groups same identifiers together for faster searches
+
+```q
+lg: 1 3 2 3 2 1 2 3
+```
+```q
+@ [`.;`lg;`g#]
+```
+* @ = apply
+* `. = within the default name space
+* g# = group attribute
+* within the default name space, apply the group attribute to list lg
+
+```q
+attr lg
+```
+`g
+* confirms group attribute applied to list lg
+
+```q
+group lg
+```
+key|value
+-|-
+1|	0 5
+3|	1 3 7
+2|	2 4 6
+
+* stores lookup table from values to indices where they occur
+
+<a name="parted_attribute"></a>
+### Parted Attribute
+* parted attribute marks a list of having same value occuring in sequential block
+* enables faster searches
+
+```q
+lp:`p#`a`a`a`b`b`b`c`c`c
+```
+* applied parted attribute to list lp
+
+```q
+attr lp
+```
+`p
+
+* confirms parted attribtue applied to list lp
+
+```q
+lp,:`a
+```
+* appends a to list
+
+```q
+attr lp
+```
+`
+* loses group attribute since a now isnt in sequential block
 
 <hr>
 
@@ -1432,6 +1761,7 @@ date| sym| time | price | size | cond
 `2021.01.02` | `JPM` | 1:45 | 34 | 342 | A
 
 * make date and sym key columns
+<hr>
 
 <a name="qsql_problem_set"></a>
 ## q-SQL Problem Set
