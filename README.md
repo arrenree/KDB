@@ -49,8 +49,16 @@
 8. [Grouped Attribute](#group_attribute)
 9. [Parted Attribute](#parted_attribute)
 
-
 <hr>
+
+## [Foreign Key Restrictions](#fkey_restrictions)
+1. [Single Foreign Keys](#single_fkey)
+2. [Checking Foreign Keys](#check_fkey)
+3. [Upserting with Foriegn Keys](#upsert_fkey)
+4. [Retrieving Custom Columns via fkey](#retrieve_fkey)
+5. [Multiple Foreign Keys](#multi_fkey)
+
+
 
 ## [qSQL](#qsql_header)
 1. [Select from where](#select_from_where)
@@ -1303,6 +1311,162 @@ attr lp
 * loses group attribute since a now isnt in sequential block
 
 <hr>
+
+<a name="fkey_restrictions"></a>
+## Foreign Key Restrictions
+[Top](#top)
+
+* Foreign keys restrict the values that are allowed in a column
+
+<a name="single_fkey"></a>
+### Single Foreign Keys
+
+Given:
+
+```q
+company:([sym:`TS`KX`C`AAPL`GOOG`MS] advice: 6?`HOLD`BUY`SELL; level: 6?100)
+```
+
+company table
+
+sym | advice | level
+-|-|-
+`TS`|HOLD |40
+`KX` |HOLD |51
+`C` | SELL | 55
+`AAPL`|	BUY|	90
+`GOOG`|	SELL|	73
+`MS`|	SELL|	90
+
+```q
+employee:( [] name:`ryan`charlie`arthur`greg; employer:`TS`KX`KX`MS)
+```
+
+employer table
+
+name|employer
+-|-
+ryan|TS
+charlie|KX
+arthur | KX
+greg | MS
+
+```q
+update `company$employer from `employee
+```
+* similar to casting, you limit the employer column to the domain in company table (keyed column)
+* limits the **employer** column from **employee table** to the domain (keyed column = **sym**) in the **company table**
+* the domain table HAS to be keyed
+* the values in column employee must exist in domain company table
+
+<a name="check_fkey"></a>
+### Checking Foreign Keys
+
+```q
+meta employee
+```
+c|t|f|a
+-|-|-|-
+name|	s| |		
+employer|	s|	company| |	
+
+* c = column
+* f = foreign key
+* confirms the employer column is linked to the company table
+
+```q
+fkeys employee
+```
+
+key|value
+-|-
+employer|company
+
+<a name="upsert_fkey"></a>
+### Upserting with Foreign Keys
+```q
+upsert[employee; ( [] name:`james`claire; employer:`RBS`RBS)]
+```
+`cast
+* prev set **employer column** from **employee table** as fkey to **company table** domain (**sym**)
+* error because RBS is NOT a sym in the company table
+* fkey restricts us from adding what's not in the domain  
+
+```q
+insert[`company; ([sym:enlist `RBS] advice:enlist `SELL; level: enlist 20)]
+```
+* need to first add RBS into the company domain (as a keyed sym)
+* remember  need to use enlist when adding single rows
+
+sym|advice|level
+-|-|-
+`TS`|HOLD |40
+`KX` |HOLD |51
+`C` | SELL | 55
+`AAPL`|	BUY|	90
+`GOOG`|	SELL|	73
+`MS`|	SELL|	90
+`RBS|SELL |20
+
+```q
+upsert[employee; ( [] name:`james`claire; employer:`RBS`RBS)]
+```
+
+name|employer
+-|-
+ryan|TS
+charlie|KX
+arthur | KX
+greg | MS
+james|RBS
+claire | RBS
+
+* now you can append james and claire
+
+<a name="retrieve_fkey"></a>
+### Retrieving Columns via fkey
+company table
+
+sym | advice | level
+-|-|-
+`TS`|HOLD |40
+`KX` |HOLD |51
+`C` | SELL | 55
+`AAPL`|	BUY|	90
+`GOOG`|	SELL|	73
+`MS`|	SELL|	90
+
+employer table
+
+name|employer
+-|-
+ryan|TS
+charlie|KX
+arthur | KX
+greg | MS
+
+```q
+update employer.advice, employer.level from employee
+```
+* prev you keyed the employer column to domain of company table (linking the 2 tables)
+* from the employee table, retrieve the value linked from employer column to company table
+* pulls in advice and level from the company table
+
+name|employer|advice|level
+-|-|-|-
+ryan|	TS	|SELL|	12
+charlie|	KX	|BUY	|10
+arthur|	KX|	BUY|	10
+greg|	MS|	SELL|	90
+
+<a name="multi_fkey"></a>
+### Multiple Foreign Keys
+
+
+
+
+
+
 
 <a name="qsql_header"></a>
 ## qSQL
