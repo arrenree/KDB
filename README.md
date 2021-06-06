@@ -58,6 +58,7 @@
 4. [Retrieving Custom Columns via fkey](#retrieve_fkey)
 5. [Multiple Foreign Keys](#multi_fkey)
 
+## [Foreign Key Problem Set](#fkey_problemset)
 
 
 ## [qSQL](#qsql_header)
@@ -1449,8 +1450,8 @@ greg | MS
 update employer.advice, employer.level from employee
 ```
 * prev you keyed the employer column to domain of company table (linking the 2 tables)
-* from the employee table, retrieve the value linked from employer column to company table
-* pulls in advice and level from the company table
+* from the employee table, retrieve the value linked from **employer column** to **company table**
+* pulls in **advice** and **level** from the **company table**
 
 name|employer|advice|level
 -|-|-|-
@@ -1461,6 +1462,113 @@ greg|	MS|	SELL|	90
 
 <a name="multi_fkey"></a>
 ### Multiple Foreign Keys
+```q
+office: ([sym:`TS`KX`C; loc:`LDN`NY`LDN] employees:10+3?1000)
+```
+office
+
+sym|loc|employees
+-|-|-
+`TS`|	`LDN`|	875
+`KX`|	`NY`|	354
+`C`	|`LDN`|	1007
+
+```q
+employee: ([] name:`ryan`charlie`arthur; employer:`TS`KX`KX; city:`LDN`NY`NY)
+```
+employee
+
+name|employer|city
+-|-|-
+ryan|	TS|	LDN
+charlie|	KX|	NY
+arthur|	KX|	NY
+
+```q
+exec `office$flip (employer;city) from employee
+```
+0 1 1
+
+* since the office table has 2 keyed columns, you have to "cast" 2 columns as fkey
+* ignore the flip syntax - youre settingn fkey by linking columns **employer** and **city** from the employee table to the domain of the **company table** (keyed columns)
+* ryan, look for TS and LDN in office table, found on row 0
+* charlie, look for KX and NY in office table, found on row 1
+* arthur, look for KX and NY in office table, found on row 1
+
+```q
+update empOffice:`office$flip(employer;city) from `employee
+```
+name|employer|city|empOffice
+-|-|-|-
+ryan|	TS|	LDN|	0
+charlie|	KX|	NY|	1
+arthur|	KX|	NY|	1
+
+* adds new column **empOffice**, which retrieves linked values from office table
+* sets column **empOffice** as the foreign key
+
+```q
+meta employee
+```
+c|t|f|a
+-|-|-|-
+name|	s|	|	
+employer|	s	|	|
+city|	s|	|	|
+empOffice|	j|	office|	|
+
+* meta shows us empOffice has an foreign key referencing the office table
+
+```q
+update empOffice.sym, empOffice.loc from employee
+```
+name|employer|city|empOffice|sym|loc
+-|-|-|-|-|-
+ryan	|TS|	LDN|	0	TS|	LDN
+charlie|	KX|	NY	|1	KX|	NY
+arthur|	KX|	NY	|1|	KX|	NY
+
+* employee table doesnt have columns for sym or loc
+* but since you set the empOffice as foreign key, it pulls in the values from the company table
+
+<hr>
+
+<a name="fkey_problemset"></a>
+## Foreign Key Problem Set
+[Top](#top)
+
+**1. Given the following table**
+
+book table
+
+id|name
+-|-
+nhajl|allen
+fabii|kevin
+pdhnc|bob
+omoan|sherman
+
+trade table
+
+date|time|sym|price|size|cond|bookId
+-|-|-|-|-|-|-
+2021.01.01 | 09:00|D| 109|100| |fmgoh
+2021.01.01|09:00|AA|93|100| B | fddig
+2021.01.01|09:00|UPS|34|100| A| lefhe
+2021.01.01|09:00|A|56|100| C| bfjnf
+
+**1. Insert a foreign key column into the trade table called owner, linking trade and book table, using bookID**
+```q
+update owner: `book$bookId from `trade
+```
+* from trade table, insert a new column **owner**, take column **bookId** and limit to domain in book table
+
+```q
+meta trade
+```
+c | t|f|a
+-|-|-|-
+owner | | book|
 
 
 
