@@ -2,7 +2,7 @@
 <a name="top"></a>
 
 
-# [Tables](#tables_header)
+## [Tables](#tables_header)
 1. [Flipping Dictionary to Table](#dict_to_table)
 2. [Simple Table](#simple_table)
 3. [Single Row Table](#single_row_table)
@@ -19,9 +19,22 @@
 14. [Retrieve From Table](#retrieve_table)
 15. [Insert Table](#insert_table)
 
-# [Tables Problem Set](#tables_problem_set)
+## [Tables Problem Set](#tables_problem_set)
 
-# [qSQL](#qsql_header)
+## [Keyed Tables](#keyed_tables)
+1. [Single Keyed Table](#single_keyed_table)
+2. [Multi_Keyed_Table](#multi_keyed_table)
+3. [Retrieving Keys/Values](#retrieving_keysvalues)
+4. [Changing Keys](#changing_keys)
+5. [Adding Keys](#adding_keys)
+6. [Removing Keys](#removing_keys)
+7. [Upsert Keys](#upsert_keys)
+8. [Upsert Multi Row/Keys](#upsert_multi_rowkeys)
+9. [Retrieving Values from Keyed Table](#retrieve_value_keys)
+
+## [Keyed Table Problem Set](#keyed_table_problem_set)
+
+## [qSQL](#qsql_header)
 1. [Select from where](#select_from_where)
 2. [Select by](#select_by)
 3. [Select count](#select_count)
@@ -36,18 +49,16 @@
 12. [Sort Ascending / Descending](#sort_asc_desc)
 13. [Renaming / Reordering Columns](#rename_reorder_columns)
 
-# [q-SQL Problem Set](#qsql_problem_set)
+## [q-SQL Problem Set](#qsql_problem_set)
 
 
 
 
 
-
-
-
+<hr>
 
 <a name="tables_header"></a>
-# Tables
+## Tables
 [Top](#top)
 
 <a name="dict_to_table"></a>
@@ -712,8 +723,260 @@ MS|	Fin|	100
 
 <hr>
 
+<a name="keyed_tables"></a>
+## Keyed Tables
+[Top](#top)
+
+<a name="single_keyed_table"></a>
+### Single Keyed Table
+
+```q
+( [id: `a`b`c`e] name:`jane`jim`kim`john; employer:`citi`citi`ms`ts; age: 11 22 33 44)
+```
+id|name|employer|age
+-|-|-|-
+`a`|	jane|	citi|	11
+`b`|	jim|	citi|	22
+`c`|	kim|	ms|	13
+`e`|	john|	ts|	15
+
+* the [ ] square bracket holds the key columns
+
+<a name="multi_keyed_table"></a>
+### Multi Keyed Table
+
+```q
+kt: ( [id:`a`b`c`d; name:`jane`jim`kim`john] employer:`citi`citi`ms`ts; age: 11 22 33 44)
+```
+
+id|name|employer|age
+-|-|-|-
+`a`|	`jane`|	citi|	11
+`b`|	`jim`|	citi|	22
+`c`|	`kim`|	ms|	13
+`e`|	`john`|	ts|	15
+
+<a name="retrieving_keysvalues"></a>
+### Retrieving Keys/Values
+```q
+key kt
+```
+id|name
+-|-
+a	|jane
+b	|jim
+c	|kim
+d	|john
+
+*retrieves key columns
+
+```q
+value kt
+```
+employer|age
+-|-
+citi|	11
+citi|	22
+ms|	33
+ts|	44
+
+<a name="changing_keys"></a>
+### Changing Keys
+Table kt
+id|name|employer|age
+-|-|-|-
+`a`|	jane|	citi|	11
+`b`|	jim|	citi|	22
+`c`|	kim|	ms|	13
+`e`|	john|	ts|	15
+
+* id column is keyed
+
+```q
+`id`name xkey `kt
+```
+id|name|employer|age
+-|-|-|-
+`a`|	`jane`|	citi|	11
+`b`|	`jim`|	citi|	22
+`c`|	`kim`|	ms|	13
+`e`|	`john`|	ts|	15
+
+* changed key columns to both id and name
+* use backtick kt to change underlying table
+
+<a name="adding_keys"></a>
+### Adding Keys
+```q
+1!kt
+```
+id|name|employer|age
+-|-|-|-
+`a`|	jane|	citi|	11
+`b`|	jim|	citi|	22
+`c`|	kim|	ms|	13
+`e`|	john|	ts|	15
+
+<a name="removing_keys"></a>
+### Removing Keys
+```q
+() xkey `kt
+```
+or
+```q
+0!kt
+```
+id|name|employer|age
+-|-|-|-
+a|	jane|	citi|	11
+b|	jim|	citi|	22
+c|	kim|	ms|	13
+e|	john|	ts|	15
+
+<a name="upsert_keys"></a>
+### Upserting Keys
+Given
+```q
+nd: ( [id:`e`f] name:`dan`kate; employer:`walmart`walmart; age:200 200)
+```
+id|name|employer|age
+-|-|-|-
+`e`|	dan|	walmart|	200
+`f`|	kate|	walmart|	200
+
+```q
+upsert[`kt;nd]
+```
+id|name|employer|age
+-|-|-|-
+`a`|	jane|	citi|	11
+`b`|	jim|	citi|	22
+`c`|	kim|	ms|	13
+`e`|	dan|	walmart|	200
+`f`|	kate|	walmart|	200
+
+* if key exists and matches, updates value
+* if new key, adds new row
+* since key e already exists, overrides values for name, employer, age
+* must make sure underlying keyed columns match, otherwise error. (1 keyed col vs 2 keyed col)
+
+```q
+upsert [`kt; ( [id:`f`g] name:`ron`allen)]
+```
+id|name|employer|age
+-|-|-|-
+`a`|	jane|	citi|	11
+`b`|	jim|	citi|	22
+`c`|	kim|	ms|	13
+`e`|	dan|	walmart|	200
+`f`|	ron|	walmart|	200
+`g`|	allen|	|	
+
+* f was updated to ron, and since no employer or age info, pulled from existing kt table (kate's old row)
+* g is new key, so adds new row. since no info, returns null
+
+<a name="upsert_multi_rowkeys"></a>
+### Upserting Multi Rows/Keys
+Given:
+```q
+et: ([employer:`kx`ms`ms; loc:`NY`NY`HK] size: 10 20 30; area: 1 2 3)
+```
+employer|loc|size|area
+-|-|-|-
+`kx`|	`NY`|	10|	1
+`ms`|	`NY`|	20|	2
+`ms`|	`HK`|	30|	3
+
+```q
+upsert [et; ([employer:`kx`ms; loc:`NY`SG] size: 9 10)]
+```
+employer|loc|size|area
+-|-|-|-
+`kx`|	`NY`|	9|	1
+`ms`|	`NY`|	20|	2
+`ms`|	`HK`|	30|	3
+`ms`|	`SG`|	10|	
+
+* updated kx, NY to 9 (overrides prev value)
+* since there was no ms, SG, adds new row 
+
+<a name="retrieve_value_keys"></a>
+### Retrieving Values from Keyed Table
+Given:
+id|name|employer|age
+-|-|-|-
+`a`|	jane|	citi|	11
+`b`|	jim|	citi|	22
+`c`|	kim|	ms|	33
+`d`|	john|	ts|	44
+`e`|	dan|	walmart|	200
+
+```q
+kt ( [] id:`a`b)
+```
+name|employer|age
+-|-|-
+jane|	citi|	11
+jim|	citi|	22
+
+* retrieves rows based on the values in column id (a and b)
+or
+```q
+( [] id:`a`b) # kt)
+```
+id|name|employer|age
+-|-|-|-
+`a`|	jane|	citi|	11
+`b`|	jim|	citi|	22
+
+* uses the #take function to lookup values in column id
+* notice it also returns the key column (id)
+
+Given:
+Table et
+employer|loc|size|area
+-|-|-|-
+`kx`|	`NY`|	10|	1
+`ms`|	`NY`|	20|	2
+`ms`|	`HK`|	30|	3
+
+```q
+et`ms`HK
+```
+key|value
+-|-
+size|30
+area|3
+
+* will lookup the keys ms and HK and return the values
+
+```q
+et(`ms`HK; `kx`NY)
+```
+
+size|area 
+-|-
+30|3
+10|1
+
+* looks up values for both ms+HK (returns 30 and 3) and kx+NY (returns 10 and 1)
+
+<hr>
+
+<a name="keyed_table_problem_set"></a>
+## Keyed Tables Problem Set
+[Top](#top)
+
+
+
+
+
+
+
+<hr>
+
 <a name="qsql_header"></a>
-# qSQL
+## qSQL
 [Top](#top)
 
 <a name="select_from_where"></a>
@@ -773,11 +1036,9 @@ select by sym from trade where date=.z.d
 
 sym|date|time|price|size|cond
 -|-|-|-|-|-|
-A	|2021-06-02	|17:29:57.306	|87.54 |	49100 |	B
-AA|	2021-06-02|	17:29:58.789 |	68.09 |	88100	|A
-AAPL|	2021-06-02|	17:29:58.262 |	76.18	|22500	|A
-
-(sym is a keyed col)
+`A`	|2021-06-02	|17:29:57.306	|87.54 |	49100 |	B
+`AA`|	2021-06-02|	17:29:58.789 |	68.09 |	88100	|A
+`AAPL`|	2021-06-02|	17:29:58.262 |	76.18	|22500	|A
 
 <a name="select_by"></a>
 ### Select By
@@ -791,11 +1052,9 @@ select first price, first time by date from trade where sym=`AAPL
 
 date|price|time
 -|-|-
-2021-05-29|	78.6 |	09:30:03.025
-2021-05-30|	60.8 |	09:30:02.686
-2021-05-31|	55.1 | 09:30:18.274
-
-(date is a keyed col)
+`2021-05-29`|	78.6 |	09:30:03.025
+`2021-05-30`|	60.8 |	09:30:02.686
+`2021-05-31`|	55.1 | 09:30:18.274
 
 ```q
 select open:first price, high:max price, low:min price, close:last price by date from trade where sym=`AAPL
@@ -804,11 +1063,8 @@ select open:first price, high:max price, low:min price, close:last price by date
 
 date|open|high|low|close
 -|-|-|-|-
-2021-05-29|	78.66|	109.91 |	50.5 |	68.01
-2021-05-30|	60.88	|109.98	| 50.0	| 90.49
-
-(date is a keyed col )
-
+`2021-05-29`|	78.66|	109.91 |	50.5 |	68.01
+`2021-05-30`|	60.88	|109.98	| 50.0	| 90.49
 
 <a name="select_count"></a>
 ### Select Count 
@@ -818,11 +1074,10 @@ select count i, max prirce by date, time.hh from trade where sym=`RBS
 ```
 date|hh|x|prrice
 -|-|-|-
-2021-05-29|	9|	645 |	50.5 
-2021-05-30|	10	|154	| 50.0
+`2021-05-29`|	`9`|	645 |	50.5 
+`2021-05-30`|	`10`	|154	| 50.0
 
 * i is a virtual column that returns the number of rows (as column x)
-
 
 <a name="using_ops_functions"></a>
 ### Using Operations and Functions 
@@ -834,10 +1089,8 @@ select price by date from trade where sym=`AAPL, price < avg price
 
 date|price
 -|-
-2021-05-29| 100 99 22 33
-2021-05-30| 23 199 44 12
-
-(date is a keyed column)
+`2021-05-29`| 100 99 22 33
+`2021-05-30`| 23 199 44 12
 
 ```q
 select price by date=.z.d from trade where sym=`AAPL, price < avg price
@@ -847,10 +1100,8 @@ select price by date=.z.d from trade where sym=`AAPL, price < avg price
 
 d | price
 -|-
-0 | 23 52 63
-1 | 23 66 12
-
-(d is a keyed column)
+`0` | 23 52 63
+`1`| 23 66 12
 
 ```q
 select {x % max x} price by date = .z.d from trade where sym=`AApl, price < avg price
@@ -859,10 +1110,8 @@ select {x % max x} price by date = .z.d from trade where sym=`AApl, price < avg 
 
 d | price
 -|-
-0b | 0.98 0.7 0.8
-1b | 0.12 0.43 0.32
-
-(d is a keyed column)
+`0b` | 0.98 0.7 0.8
+`1b` | 0.12 0.43 0.32
 
 <a name="in_function"></a>
 ### In Function
@@ -915,10 +1164,8 @@ select count i, max price by date, xbar [15*60*1000;time] from trade where sym=`
 
 date|time|x|price
 -|-|-|-
-2021-05-30|	11:40:02.743 |	100 |	97.113
-2021-05-30|	11:44:03.025 |	123 |	98.66 
-
-(date and time are keyed columns)
+`2021-05-30`|	`11:40:02.743` |	100 |	97.113
+`2021-05-30`|	`11:44:03.025` |	123 |	98.66 
 
 <a name="exec"></a>
 ### Exec Query
@@ -959,9 +1206,9 @@ exec price by sym from trade where date=.z.d
 ```
 sym| price
 -|-
-A | 108 77 88
-AA| 33 45 23
-AAPL| 34 56 23
+`A` | 108 77 88
+`AA`| 33 45 23
+`AAPL`| 34 56 23
 
 ```q
 exec first price by sym, cond from trade where date=.z.d, sym in `KX`AAPL
@@ -969,9 +1216,9 @@ exec first price by sym, cond from trade where date=.z.d, sym in `KX`AAPL
 
 sym | cond | price
 -|-|-
-AAPL | | 95
-AAPL | A | 43
-KX | C | 32
+`AAPL` |` `| 95
+`AAPL` | `A` | 43
+`KX` | `C` | 32
 
 <a name="update_statement"></a>
 ### Update
@@ -1161,10 +1408,8 @@ F| 70| 2021.03.01 | 15:09:01| A | 31.2
 ```
 sym| date
 -|-
-BAC | 2021.01.01
-RBS | 2021.01.23
-
-(sym is a keyed column)
+`BAC` | 2021.01.01
+`RBS` | 2021.01.23
 
 * group by column sym
 
@@ -1173,10 +1418,8 @@ RBS | 2021.01.23
 ```
 date| sym| time
 -|-|-
-2021.01.01 | BAC | 1:12
-2021.01.02 | JPM | 1:45
-
-(date and sym are keyed columns)
+`2021.01.01` | `BAC` | 1:12
+`2021.01.02` | `JPM` | 1:45
 
 * group and key by 2 columns (date and sym)
 
@@ -1185,19 +1428,13 @@ date| sym| time
 ```
 date| sym| time | price | size | cond
 -|-|-|-|-|-
-2021.01.01 | BAC | 1:12 | 83 | 834 | B
-2021.01.02 | JPM | 1:45 | 34 | 342 | A
-
-(date and sym are keyed columns)
+`2021.01.01` | `BAC` | 1:12 | 83 | 834 | B
+`2021.01.02` | `JPM` | 1:45 | 34 | 342 | A
 
 * make date and sym key columns
 
-
-
-
-
 <a name="qsql_problem_set"></a>
-# q-SQL Problem Set
+## q-SQL Problem Set
 [Top](#top)
 
 **1. Extract from trade table, trades for MS greater than 1,000 in size**
@@ -1223,9 +1460,9 @@ select total: sum size, avg price by sym from trade
 
 sym|total | price
 -|-|-
-AAPL | 320 | 1015
-C | 310 | 100
-MS | 740 | 234
+`AAPL` | 320 | 1015
+`C` | 310 | 100
+`MS` | 740 | 234
 
 * "price paid per sym" = we need to set sym as a keyed colummn (by sym)
 * select + conditions = columns retrieved
@@ -1275,8 +1512,8 @@ select last date, last price, last size by sym from trade
 ```
 sym|date|price|size
 -|-|-|-
-A|	2021-06-03|	87.54| 49100
-AA|	2021-06-03|	68.09| 88100
+`A`|	2021-06-03|	87.54| 49100
+`AA`|	2021-06-03|	68.09| 88100
 
 
 Alternative Solution
@@ -1339,9 +1576,9 @@ select NumberTrades: count i, totalSize: sum size by time.hh from trade where sy
 ```
 hh|NumberTrades|totalSize
 -|-|-
-9|	3186|	159063500
-10|	6544|	321195100
-11|	6280|	315284200
+`9`|	3186|	159063500
+`10`|	6544|	321195100
+`11`|	6280|	315284200
 
 * NumberTrades + TotalSize = new column names
 * count i = virtual column. Counts agg number of horizontal rows
@@ -1358,9 +1595,9 @@ select numbertrades: count i, totalsize: sum size by 30 xbar time.minute from tr
 
 minute|numbertrades|totalsize
 -|-|-
-09:30|	3186|	159063500
-10:00|	3271|	162197000
-10:30|	3273|	158998100
+`09:30`|	3186|	159063500
+`10:00`|	3271|	162197000
+`10:30`|	3273|	158998100
 
 * 30 xbar time.minute = rounds minutes by 30; groups together and is set as key
 
