@@ -1,7 +1,6 @@
 # Allen's Notes for KDB+ / Q
 <a name="top"></a>
 
-
 ## [Tables](#tables_header)
 1. [Flipping Dictionary to Table](#dict_to_table)
 2. [Simple Table](#simple_table)
@@ -60,7 +59,6 @@
 
 ## [Foreign Key Problem Set](#fkey_problemset)
 
-
 ## [qSQL](#qsql_header)
 1. [Select from where](#select_from_where)
 2. [Select by](#select_by)
@@ -78,13 +76,26 @@
 
 <hr>
 
-## [q-SQL Problem Set](#qsql_problem_set)
+## [qSQL Problem Set](#qsql_problem_set)
 
-
-
-
+## [qSQL Joins](#qsql_joins)
+1. [Left Join](#left_join)
+2. [Plus Join](#plus_join)
+3. [Inner Join](#inner_join)
+4. [Union Join](#union_join)
 
 <hr>
+
+## [qSQL Joins Problem Set](#qsqljoins_problem_set)
+
+<hr>
+
+
+
+
+
+
+
 
 <a name="tables_header"></a>
 ## Tables
@@ -1543,10 +1554,10 @@ book table
 
 id|name
 -|-
-nhajl|allen
-fabii|kevin
-pdhnc|bob
-omoan|sherman
+fmgoh|jim
+fddig|allen
+lefhe|bob
+bfjnf|sherman
 
 trade table
 
@@ -1563,6 +1574,13 @@ update owner: `book$bookId from `trade
 ```
 * from trade table, insert a new column **owner**, take column **bookId** and limit to domain in book table
 
+date|time|sym|price|size|cond|bookId | owner
+-|-|-|-|-|-|-|-
+2021.01.01 | 09:00|D| 109|100| |fmgoh|fmgoh 
+2021.01.01|09:00|AA|93|100| B | fddig| fddig
+2021.01.01|09:00|UPS|34|100| A| lefhe| lefhe
+2021.01.01|09:00|A|56|100| C| bfjnf| bfjnf
+
 ```q
 meta trade
 ```
@@ -1570,11 +1588,21 @@ c | t|f|a
 -|-|-|-
 owner | | book|
 
+**2. Join the book table onto the trade table and add the name of person who did trade**
+```q
+update owner.name from trade
+```
+date|time|sym|price|size|cond|bookId | owner|name
+-|-|-|-|-|-|-|-|-
+2021.01.01 | 09:00|D| 109|100| |fmgoh|fmgoh |jim
+2021.01.01|09:00|AA|93|100| B | fddig| fddig|allen
+2021.01.01|09:00|UPS|34|100| A| lefhe| lefhe|bob
+2021.01.01|09:00|A|56|100| C| bfjnf| bfjnf|sherman
 
+* the book table only has id and name columns, so you are really only joining the name column onto trade
+* since owner is linked to book table, you can use that as a link to reference the name colum* 
 
-
-
-
+<hr>
 
 <a name="qsql_header"></a>
 ## qSQL
@@ -2033,10 +2061,11 @@ date| sym| time | price | size | cond
 `2021.01.02` | `JPM` | 1:45 | 34 | 342 | A
 
 * make date and sym key columns
+* 
 <hr>
 
 <a name="qsql_problem_set"></a>
-## q-SQL Problem Set
+## qSQL Problem Set
 [Top](#top)
 
 **1. Extract from trade table, trades for MS greater than 1,000 in size**
@@ -2116,7 +2145,6 @@ sym|date|price|size
 -|-|-|-
 `A`|	2021-06-03|	87.54| 49100
 `AA`|	2021-06-03|	68.09| 88100
-
 
 Alternative Solution
 
@@ -2210,3 +2238,380 @@ minute|numbertrades|totalsize
 ```q
 a: update avgPrice: avg price by date from select from trade where sym=`A
 ```
+
+<hr>
+
+<a name="qsql_joins"></a>
+## qSQL Joins
+[Top](#top)
+
+<a name="left_join"></a>
+### qSQL Join Left 
+
+* syntax = **source table** lj **lookup table** (must be keyed)
+* for each row in **source**, find corresponding values in **lookup** (keyed)
+* no match = nulls
+* column names must match
+* will always return same number of rows as **source** table
+
+trade table
+
+x|date |      time |        sym|  price|    size  
+-|-----|-----------|-----------|---------|------
+1|2021.06.03| 09:30:02.553| C   | 107.2018| 63500
+2|2021.06.03| 09:30:02.701| MSFT |96.87488| 1700
+3|2021.06.03| 09:30:02.743| RBS  |97.11338| 80700
+4|2021.06.03| 09:30:02.758| A    |100.35  | 50300
+5|4021.06.03| 09:30:03.044| F    |79.48574| 54100
+
+stock table
+
+x|`sym`| sector | employees
+-|---|--------|----------
+1|`C`    |Tech      |862      
+2|`MSFT` |Tech      |765      
+3|`RBS`  |Tech      |377      
+4|`A`    |Financial |167      
+5|`F`    |Financial | 615     
+
+```q
+trade lj stock
+```
+
+x|date |      time |        sym|  price|    size|  cond| sector |   employees
+-|-----|------------|------------|--------|----------|------|----------|-----
+1|2021.06.03| 09:30:02.553| C   | 107.2018| 63500| B |  Tech      |862      
+2|2021.06.03| 09:30:02.701| MSFT| 96.87488| 1700 | B |  Tech      |765      
+3|2021.06.03| 09:30:02.743| RBS | 97.11338| 80700| C |  Tech      |377      
+4|2021.06.03| 09:30:02.758| A   | 100.35  | 50300| B |  Financial |167      
+5|2021.06.03| 09:30:03.044| F   | 79.48574| 54100| A |  Financial |615      
+
+* all column names must match
+* **stock** table has **sector** and **employees**, which **trade** does not
+* **trade** = source table
+* **stock** = lookup table (keyed by sym)
+* takes trade table, for each sym, pulls in **sector** and **employees** columns
+* will always be same number of rows as source table (5)
+
+<a name="plus_join"></a>
+### qSQL Plus Join 
+
+* finds the same value across 2 tables, adds their values
+
+stock table
+
+x|`sym`| sector | employees
+-|---|--------|----------
+1|`C`    |Tech      |100      
+2|`MSFT` |Tech      |100      
+3|`RBS`  |Tech      |100      
+
+trade table
+
+x|`sym`| sector | employees
+-|---|--------|----------
+1|`C`    |Tech      |100      
+2|`MSFT` |Tech      |-100      
+
+```q
+stock pj trade
+```
+or
+```q
+stock pj [ (sym:`C`MSFT] employees: 100 -100)
+```
+
+* stock = source table
+* trade = lookup table
+
+x|`sym`| sector | employees
+-|---|--------|----------
+1|`C`    |Tech      |200      
+2|`MSFT` |Tech      |0      
+3|`RBS`  |Tech      |100    
+
+* from stock table, find the corresponding syms, add values together
+* if value doesnt exist (RBS) just leave as is
+
+<a name="inner_join"></a>
+### qSQL Inner Join 
+
+* similar to left join, but **only returns rows where matches occur**
+
+trade table
+
+x|date |        sym|  price|    size  
+-|-----|-----------|---------|------
+1|2021.06.03| C   | 107.2018| 63500
+2|2021.06.03| MSFT |96.87488| 1700
+3|2021.06.03| UBS    |100.35  | 50300
+
+stock table
+
+x|`sym`| sector | employees
+-|---|--------|----------
+1|`C`    |Tech      |100      
+2|`MSFT` |Tech      |100      
+
+```q
+trade pj stock
+```
+* adds columns where the key matches (sym), otherwise remove
+
+x|date |        sym|  price|    size  | sector | employees
+-|-----|-----------|---------|------| -|-
+1|2021.06.03| C   | 107.2018| 63500| Tech | 100
+2|2021.06.03| MSFT |96.87488| 1700| Tech | 100
+
+* removes row UBS since no match
+
+<a name="union_join"></a>
+### qSQL Union Join 
+
+* adds ALL rows/columns together
+* if key matches, will upsert (update or insert)
+* if no match, just append as new entry
+
+trade table
+
+x|date |        sym|  price|    size  
+-|-----|-----------|---------|------
+1|2021.06.03| C   | 107.2018| 10
+2|2021.06.03| MSFT |96.87488| 10
+3|2021.06.03| UBS    |100.35  | 10
+
+stock table
+
+x|`sym`| sector | size | book
+-|---|--------|---------|-
+1|`FB`    |Tech      |100| A      
+2|`GOOG` |Tech      |100 | B
+
+```q
+trade uj stock
+```
+x|date |        sym|  price|    size | book 
+-|-----|-----------|---------|------|--
+1|2021.06.03| C   | 107.2018| 10 | 
+2|2021.06.03| MSFT |96.87488| 10 |
+3|2021.06.03| UBS    |100.35  | 10 |
+4| | FB |  |100 |A
+5| | GOOG |  |100 | A
+
+* no key match for FB or GOOG, so appends new row
+* adds new column book; blank for existing, pulls in value from new
+
+<hr>
+
+<a name="qsqljoins_problem_set"></a>
+## qSQL Joins Problem Set
+[Top](#top)
+
+```q
+\l ex-joins.q
+```
+```q
+\a
+```
+* **fbTrades** (headers = dt, sym, size, book) \
+* **newsItems** (headers = ndate, ticker, title) \
+* **quote** (headers = date, time, sym, size, cond, bid, ask, asize, bside)\
+* **stock** (headers = sym, sector, employees)\
+* **trade** (headers = dt, sym, price, size)
+
+**1. Find the total value of trades by sector, include those who's sector is unknown (totalvalue = price x size)**
+
+* the columns you need are price x size (trade table) and sector (stock table) 
+* need to use left join because you want to keep the same number of rows, and add in the relevant columns
+
+```q
+trade lj stock
+```
+dt|sym|price|size|sector|employees
+-|-|-|-|-|-
+2015-01-01|	C|	10.0|	10|	Financial|	262000
+2015-01-02|	C	|10.5	|100	|Financial|	262000
+2015-01-04|	DBK|	35.6|	55|	|	
+
+* joins tables together, but does not calculate totalValue
+
+```q
+select totalValue:sum price*size by sector from trade lj stock
+```
+
+sector | totalValue
+-|-
+null	|1958.0
+Financial|	159850.0
+Tech	|326200.0
+
+```q
+select totalValue:sum price*size by `unknown^sector from trade lj stock
+```
+sector |totalValue
+-|-
+Financial|	159850.0
+Tech|	326200.0
+unknown|	1958.0
+
+* use `unknown^sector to rename the null sectors (visually more appeasing)
+* price * size will get you all the individual prices, but you want an aggregate figure. so need to use sum price
+* you want the new values by sector, so this becomes your key
+
+<hr>
+
+**2. Combine trades from trade and fbTrades Table into a table t2, sorted by date. Include all columns**
+
+* include all columns, so we use union join
+
+```q
+t2: trade uj fbTrades
+```
+dt|sym|price|size|book
+-|-|-|-|-
+2015-01-06|	AAPL	|1020.0|	300|	
+2015-01-07|	MS	|254.0|	400|	
+2015-01-02|	FB	|	1000|	A
+2015-01-03|	FB	|	1000|	B
+2015-01-05|	FB	|	1000|	A
+
+* joins tables together, but doesnt sort by date
+
+```q
+t2:`dt xasc trade uj fbTrades
+```
+dt|sym|price|size|book
+-|-|-|-|-
+2015-01-02|	FB	|	1000|	A
+2015-01-03|	FB	|	1000|	B
+2015-01-05|	FB	|	1000|	A
+2015-01-06|	AAPL	|1020.0|	300|	
+2015-01-07|	MS	|254.0|	400|	
+
+* `dt xasc sorts dates by ascending
+* since you are joining table together, no select query
+
+<hr>
+
+**3. Find the highest and lowest price in the trade table for each sym**
+
+```q
+select max price by sym from trade
+```
+sym|price
+-|-
+AAPL|	1020.0
+C|	11.0
+DBK|	35.6
+MS|	260.0
+
+```q
+select min price by sym from trade
+```
+sym|price
+-|-
+AAPL|	1010.0
+C|	10.0
+DBK|	35.6
+MS|	254.0
+
+<hr>
+
+**4. Find the 2 highest trade prices for each sym**
+
+```q
+ungroup select 2 sublist desc price by sym from trade
+```
+* sublist creates a subset of a list
+* select 2 = you want 2 highest
+* sort by descending 
+* ungroup = ungroups everything
+
+sym | price
+-|-
+AAPL|	1010.0
+C	|10.0
+DBK|	35.6
+MS	|254.0
+
+```q
+select 2 sublist desc price by sym from trade
+```
+sym | price
+-|-
+AAPL|	1,020 1,010f
+C	|11 10.5
+DBK|	,35.6
+MS|	260 255f
+
+* if you dont ungroup, it groups together by sym
+
+<hr>
+
+**5. Find the average daily price for each sym in trade table. Join the newsItems table to show only those items where the sym had a newsItem on that date**
+
+* from trade table, find avg price. then join the newsItem table where matches date and sym
+* so date and sym need to be keys in the newsItems table
+* **newsItems** (headers = ndate, ticker, title) \
+* **trade** (headers = dt, sym, price, size)
+
+```q
+select avg price by dt, sym from trade
+```
+* first step is calc the avg price grouped by dt, sym from **trade** table
+
+dt|sym|price
+-|-|-
+2015-01-01|	C|	10.0
+2015-01-02|	C	|10.5
+2015-01-03|	MS|	260.0
+2015-01-04|	C	|11.0
+2015-01-04|	DBK|	35.6
+2015-01-05|	AAPL|	1010.0
+2015-01-06|	AAPL	|1020.0
+2015-01-07 |	MS	|254.5
+
+```q
+(select avg price by dt, sym from trade) ij 2!`dt`sym xcol newsItems
+```
+* `dt`sym xcol newwsItems = **renaming columns** in newsItems from **ndate to dt** and **ticker to sym**
+* then use 2! to set those 2 columns as keys
+* then inner join so only those rows with matches will be returned
+* 2! sets first 2 columns as keys in newsItems table
+
+dt| sym| price|title
+-|-|-|-
+2015-01-04|	C|	11.0|	regulators| investigating
+
+<hr>
+
+**6. Take the newsItems table and join the trade table to bring in the latest price for each ticker**
+
+```q
+aj [`ticker`ndate;newsItems; `ndate`ticker xcol trade]
+```
+* from newsItems table, retrieve ticker and ndate
+* from trade table, rename dt to ndate and sym to ticker
+* aj = as of join
+
+ndate|ticker|title|price|size
+-|-|-|-|-
+2015-01-06|	MS|	traders did it!|	260.0|	15
+2015-01-04|	C|	regulators investigating|	11.0|	200
+
+```q
+delete size from aj [`ticker`ndate;newsItems; `ndate`ticker xcol trade]
+```
+
+ndate|ticker|title|price
+-|-|-|-
+2015-01-06|	MS|	traders did it!|	260.0
+2015-01-04|	C|	regulators investigating|	11.0
+
+* deletes the size column
+
+<hr>
+
+
+[Top](#top)
+
