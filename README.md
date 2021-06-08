@@ -1,6 +1,16 @@
 # Allen's Notes for KDB+ / Q
 <a name="top"></a>
 
+
+## [Functions](#functions_header)
+1. [Defining & Calling Functions](#define_func)
+2. [Anonymous Function](#anon_function)
+3. [Implicit Argument](#implicit_argu)
+4. [Local vs Global Variables](#local_global_variables)
+5. [Projected Functions](#projected_func)
+
+## [Functions Problem Set](#func_problem_set)
+
 ## [Tables](#tables_header)
 1. [Flipping Dictionary to Table](#dict_to_table)
 2. [Simple Table](#simple_table)
@@ -89,6 +99,143 @@
 ## [qSQL Joins Problem Set](#qsqljoins_problem_set)
 
 <hr>
+
+
+
+
+
+<a name="functions_header"></a>
+## Functions
+[Top](#top)
+
+<a name="define_func"></a>
+### Defining & Calling Functions
+* functions are encased in { }
+```q
+f: { [a] a * a}
+```
+```q
+f [3]
+```
+or
+```q
+f @ 3
+```
+9
+* [a] defines the argument
+* f[3] or f@3  calls the function with a=3
+
+```q
+add: { [a;b] a+ b}
+```
+```q
+add [3;5]
+```
+8
+* multi argument function
+* [a;b] = defines first, second argument
+* a+b = statement
+
+<a name="anon_function"></a>
+### Anonymous Functions
+```q
+{[a] a*a}6
+```
+36
+* you dont assign variable 
+* simply call the argument outside the function { } 
+
+<a name="implicit_argu"></a>
+### Implicit Argument
+```q
+{x*x}5
+```
+25
+* omit [x], q implicitly understands x is an argument
+
+```q
+{x+y+z}[1;2;3]
+```
+6
+* q has x, y, z as implicit arguments
+
+```q
+{x+z}[1;2]
+```
+* error because you can't skip the y. if only 2 implicit arguments, need to use x, y
+
+<a name="local_global_variables"></a>
+### Local vs Global Variables
+```q
+{a:1; b:2; a+b*x} [12]
+```
+25
+* = (12x2) + 1
+* a and b are locally defined variables within the function
+* will NOT work if you try to recall variable a or b outside the function
+* 12 = implicit argument x
+
+```q
+d:10
+f:{d+x}
+f 1
+```
+11
+* assign global variable D to 10 (outside the function)
+* functions pulls in 10 (global variable) for d and 1 for x (implicit argument)
+
+```q
+g: {d:20; d+x}
+g 1
+```
+21
+* local variable d:20 takes priority over global variable of 10
+
+<a name="projected_func"></a>
+### Projected Functions
+```q
+raise: {x xexp y}
+raise [10; 2 3 4]
+```
+100 1000 1000f
+* calls x = 10; y = 2 3 4
+
+```q
+g: raise [10; ]
+g 1 2 3
+```
+10 100 1000
+* creates a projection of the original raise function
+
+<hr>
+
+<a name="func_problem_set"></a>
+## Functions Problem Set
+[Top](#top)
+
+**1. Create a function volc that accepts 2 arguments (r and h), that returns the volume of the given volc [2;3] \
+vol of cone = 1/3 * pi * r^2 * h \
+pi = -4 * atan -1**
+
+```q
+volc: {[r;h] pi:-4*atan -1; pi*r*r*h%3}
+volc[2;3]
+```
+12.57
+* define arguments [r;h] first
+* define variable pi
+* must have space after atan and before -1
+* no space for volc[2;3]
+
+**2. Write function sph that takes radius and returns the area and volume\
+v = 4/3 * pi * r^3 \
+a = 4 * pi * r^2
+
+```q
+sph: { [r] pi:-4*atan-1; a:(4%3)*pi*r xexp 3; v:4*pi*r xexp 2; `area`volume ! (a;v)}
+```
+
+
 
 
 
