@@ -8,6 +8,13 @@
 3. [Implicit Argument](#implicit_argu)
 4. [Local vs Global Variables](#local_global_variables)
 5. [Projected Functions](#projected_func)
+6. [If True Statements](#iftrue_state)
+7. [If True/Else Statements](#iftrue_else_state)
+8. [Multi Condition If True/Else Statements](#multi_cond_iftrue)
+9. [Adding Conditional Branch Pair](#add_cond_branch)
+10. [Do Loops](#do_loop)
+11. [While_Loops](#while_loop)
+12. [Multi Condition While Loops](#multi_cond_while_loop)
 
 ## [Functions Problem Set](#func_problem_set)
 
@@ -206,6 +213,120 @@ g 1 2 3
 ```
 10 100 1000
 * creates a projection of the original raise function
+
+<a name="iftrue_state"></a>
+### If True Statements
+
+```q
+if [10>3; a:11; show a*10]
+```
+110
+* if the first condition is true, then execute the statements that follow
+
+```q
+if[10>3; a:11; show a*10; show "hello"]
+```
+110
+"hello"
+* as long as the first condition is true, execute all following statements
+
+<a name="iftrue_else_state"></a>
+### If True/Else Statements
+
+```q
+$[1b; show "true"; show "false"]
+```
+true
+* always starts with $[ ] 
+* if first condition true, then show second condition. else, show third condition
+* here the first condition is the false boolean
+
+```q
+$[100>1; [show "message"; `a];`b]
+```
+"message"
+`a
+* since true, show everythign  in the [ ]
+
+<a name="add_cond_branch"></a>
+### Adding Conditional Branch Pair
+
+```q
+{$[x < 0; `negative; x=0; `zero; `positive]}0
+```
+`zero
+* using implicit argument x =0
+* 0 doesnt equal 0, so false. goes to 2nd condition, x=0
+* x = 0 this begins another conditional branch
+* since x-0 is true, returns first condition (zero)
+
+```q
+{$[x < 0; `negative; x=0; `zero; `positive]}2
+```
+`posititve
+* 2 = x and since 2 isnt less than 0, false. 
+* 2 does NOT equal x=0, so false again
+* skips first condition, returns second condition (positive)
+
+<a name="do_loop"></a>
+### Do Loops
+```q
+do[3;show "hi"]
+```
+hi
+hi
+hi
+* repeats loop x number of times
+
+```q
+f:{avg x xexp 1000?2}
+\t do[1000;f]
+```
+0
+* time the loop 1000x on function f
+
+<a name="while_loop"></a>
+### While Loops
+* while will execute a statement x number of times until statement is no longer true
+```q
+a:1
+while[a<3; show a; a:a+1]
+```
+1
+2
+* 1 is less than 3, so show 1
+* a becomes 1+1 =2
+* 2 less than 3, so show 2
+* a becomes 2+1=3
+* 3 not less than 3, so stop executing
+
+```q
+a:1
+b:2
+while[(a<10); a:a+1; b:b+1; show enlist b,a]
+```
+* a = 1; a becomes 1+1(2)
+* b = 2; b becomes 2+1(3)
+* show enlist shows b and a in a clean list
+* stop running this loop when first condition becomes false
+
+key|value
+-|-
+3|2
+4|3
+5|4
+6|5
+
+<a name="multi_cond_while_loop"></a>
+### Multi Condition While Loops
+
+```q
+a:1
+b:2
+while[(a<10) and (b<3); a:a+1; b:b+1; show enlist b,a]
+```
+* if you have 2 conditions, must use ( ) as KDB reads right to left
+
 
 <hr>
 
