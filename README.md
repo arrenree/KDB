@@ -213,7 +213,7 @@ g 1 2 3
 ## Functions Problem Set
 [Top](#top)
 
-**1. Create a function volc that accepts 2 arguments (r and h), that returns the volume of the given volc [2;3] \
+**1. Create a function volc that accepts 2 arguments (r and h), that returns the volume of the given volc [2;3]** \
 vol of cone = 1/3 * pi * r^2 * h \
 pi = -4 * atan -1**
 
@@ -227,21 +227,155 @@ volc[2;3]
 * must have space after atan and before -1
 * no space for volc[2;3]
 
-**2. Write function sph that takes radius and returns the area and volume\
+<hr>
+
+**2. Write function sph that takes radius and returns the area and volume**\
 v = 4/3 * pi * r^3 \
 a = 4 * pi * r^2
 
 ```q
-sph: { [r] pi:-4*atan-1; a:(4%3)*pi*r xexp 3; v:4*pi*r xexp 2; `area`volume ! (a;v)}
+sph: { [r] pi:-4*atan -1; a:(4%3)*pi*r xexp 3; v:4*pi*r xexp 2; `area`volume ! (a;v)}
 ```
+```q
+sph[1]
+```
+key|value
+-|-
+area	|4.18
+volume |	12.56
 
+* define argument [r]
+* define variable pi with formula
+* define variable a with formula
+* define variable v with formula
+* show dictionary with symbols `area `volume against values a and v
 
+<hr>
 
+**3. Create function setc that takes one argument and sets the global value c to that argument**
+```q
+setc: {c::x}
+setc[10]
+c
+```
+10
+* setc 10 = setting x = 10 (implicit variable)
+* since x = 10, and you've set c as the global variable to x, then c = 10
 
+```q
+setc `hi
+c
+```
+`hi
+* you set setc = `hi, so c = x = `hi
 
+<hr>
 
+**4. Given raise:{x xexp y}, create function that is projection of the raise. Ex, root[9] = 3**
+```q
+raise: {x xexp y}
+root: raise[ ; 0.5]
+root[9]
+```
+3
+* an embedded function is a function within another function
+* root function sets y as 0.5
+* so root 9 =x
 
+<hr>
 
+**5. Convert all entries of list L to a string**
+* list of long, sym, and boolean
+```q
+l: (100;`price;1b)
+string l
+```
+"100"
+"price"
+"1b"
+
+* remember, mixed lists have to be contained in parathesis ( )
+
+<hr>
+
+**6. Given the string, find and replace "cow" with "kangaroo"**
+
+```q
+st: "the cow jumped over the moon"
+ssr [st; "cow";"kangaroo"]
+```
+"the kangaroo jumped over the moon"
+* ssr = string search replace.
+* syntax = ssr [listname + find this + replace with this]
+
+<hr>
+
+**7. Create function sayHi that takes 2 arguments, first one name, second one age and behaves as follows:**
+
+sayHi("joe";90] \
+"hello 90 year old joe"
+
+```q
+sayHi:{[name;age] "hello ", string[age]," year old ", name}
+sayHi["joe";90]
+```
+hello 90 year old joe
+* name and age are your arguments
+* "hello" and "year old" are simply lists of characters
+* you have to convert raw data values into strings, use , to concatenate the strings together
+* need to convert [age] to string
+* when you define argument "joe" have to use parathesis otherwise wont work
+
+<hr>
+
+**8. I have a box of 7 eggs, find the median and average weight**
+
+eggs: 10 20 30 40 50 60 70
+
+```q
+med eggs
+```
+40
+```q
+avg eggs
+```
+40
+
+<hr>
+
+**9. I sold 2 boxes of eggs. 1 box had 10 eggs and i sold it for 50 each. the other box had 20 eggs and sold it for 100 each. find the average price paid per egg**
+
+```q
+10 20 wavg 50 100
+```
+83.3
+* wavg = weight average function
+
+<hr>
+
+**10. Generate list k of 10 random integers. Find the moving average with window size of 3**
+```
+k: 10?10
+mavg[3;k]
+```
+8 4.5 6 5 6 5 5.33 4.33 5 4.67
+
+**Find the 3 largest numbers in list k**
+
+```q
+3#desc k
+```
+9 8 8 
+* take 3 of the largest from k, sort by desc
+
+**Find the difference between the successive elements of k**
+
+```q
+deltas k
+```
+8 -7 8 -4 -1 2 0 -5 7 -3
+
+<hr>
 
 
 <a name="tables_header"></a>
