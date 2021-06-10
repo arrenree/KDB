@@ -10,7 +10,6 @@
 5. [Projected Functions](#projected_func)
 6. [If True Statements](#iftrue_state)
 7. [If True/Else Statements](#iftrue_else_state)
-8. [Multi Condition If True/Else Statements](#multi_cond_iftrue)
 9. [Adding Conditional Branch Pair](#add_cond_branch)
 10. [Do Loops](#do_loop)
 11. [While_Loops](#while_loop)
@@ -326,7 +325,34 @@ b:2
 while[(a<10) and (b<3); a:a+1; b:b+1; show enlist b,a]
 ```
 * if you have 2 conditions, must use ( ) as KDB reads right to left
+* 2 < 3, yes. 1< 10, yes
+* so a = 1+1 = 2 and b=2+1 = 3
+* shows 3 2
+* 3 is not < 3, so false. stops running
 
+```q
+isprime:{if[x<2; 0b]; a:2; while[a<x; if[(x mod a)=0;0b]; a+:1]; 1b}
+```
+* if x = 1
+* x(1) < (2) (TRUE) so returns 0b (not prime)\
+
+* if x = 4
+* x(4)< 2 (FALSE), skip 0b statement, moves onto a:2
+* a(2) < x(4)? (TRUE), x mod a = 4 mod 2 = 0 (no remainders if you divide 4 by 2). (TRUE), so returns 0b (not prime)\
+
+* if x = 7
+* x(7) < 2 (FALSE), skip 0b
+* a(2) < x(7) (TRUE), x mod a = 7 mod 2 = 1 (FALSE), so returns 1b (TRUE)
+
+```q
+findprime: { [n] r:(); a:1; while [a<n; if[isprime[a];r,:a]; a:a+1];r}
+findprime 10 
+```
+2 3 5 7
+* n = single argument
+* r () = empty list
+* a starts from 1, if a (1) < n (10) TRUE, append a to list r
+* go through every value of a, and add to list r
 
 <hr>
 
@@ -498,6 +524,90 @@ deltas k
 
 <hr>
 
+**11. Create function factw, using a loop to write a factorial function**
+```q
+factw:{r:i:1; while[i<=x; r*:i; i+:1];r}
+factw 3
+```
+6
+* x is implicit variable= 3
+* set r = i = 1
+* while i(1) <= x(3) TRUE, execute following statements
+* r = r(1) * i(1) = 1
+* i = i(1) + 1 = 2
+
+i(2) <= x(3) TRUE, so continue executing
+* r = r(1) x i(2) = 2
+* i = i(2) + 1 = 3
+
+i(3) <= x(3) TRUE
+* r = r(2) x i(3) = 6
+* i = i(3) + 1 = 4
+
+i(4) <= x(3) FALSE, so returns r = 6
+
+<hr>
+
+**12. Re-create the factorial function as factp without using loops**
+```q
+factp:{prd 1+til x}
+factp 3
+```
+6
+* x = implicit variable. 
+* right to left (til 6 = 0 1 2...5) + 1, multiplie together
+
+<hr>
+
+**13. Demonstrate which calculation is faster, factorial using loops or via KDB**
+```q
+\ts do[1000;factw 12]
+```
+4 1008
+* 4 miliseconds 1008 bytes of memory
+
+```q
+\ts do[1000;factp 12]
+```
+0 1008
+* 0 miliseconds 1008 bytes of memory
+
+<hr>
+
+**14. Create function safefact that wraps factp with protected evaluation to return null On instead of error when calling on a negattive number**
+```q
+safefact:{@[factp; x; 0N]}
+safefact -10
+```
+0N
+* apply factp, if true, return x, if false, return 0N
+
+<hr>
+
+**15. Write function isPalindrome that returns `yes if single argument is a palindrome list. Otherwise return `no**
+```q
+isPalindrome:{$[x~reverse x;`yes;`no]}
+isPalindrome 1 2 2 1
+```
+yes
+* $ means if/else statement
+* if x is the reverse of x, return yes. otherwise, no
+* remember, ~ is the match function
+* x = list of numbers
+
+<hr>
+
+**16. Find the sum of all multiples of 3 or 5 below 1000**
+```q
+sum where {(0 =x mod 3) or (0 = x mod 5)}[til 1000]
+```
+233168
+* sum where = adds everything together
+* 0 = x mod 3/5 = no remainders when x is divdied by 3 or 5 = multiples of 3 or 5
+x = implicit variable
+til 1000 = implicit variable (runs through 0...999)
+
+<hr>
 
 <a name="tables_header"></a>
 ## Tables
