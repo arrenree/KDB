@@ -2,6 +2,40 @@
 <a name="top"></a>
 
 
+## [Primitive Operations](#primitive_header)
+1. [Addition](#add_list)
+2. [Comparing Lists](#compare_lists)
+3. [Equal and Match Differences](#match_diff)
+4. [Basic Operations](#basic_operations)
+5. [Division Remainders Mod](#mod_operations)
+6. [Running Sums/Moving Windows](#running_sums)
+7. [Contain](#contain_ops)
+8. [Except](#except_ops)
+9. [Inter](#inter_ops)
+10. [Distinct](#distinct_ops)
+11. [Reverse](#reverse_ops)
+12. [Upper/Lowercase](#uppercase_ops)
+
+## [Primitive Operations Problem Set](#primitive_problemset)
+
+<hr>
+
+## [Dictionary](#dict_header)
+1. [Constructing a Dictionary from Lists](#dict_from_list)
+2. [Retrieving values](#retrieve_dict)
+3. [Index Retrieve](#index_retrieve_dict)
+4. [Take](#take_dict)
+5. [Drop](#drop_dict)
+6. [Upsert](#upsert_dict)
+7. [Multi Key Dictionaries](#multi_key_dict)
+8. [Repeat Keys](#repeat_key_dict)
+9. [Find Operator](#find_dict)
+10. [Dictionary Operators](#dict_opt)
+
+<hr>
+
+## [Dictionary Problem Set](#dict_problemset)
+
 ## [Functions](#functions_header)
 1. [Defining & Calling Functions](#define_func)
 2. [Anonymous Function](#anon_function)
@@ -106,9 +140,665 @@
 
 <hr>
 
+<a name="primitive_header"></a>
+## Primitive Operations
+[Top](#top)
+
+<a name="add_list"></a>
+### Addition
+```q
+10 + 10 20 30
+```
+20 30 40
+
+```q
+10 20 30 + 1 2 3 
+```
+11 22 33
+
+```q
+10 20 30 + 1 2
+```
+length
+* error because different list lengths
+
+<a name="compare_lists"></a>
+### Comparing Lists
+```q
+1 2 3 = 1 2 3 
+```
+111b
+* comparing 2 lists will result in boolean answer (true true true)
+
+<a name="match_diff"></a>
+### Match and Equal Differences
+```q
+1 2 3 = 1 2 3 
+```
+* = is type tolerant. allows for some rounding. accomodates different data types
+
+```q
+1 2 3 ~ 1.0 2.0 3.0
+```
+0b
+* match key ~ is EXACT match
+* single item return (false)
+
+<a name="basic_operations"></a>
+### Basic Operations
+
+l: 10 20 30 40 50 
+
+```q
+max l
+min l
+med l
+avg l
+dev l
+sqrt l
+x xexp y
+```
+* med = median
+* dev = standard deviation
+* xexp = to the power of
+
+<a name="mod_operations"></a>
+### Division Remainders Mod
+
+```q
+11 21 31 mod 2
+```
+1 1 1
+* modulus function returns remainder after dividing it
+
+<a name="running_sums"></a>
+### Running Sums/Moving Windows
+```q
+sums l
+prds 1
+maxs l
+```
+running sums, running products, running max
+```q
+3 msum 1
+```
+moving window sum of 3
+
+```q
+3 mmax l
+```
+moving window max of 3
+
+<a name="contain_ops"></a>
+### Contain
+
+```q
+5 in 1 2 3 4
+```
+0000b
+* is x in y? no, so 0
+
+<a name="except_ops"></a>
+### Except
+
+```q
+1 2 3 4 except 3
+```
+1 2 4
+* return the list except 3
+
+<a name="inter_ops"></a>
+### Inter
+
+```q
+1 2 3 inter 2 3 4
+```
+2 3
+* inter returns values occuring in both lists
+
+<a name="distinct_ops"></a>
+### Distinct
+
+```q
+distinct `a`a`b`b`c`c
+```
+a b c
+* distinct only returns distinct values
+
+<a name="reverse_ops"></a>
+### Reverse
+```q
+reverse 1 2 3
+```
+3 2 1
+
+<a name="uppercase_ops"></a>
+### Upper/Lowercase
+```q
+upper "adsf"
+lower "ADSF"
+```
+ADSF
+adsf
+
+## [Primitive Operations Problem Set](#primitive_problemset)
+
+**1. Find index location for a string of chars**
+
+```q
+"hello ryan where is ryan" ss "ryan"
+```
+6 20
+* ss = finds the index location
+
+<hr>
+
+**2. replace "ryan" with "john"**
+```q
+ssr["hello ryan where is ryan";"ryan";"john"]
+```
+hello johhn where is john
+
+* this is similar to excel search and replace function
+
+<hr>
+
+**3. Find the number of days in 2004**
+```
+2005.01.01-2004.01.01
+```
+366
+
+<hr>
+
+**4. Given list L and K, find the common numbers in both lists**
+l: 7 5 13 20 19 17 30
+k: 7 17 200 300 400 1000
+
+```q
+l inter k
+```
+7 17
+
+<hr>
+
+**5. Find the sum of the first 5 numbers in l**
+```q
+sum 5#l
+```
+64
+
+<hr>
+
+**6. Find the result whhen you remove the last 2 items from k**
+```q
+-2_k
+```
+7 17 200 300
+
+<hr>
+
+**7. Return only numbers in l that are wholly divisible by 5**
+```q
+l mod 5
+```
+2 0 3 0 4 2 0
+
+```q
+l where 0 = l mod 5
+```
+5 20 30
+* show list l where l divide by 5 = 0
+
+<hr>
+
+**8. Subtract the average of list l from max value in list k**
+```q
+max[k] - avg [l] 
+```
+984.14
+
+<hr>
+
+**9. Generate list p of 1000 random integers between 0 and 100. Find all values in p that are square numbers**
+```q
+p: 1000?100
+a: sqrt p
+```
+* a will contain both ints and floats
+
+```q
+a = `int$a
+```
+* cast a as an integer (whole number)
+```q
+p where a=`int$a
+```
+* return value in p where a = whole number
+```q
+count p where a=`int$a
+```
+count the number of times p is a whole number
+
+<hr>
+
+<a name="dict_header"></a>
+## Dictionary
+[Top](#top)
+
+* a dictionary is constructured from 2 lists of same length using the ! operator
+* left of ! = list of keys
+* right of ! = list of values
+
+<a name="dict_from_list"></a>
+### Constructing a Dictionary from Lists
+```q
+k:`apple`plum
+v:`green`purple
+d:k!v
+```
+key|value
+-|-
+apple|	green
+plum|	purple
+
+<a name="retrieve_dict"></a>
+### Retrieving Values
+
+Given dictionary d, 3 ways to retrieve a
+
+```q
+d:`a`b`c!1 2 3
+```
+key|values
+-|-
+a|	1
+b|	2
+c|	3
+
+```q
+d[`a]
+```
+```q
+d`a
+```
+```q
+d@`a
+```
+
+* all 3 syntax work for retrieving values in a dictionary
+
+```q
+key d
+```
+a b c
+* retrieves all keys in d
+
+```q
+value d
+```
+1 2 3
+* retrieves all values in d
+
+```q
+d @ `a`b`a`
+```
+1 2 1 1
+* can retrieve multiple values
 
 
+<a name="index_retrieve_dict"></a>
+### Index Retrieve
 
+```q
+dc:`c1`c2!(10 * til 5; 1+ til 3)
+dc
+```
+key | value
+-|-
+c1	|0 10 20 30 40
+c2	|1 2 3
+
+```q
+dc[`c2]
+```
+1 2 3 
+* retrieves list c2
+
+```q
+dc[`c2;2]
+```
+3
+* retrieves from list c2, index position 2 (0 1 2)
+*
+
+```q
+dc[ ; 1]
+```
+key|value
+-|-
+c1	|10
+c2	|2 
+
+* takes index position 1 from values (2nd column)
+
+<a name="take_dict"></a>
+### Take
+
+```q
+2#d
+```
+
+key | value
+-|-
+a | 1
+b |2
+
+* take first 2 entries from d
+
+```q
+`a`b#d
+```
+
+key | value
+-|-
+a | 1
+b |2
+
+* take subset from d
+
+```q
+d`a`b
+```
+1 2
+* retrieve symbol a b from d
+
+```q
+(enlist`a)#d
+```
+1
+
+* have to use enlist when retrieving a single item from dictionary
+
+<a name="drop_dict"></a>
+### Drop
+
+```q
+2_d
+```
+* drop first 2 rows from d
+
+key | value
+-|-
+C | 3
+
+
+```q
+`a`h`g_d
+```
+* drop values from symbols a, h, and g
+
+key | value
+-|-
+B | 2
+C | 3
+
+<a name="upsert_dict"></a>
+### Upsert
+
+```q
+d [`e]: 99
+d
+```
+* update / insert value
+* if key exists, will update value
+* if key doesn't exist, will insert new key + value
+
+key|value
+-|-
+a|	1
+b|	2
+c|	3
+e|	99
+
+<a name="multi_key_dict"></a>
+### Multi Key Dictionaries
+
+```q
+md: (`a`b;`c`d;`e`f) ! 1 2 3
+```
+* created a dictionary md with 2 keys for every 1 value
+* ; separate the various rows
+
+key| value
+-|-
+a b	|1
+c d	|2
+e f	|3
+
+<a name="repeat_key_dict"></a>
+### Repeat Keys
+* you can technically have multiple repeat keys, but this is NOT recommended
+
+```q
+dk: 1 2 3 1 ! `a`b`c`d
+```
+key|values
+-|-
+1|	a
+2|	b
+3|	c
+1|	d
+
+```q
+dk[1]
+```
+a
+* if you attempt to retrieve a repeated key, it will only get the first value
+
+<a name="find_dict"></a>
+### Find Operator
+
+```q
+d?2
+```
+b
+* ? is the find operator
+
+<a name="dict_opt"></a>
+### Dictionary Operators
+```q
+sum d
+```
+6
+```q
+neg d
+```
+key|value
+-|-
+a|	-1
+b|	-2
+c|	-3
+
+```q
+d%100
+```
+key|value
+-|-
+a|	0.01
+b|	0.02
+c|	0.03
+
+```q
+d1:`a`b`c!1 2 3
+d2:`a`b`c!1 2 3
+```
+
+```q
+d1+d2
+d1,d2
+```
+key|value
+-|-
+a|	2
+b|	4
+c|	6
+
+<hr>
+
+<a name="dict_problemset"></a>
+## Dictionary Problem Set
+[Top](#top)
+
+**1. Given the below dictionary, find the type, the keys, and its values**
+```q
+d:`p`q`r`s!10 20 40 100
+```
+key|value
+-|-
+p|	10
+q|	20
+r|	40
+s|	100
+
+```q
+type d
+key d
+value d
+```
+99h \
+p q r s \
+10 20 40 100 \
+
+<hr>
+
+**2. Add new entry u 200 to list d**
+```q
+d[`u]: 200
+```
+* upsert. will update if key exists, if not, will append it
+
+key|value
+-|-
+p|	10
+q|	20
+r|	40
+s|	100
+u| 200
+
+<hr>
+
+**3. Change value of p to 2**
+```q
+d[`p]:2
+```
+<hr>
+
+**4. Create dictionary d2, only containing values of p q r from dictionary d**
+```q
+d2:`p`q`r#d
+```
+* take p q r from dictionary d
+
+<hr>
+
+**5. Add common elements in d2 and d, only return common keys and values**
+```q
+(key[d] inter key[d2]) # d+d2
+```
+* inter returns values occuring in both lists
+* take the common keys in dictionary d and d2 and show its values
+
+key|value
+-|-
+p|	20
+q|	40
+r|	80
+
+<hr>
+
+**6. Given the 2 dictionaries below, find those who are greater than 1.7m in height**
+```q
+dheight:`john`mark`luke`paul`ian`peter!1.5 1.6 1.7 1.8 1.9 1.4
+dweight:`john`mark`luke`paul`ian`peter!81 72 88 91 55 110
+```
+dheight
+
+key|value
+-|-
+john|	1.5
+mark|	1.6
+luke|	1.7
+paul|	1.8
+ian|	1.9
+peter|	1.4
+
+dweight
+
+key|value
+-|-
+john|	81
+mark|	72
+luke|	88
+paul|	91
+ian|	55
+peter|	110
+
+```q
+dheight > 1.7
+```
+key|value
+-|-
+john|	0b
+mark|	0b
+luke|	0b
+paul|	1b
+ian|	1b
+peter|	0b
+
+* dictionary + condition = examines values as booleans, returns as true/false
+
+```q
+where dheight > 1.7
+```
+* where = returns the keys
+
+paul ian
+
+<hr>
+
+**7. Find the average height of people who weight over 90**
+```q
+where dweight > 90
+```
+paul peter
+
+```q
+dheight where dweight > 90
+```
+1.8 1.4
+
+```q
+avg dheight where dweight > 90
+```
+1.6
+
+<hr>
+
+**8. Find the body mass index (weight) / (height x height)**
+```q
+dweight%dheight*dheight
+```
+key|value
+-|-
+john|	36.0
+mark|	28.1
+luke|	30.4
+paul|	28.0
+ian|	15.2
+peter|	56.1
+
+<hr>
 
 <a name="functions_header"></a>
 ## Functions
