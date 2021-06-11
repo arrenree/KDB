@@ -1,6 +1,15 @@
 # Allen's Notes for KDB+ / Q
 <a name="top"></a>
 
+
+## [Data Types & Casting & Enumeration](#casting_header)
+1. [Date](#date_type)
+2. [Time](#time_type)
+3. [Casting](#cast_type)
+4. [Enumeration](#enu_cast)
+
+## [Casting & Enumeration Problem Set](#casting_problemset)
+
 ## [Lists](#lists_header)
 1. [Simple Lists](#simple_list)
 2. [Mixed Lists](#mixed_list)
@@ -13,8 +22,6 @@
 9. [Matrix](#matrix_list)
 
 ## [Lists Problem Set](#list_problemset)
-
-<hr>
 
 ## [Primitive Operations](#primitive_header)
 1. [Addition](#add_list)
@@ -32,8 +39,6 @@
 
 ## [Primitive Operations Problem Set](#primitive_problemset)
 
-<hr>
-
 ## [Dictionary](#dict_header)
 1. [Constructing a Dictionary from Lists](#dict_from_list)
 2. [Retrieving values](#retrieve_dict)
@@ -45,8 +50,6 @@
 8. [Repeat Keys](#repeat_key_dict)
 9. [Find Operator](#find_dict)
 10. [Dictionary Operators](#dict_opt)
-
-<hr>
 
 ## [Dictionary Problem Set](#dict_problemset)
 
@@ -82,8 +85,6 @@
 14. [Retrieve From Table](#retrieve_table)
 15. [Insert Table](#insert_table)
 
-<hr>
-
 ## [Tables Problem Set](#tables_problem_set)
 
 ## [Keyed Tables](#keyed_tables)
@@ -97,8 +98,6 @@
 8. [Upsert Multi Row/Keys](#upsert_multi_rowkeys)
 9. [Retrieving Values from Keyed Table](#retrieve_value_keys)
 
-<hr>
-
 ## [Keyed Table Problem Set](#keyed_table_problem_set)
 
 ## [Table Attributes](#table_attributes)
@@ -111,8 +110,6 @@
 7. [Unique Attribute](#unique_attribute)
 8. [Grouped Attribute](#group_attribute)
 9. [Parted Attribute](#parted_attribute)
-
-<hr>
 
 ## [Foreign Key Restrictions](#fkey_restrictions)
 1. [Single Foreign Keys](#single_fkey)
@@ -138,8 +135,6 @@
 12. [Sort Ascending / Descending](#sort_asc_desc)
 13. [Renaming / Reordering Columns](#rename_reorder_columns)
 
-<hr>
-
 ## [qSQL Problem Set](#qsql_problem_set)
 
 ## [qSQL Joins](#qsql_joins)
@@ -148,9 +143,219 @@
 3. [Inner Join](#inner_join)
 4. [Union Join](#union_join)
 
+## [qSQL Joins Problem Set](#qsqljoins_problem_set)
+
 <hr>
 
-## [qSQL Joins Problem Set](#qsqljoins_problem_set)
+
+<a name="casting_header"></a>
+## Data Types & Casting
+[Top](#top)
+
+type|	size|	char|	num|	notation|	Null Value|	Positive Infinity
+-|-|-|-|-|-|-
+Mixed List|	|	|	|0|	|	|	
+boolean|	1|	b|	1|	1b|	0b|	
+byte|	1|	x|	4|	0x26|	0x00|	
+short|	2|	h|	5|	42h|	0Nh	|0Wh
+int|	4|	i	|6	|42	|0N|	0W
+long|	8|	j	|7|	42j|	0Nj|	0Wj
+real	|4	|e	|8	|4.2e	|0Ne	|0We
+float	|8|	f|	9|	4.2	|0n|	0w
+char	|1	|c	|10	|"z"|	" "|	
+symbol|	|	s|	11|	`zaphod|	`|	
+timestamp|	8|	p	|12|	2011.07.08D21:48:48.703125000|	0Np	|0Wp
+month|	4|	m|	13|	2006.07m	|0Nm	|0Wm
+date|	4	|d|	14|	2006.07.21	|0Nd	|0Wd
+datetime	|4	|z	|15|	2006.07.21T09:13:39	|0Nz	|0Wz
+timespan	|8|	n	|16|	0D21:56:26.421875000	|0Nn	|0Wn
+minute|	4	|u	|17|	12:11|	0Nu|	0Wu
+second	|4|	v	|18|	12:11:17|	0Nv	|0Wv
+time	|4	|t	|19	|09:01:02:042	|0Nt	|0Wt
+enum	|4|	*|	20-77	|`u$v|	|
+table|	|	|98	|([] c1:ab`c; c2:10 20 30) | 
+dictionary	|	|	|99	|`a`b`c!!10 20 30 |
+
+<a name="date_type"></a>
+### Date
+
+Given:
+d: 2011.02.22
+
+```q
+d.year
+d.mm
+d.month
+d.dd
+```
+2011i \
+2i \
+22i 
+
+<a name="time_type"></a>
+### Time
+
+Given:
+t: 11:02:58:000
+
+```q
+t.hh
+t.mm
+t.minute
+t.ss
+t.second
+```
+11i \
+2i \
+11:02 \
+58i \
+11:02:85 
+
+```q
+.z.t
+.z.d
+.z.n
+```
+* current time
+* current date
+* current timespan
+
+<a name="cast_type"></a>
+### Casting
+* casting = changing datatype 
+
+```q
+`date$2
+```
+2000-01-03d
+* 2nd day of the millennia
+
+```q
+`time$2
+```
+00:00:00.002t
+* 2 + 00:00:00.000
+
+```q
+`month$2
+```
+2000.03m
+* KDB time starts at 2000.01.01 
+* 2 + 2000.01.01
+
+```q
+`minute$2
+```
+00:02
+* takes 2 + 00:00
+
+```q
+`seconds$2
+```
+00:00:02
+
+<a name="enu_cast"></a>
+### Enumeration
+* enumeration is converting a list of values to a defined domain which restricts values to that domain
+
+```q
+suits:`hearts`clubs`spades`diamonds
+l: `hearts`clubs`diamonds
+el: `suits$l
+```
+* enumerate all symbols in list l under same domain as suits
+* will enforce/restrict their type as same domain 
+
+```q
+el,:`apple
+```
+cast
+* if you try adding a value that is NOT within that domain (apple), you will get a cast error
+
+```q
+el[0]:`pear
+```
+cast
+* also cannot update value if not in the existing domain
+
+<hr>
+
+<a name="casting_problemset"></a>
+## Casting & Enumeration Problem Set
+[Top](#top)
+
+**1. What is the syntax to add to a list**
+```q
+el, : apple
+```
+* listname + , + :
+
+<hr>
+
+**2. Show 3 ways to conver float 4.5 to an integer**
+```q
+`int$4.5
+"i"$4.5
+6h$4.5
+```
+
+<hr>
+
+**3. Given strings "2001.02.02" and "2003.08.09", parse the strings into KDB dates**
+```q
+"D"$("2001.02.02";"2003.08.09")
+```
+* these are strings which you are trying to parse into the date datatype
+* have to use upper case when parsing
+
+<hr>
+
+**4. Given the mixed list L: ("100.1";"hello";"10"), convert elements to float, char, and int**
+```q
+"F*I"$("100.1";"hello";"10")
+```
+100.1
+"hello" 
+10i
+* have to use capital F and I
+* the astrik is used for strings
+
+<hr>
+
+**5. Create empty symbol list s**
+
+```q
+s: `symbol$()
+```
+
+**Append integer 3 to list s**
+```q
+s ,: 3
+```
+type 
+* error because 3 is an int and the list is enumerated as syms
+
+**Append symbol ooo to list s**
+```q
+s,:`ooo
+```
+
+<hr>
+
+**6. Create an enumeration t containing values p q r that is restricted to domain s**
+```q
+s: `symbol$()
+t: `s$`p`q`r
+```
+* t is now an enumeration which only contain domain s (symbols)
+
+**7. Insert new value u into t**
+
+```q
+s,:`u
+t,:`u
+```
+* since t is restricted to domain s, need to first add u into s before adding to t
 
 <hr>
 
@@ -528,7 +733,11 @@ lower "ADSF"
 ADSF
 adsf
 
-## [Primitive Operations Problem Set](#primitive_problemset)
+<hr>
+
+<a name="primitive_problemset"></a>
+## Primitive Operations Problem Set
+[Top](#top)
 
 **1. Find index location for a string of chars**
 
