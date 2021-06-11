@@ -1,6 +1,20 @@
 # Allen's Notes for KDB+ / Q
 <a name="top"></a>
 
+## [Lists](#lists_header)
+1. [Simple Lists](#simple_list)
+2. [Mixed Lists](#mixed_list)
+3. [Empty Lists](#empty_list)
+4. [Single Item Lists](#atom_list)
+5. [Joining Lists](#join_lists)
+6. [Retrieving from Lists](#retrieve_list)
+7. [Update List Values](#update_list)
+8. [Nested Lists](#nest_list)
+9. [Matrix](#matrix_list)
+
+## [Lists Problem Set](#list_problemset)
+
+<hr>
 
 ## [Primitive Operations](#primitive_header)
 1. [Addition](#add_list)
@@ -137,6 +151,239 @@
 <hr>
 
 ## [qSQL Joins Problem Set](#qsqljoins_problem_set)
+
+<hr>
+
+<a name="lists_header"></a>
+## Lists
+[Top](#top)
+
+<a name="simple_list"></a>
+### Simple Lists
+```q
+L1: 1 2 3 4
+L2: 1;2;3;4
+L3: 1 2 3 4i
+L4: 1.0 2.0 3.0 4.0
+L5: `p`q`r
+L6: ("a";"b";"c")
+```
+* simple lists with same datatype don't need semi colons
+* L3 = list of ints
+* L4 = list of floats
+* L5 = list of syms
+* L6 = list of chars
+ 
+<a name="mixed_list"></a>
+### Mixed Lists
+```q
+L7: (1; `p; 200.)
+```
+* mixed list of an int, sym, and float
+
+```q
+type L7
+```
+0h 
+* null because its a mixed list
+
+<a name="empty_list"></a>
+### Empty Lists
+
+```q
+L8: ()
+count L8
+```
+0
+
+<a name="atom_list"></a>
+### Single Item Lists
+```q
+L9: enlist `C
+```
+* have to use enlist for single item lists
+
+<a name="join_lists"></a>
+### Joining Lists
+a: 1 2 3
+b: 4 5 6
+```q
+a,b
+```
+1 2 3 4 5 6
+
+<a name="retrieve_list"></a>
+### Retrieving from Lists
+L: 10 20 30
+
+```q
+L[0]
+L[1 2]
+L 1 2 3
+```
+10 \
+10 20 \
+10 20 30 \
+
+* retrieval uses 0 indexing logic (count starts with 0)
+* notice you DONT use colons : when retrieving from lists
+
+<a name="update_list"></a>
+### Update List Values
+L: 10 20 30
+```q
+L[0 1 2] : 40 50 60
+```
+40 50 60
+* notice you use colon : to update values
+
+<a name="nest_list"></a>
+### Nested Lists
+```q
+L: 10 20 30 40 50
+K: 0.1 0.2 0.3
+NL: (L; K; `pp`qq`rr)
+```
+* NL is a list of 3 nested lists: L, K, and the syms
+
+10 20 30 40 50 \
+0.1 0.2 0.3 \
+`pp`qq`rr \
+
+```q
+NL [ 0 2]
+```
+10 20 30 40 50 \
+`pp`qq`rr \
+* So think of list NL as 3 separate lists. we retrieved index location 0 and 2, so returned the first and 3rd list
+
+```q
+(NL 0)0
+NL [0][0]
+```
+10
+* retrieves list L (index location 0) and the first value from that list (index location 0)
+
+<a name="matrix_list"></a>
+### Matrix
+
+m: (10 20 30; 40 50 60; 70 80 90)
+
+0|1|2
+-|-|-
+10| 20| 30
+40| 50| 60
+70| 80| 90
+
+* when retrieving in a matrix, always go ROW, then COLUMN
+
+```q
+m[1; ]
+```
+40 50 60
+* takes index 1 location (2nd row)
+
+```q
+m[ ; 1]
+```
+20 50 80
+* ignores row (blank), retrieves index 1 location for column (2nd column)
+
+<hr>
+
+<a name="list_problemset"></a>
+## Lists Problem Set
+[Top](#top)
+
+**1. What is the difference between 3 ? 10 and 3 ? 10 20 30**
+
+```q
+3?10
+```
+* returns 3 random numbers from 0-10
+
+```q
+3? 10 20 30
+```
+10 10 30
+* returns 3 random numbers from the list
+
+<hr>
+
+**2. Create a general list containing symbol p, boolean 1b, and long 1000200j**
+
+```q
+GL: (`p; 1b; 100200j)
+```
+* general lists with different data types have to be contained within ( ) with ; separating each item
+
+<hr>
+
+**3. Given the following**
+
+p: 100 200 300 400 500 600
+t: "say hello world to bob"
+m: (1 2 3; 10 20 30; 100 200 300)
+
+**Retrieve first 3 items from p**
+```q
+3#p
+```
+100 200 300
+
+<hr>
+
+**4. From t, retrieve the list "sold"**
+```q
+t[0 8 6 14]
+```
+"sold"
+* you are retrieving characters from their index position
+
+<hr>
+
+**5. Create the nested list ("shoot";"bob") by indexing into t**
+```q
+t?"shoot"
+```
+0 4 8 8 16
+
+```q
+t? "bob"
+```
+19 8 19
+```q
+t(0 4 8 8 16; 19 8 19)
+```
+("shoot";"bob")
+
+* you are finding the index locations of those chars from list t
+* then retrieving those index positions (letters) to spell out 
+
+<hr>
+
+**6. Change the last number in p to 1000**
+```q
+p[5]: 1000
+```
+* upsert. find index location 5, replace value with 1000
+
+<hr>
+
+**7. Find the 3 highest numbers in p**
+```q
+3#desc p
+```
+100 500 400
+* take 3 numbers from descending list p
+
+<hr>
+
+**8. Find values of p that are below the mean**
+```q
+p where p<avg p
+```
+100 200 300 400
 
 <hr>
 
