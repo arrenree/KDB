@@ -1,4 +1,4 @@
-# Allen's Notes for KDB+ / Q
+# Allen's Notes for KDB+
 <a name="top"></a>
 
 ## [KDB Basics](#kdbintro_header)
@@ -7,27 +7,24 @@
 3. [Division](#division_intro)
 4. [Loading Scripts](#load_intro)
 5. [Floats](#float_intro)
-6. [Operators](#operator_intro)
-7. [Til](#til_intro)
-8. [Booleans](#boolean_intro)
-9. [Over](#over_intro)
-10. [Scan](#scan_intro)
-11. [Count](#count_intro)
-12. [Take](#take_intro)
-13. [Drop](#drop_intro)
-14. [Larger](#larger_intro)
-15. [Smaller](#smaller_intro)
-
-
-
+6. [Til](#til_intro)
+7. [Booleans](#boolean_intro)
+8. [Over](#over_intro)
+9. [Scan](#scan_intro)
+10. [Count](#count_intro)
+11. [Take](#take_intro)
+12. [Drop](#drop_intro)
+13. [Larger](#larger_intro)
+14. [Smaller](#smaller_intro)
 
 ## [Data Types & Casting & Enumeration](#casting_header)
-1. [Date](#date_type)
-2. [Time](#time_type)
-3. [Casting](#cast_type)
-4. [Enumeration](#enu_cast)
+1. [Datatype Table](#datatype_table)
+2. [Date](#date_type)
+3. [Time](#time_type)
+4. [Casting](#cast_type)
+5. [Enumeration](#enu_cast)
 
-## [Casting & Enumeration Problem Set](#casting_problemset)
+## [Data Types & Casting & Enumeration Problem Set](#casting_problemset)
 
 ## [Lists](#lists_header)
 1. [Simple Lists](#simple_list)
@@ -166,10 +163,6 @@
 
 <hr>
 
-
-
-
-
 <a name="kdbintro_header"></a>
 ## KDB Basics
 [Top](#top)
@@ -177,9 +170,10 @@
 * KDB is a time series database built upon q
 * q is an interpreted language, which means the code is evaluated immediately upon entering
 * q is a declarative language, which means you say what you want, not how to do it
+* in KDB, all operators are executed RIGHT to LEFT
 
 <a name="assign_intro"></a>
-### Assigning Values to Varibles
+### 1) Assigning Values to Varibles
 ```q
 a: 7
 a
@@ -187,7 +181,7 @@ a
 7
 
 <a name="expression_intro"></a>
-### Expressions
+### 2) Expressions
 ```q
 6*7
 ```
@@ -202,7 +196,7 @@ b
 
 
 <a name="division_intro"></a>
-### Division
+### 3) Division
 * division in KDB is expressed as %
 * always gives a float response
 
@@ -221,11 +215,6 @@ b
 ### Floats
 * a float is any number with a decimal point
 * remember, division will always return a float response
-
-<a name="operator_intro"></a>
-### Operators
-* in KDB, all operators executed RIGHT to LEFT
-
 
 <a name="til_intro"></a>
 ### Til
@@ -392,10 +381,14 @@ k: 1 2 3 4
 1 2
 * drop the last 2 values from list k
 
+<hr>
 
 <a name="casting_header"></a>
 ## Data Types & Casting
 [Top](#top)
+
+<a name="datatype_table"></a>
+### Datatype Table
 
 type|	size|	char|	num|	notation|	Null Value|	Positive Infinity
 -|-|-|-|-|-|-
@@ -469,6 +462,10 @@ t.second
 ### Casting
 * casting = changes one datatype to another type that's compatible
 * parsing = converting from a string to a native type
+* x $ y 
+* x = target type
+* y = source type
+* so you are casting y to x
 
 ```q
 `date$2
@@ -510,7 +507,6 @@ t.second
 `boolean$0
 ```
 0b
-
 
 <a name="enu_cast"></a>
 ### Enumeration
