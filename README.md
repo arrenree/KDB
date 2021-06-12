@@ -1,6 +1,25 @@
 # Allen's Notes for KDB+ / Q
 <a name="top"></a>
 
+## [KDB Basics](#kdbintro_header)
+1. [Assigning Values to Variable](#assign_intro)
+2. [Expressions](#expression_intro)
+3. [Division](#division_intro)
+4. [Loading Scripts](#load_intro)
+5. [Floats](#float_intro)
+6. [Operators](#operator_intro)
+7. [Til](#til_intro)
+8. [Booleans](#boolean_intro)
+9. [Over](#over_intro)
+10. [Scan](#scan_intro)
+11. [Count](#count_intro)
+12. [Take](#take_intro)
+13. [Drop](#drop_intro)
+14. [Larger](#larger_intro)
+15. [Smaller](#smaller_intro)
+
+
+
 
 ## [Data Types & Casting & Enumeration](#casting_header)
 1. [Date](#date_type)
@@ -148,6 +167,232 @@
 <hr>
 
 
+
+
+
+<a name="kdbintro_header"></a>
+## KDB Basics
+[Top](#top)
+
+* KDB is a time series database built upon q
+* q is an interpreted language, which means the code is evaluated immediately upon entering
+* q is a declarative language, which means you say what you want, not how to do it
+
+<a name="assign_intro"></a>
+### Assigning Values to Varibles
+```q
+a: 7
+a
+```
+7
+
+<a name="expression_intro"></a>
+### Expressions
+```q
+6*7
+```
+42
+
+You can also store an expression in a variable
+```q
+b: 6*7
+b
+```
+42
+
+
+<a name="division_intro"></a>
+### Division
+* division in KDB is expressed as %
+* always gives a float response
+
+```q
+4 % 2
+```
+2
+
+<a name="load_intro"></a>
+### Loading Scripts
+```q
+\l scriptname.q
+```
+
+<a name="float_intro"></a>
+### Floats
+* a float is any number with a decimal point
+* remember, division will always return a float response
+
+<a name="operator_intro"></a>
+### Operators
+* in KDB, all operators executed RIGHT to LEFT
+
+
+<a name="til_intro"></a>
+### Til
+* til generates integers until value
+* always starts at 0; does NOT include value indicated
+
+```q
+til 4
+```
+0 1 2 3
+
+```q
+1+ til 4
+```
+1 2 3 4
+
+<a name="boolean_intro"></a>
+### Booleans
+* booleans are true/false statements
+* 0b = false
+* 1b = true
+
+```q
+101b
+```
+True, False, True
+
+```q
+42 = 6*7
+```
+1b (true)
+
+```q
+1 2 3 = 10 2 30
+```
+010b
+* can compare 2 lists of equal length
+
+<a name="over_intro"></a>
+### Over
+```q
+0 +/ 1 2 3
+```
+1 2 3
+* / means over
+* execute "over" entire list
+
+```q
+(*/) 2 # 5
+```
+25
+* take 2 values from 5 = 5 5
+* multiply 5 x 5 = 25
+
+<a name="scan_intro"></a>
+### Scan
+* scan is similar to over /, but instead of returning the final result, returns all values
+
+```q
+(+\) 1 + 0 1 2 3
+```
+1 3 6 10
+
+<a name="larger_intro"></a>
+### Larger
+
+```q
+4 | 5
+```
+5
+* | is called style or bar
+* returns the larger of the two operants
+
+```q
+(|/) til 10
+```
+9
+* find the largest value over the list
+
+```q
+max 10 20 30
+```
+30
+* return the largest value over the list
+
+<a name="smaller_intro"></a>
+### Smaller
+
+```q
+10 & 2
+```
+2
+* the & is called amper
+* chooses the lesser of the 2
+
+```q
+(&/) til 10
+```
+0
+* return the smallest value over the list
+
+```q
+min 10 20 30
+```
+10
+* return the smallest value  in this list
+
+<a name="count_intro"></a>
+### Count
+
+```q
+count (til 6; 10 20 30)
+```
+2
+* counted 2 lists
+
+```q
+count each (til 6; 10 20 30)
+```
+6 3
+* count each will count the number of values in each list
+
+<a name="take_intro"></a>
+### Take
+
+```q
+k: 1 2 3 4
+2#k
+```
+1 2
+* take # will take the first 2 values of list k
+
+```q
+-2#k
+```
+3 4
+* take last 2 values of list k
+
+```q
+5 # 8
+```
+8 8 8 8 8 
+* take 5 values of 8
+
+```q
+5 # 1 2 3
+```
+1 2 3 1 2
+* take 5 values from this list
+
+<a name="drop_intro"></a>
+### Drop
+k: 1 2 3 4
+
+```q
+2_k
+```
+3 4
+* drop the first 2 values from list k
+
+```q
+-2_k
+```
+1 2
+* drop the last 2 values from list k
+
+
 <a name="casting_header"></a>
 ## Data Types & Casting
 [Top](#top)
@@ -222,7 +467,8 @@ t.second
 
 <a name="cast_type"></a>
 ### Casting
-* casting = changing datatype 
+* casting = changes one datatype to another type that's compatible
+* parsing = converting from a string to a native type
 
 ```q
 `date$2
@@ -253,6 +499,18 @@ t.second
 `seconds$2
 ```
 00:00:02
+
+```q
+`boolean$9
+```
+1b
+* casting a boolean will always be true (1b), unless its 0
+
+```q
+`boolean$0
+```
+0b
+
 
 <a name="enu_cast"></a>
 ### Enumeration
