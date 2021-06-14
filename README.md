@@ -1,7 +1,7 @@
 # Allen's Notes for KDB+
 <a name="top"></a>
 
-## [KDB Basics](#kdbintro_header)
+## 1. [KDB Basics](#kdbintro_header)
 1. [Assigning Values to Variable](#assign_intro)
 2. [Expressions](#expression_intro)
 3. [Division](#division_intro)
@@ -17,16 +17,16 @@
 13. [Larger](#larger_intro)
 14. [Smaller](#smaller_intro)
 
-## [Data Types & Casting & Enumeration](#casting_header)
+## 2. [Data Types & Casting & Enumeration](#casting_header)
 1. [Datatype Table](#datatype_table)
 2. [Date](#date_type)
 3. [Time](#time_type)
 4. [Casting](#cast_type)
 5. [Enumeration](#enu_cast)
 
-## [Data Types & Casting & Enumeration Problem Set](#casting_problemset)
+## 3. [Data Types & Casting & Enumeration Problem Set](#casting_problemset)
 
-## [Lists](#lists_header)
+## 4. [Lists](#lists_header)
 1. [Simple Lists](#simple_list)
 2. [Mixed Lists](#mixed_list)
 3. [Empty Lists](#empty_list)
@@ -37,9 +37,9 @@
 8. [Nested Lists](#nest_list)
 9. [Matrix](#matrix_list)
 
-## [Lists Problem Set](#list_problemset)
+## 5. [Lists Problem Set](#list_problemset)
 
-## [Primitive Operations](#primitive_header)
+## 6. [Primitive Operations](#primitive_header)
 1. [Addition](#add_list)
 2. [Comparing Lists](#compare_lists)
 3. [Equal and Match Differences](#match_diff)
@@ -53,9 +53,9 @@
 11. [Reverse](#reverse_ops)
 12. [Upper/Lowercase](#uppercase_ops)
 
-## [Primitive Operations Problem Set](#primitive_problemset)
+## 7. [Primitive Operations Problem Set](#primitive_problemset)
 
-## [Dictionary](#dict_header)
+## 8. [Dictionary](#dict_header)
 1. [Constructing a Dictionary from Lists](#dict_from_list)
 2. [Retrieving values](#retrieve_dict)
 3. [Index Retrieve](#index_retrieve_dict)
@@ -67,9 +67,9 @@
 9. [Find Operator](#find_dict)
 10. [Dictionary Operators](#dict_opt)
 
-## [Dictionary Problem Set](#dict_problemset)
+## 9. [Dictionary Problem Set](#dict_problemset)
 
-## [Functions](#functions_header)
+## 10. [Functions](#functions_header)
 1. [Defining & Calling Functions](#define_func)
 2. [Anonymous Function](#anon_function)
 3. [Implicit Argument](#implicit_argu)
@@ -82,9 +82,9 @@
 11. [While_Loops](#while_loop)
 12. [Multi Condition While Loops](#multi_cond_while_loop)
 
-## [Functions Problem Set](#func_problem_set)
+## 11. [Functions Problem Set](#func_problem_set)
 
-## [Tables](#tables_header)
+## 12. [Tables](#tables_header)
 1. [Flipping Dictionary to Table](#dict_to_table)
 2. [Simple Table](#simple_table)
 3. [Single Row Table](#single_row_table)
@@ -101,9 +101,9 @@
 14. [Retrieve From Table](#retrieve_table)
 15. [Insert Table](#insert_table)
 
-## [Tables Problem Set](#tables_problem_set)
+## 13. [Tables Problem Set](#tables_problem_set)
 
-## [Keyed Tables](#keyed_tables)
+## 14. [Keyed Tables](#keyed_tables)
 1. [Single Keyed Table](#single_keyed_table)
 2. [Multi_Keyed_Table](#multi_keyed_table)
 3. [Retrieving Keys/Values](#retrieving_keysvalues)
@@ -114,9 +114,9 @@
 8. [Upsert Multi Row/Keys](#upsert_multi_rowkeys)
 9. [Retrieving Values from Keyed Table](#retrieve_value_keys)
 
-## [Keyed Table Problem Set](#keyed_table_problem_set)
+## 15. [Keyed Table Problem Set](#keyed_table_problem_set)
 
-## [Table Attributes](#table_attributes)
+## 16. [Table Attributes](#table_attributes)
 1. [Setting Attributes During Creation](#set_attribute_creation)
 2. [Applying Attribute to Existing Data](#apply_attribute_data)
 3. [Updating Attribute to Existing Data](#update_attribute_data)
@@ -127,16 +127,16 @@
 8. [Grouped Attribute](#group_attribute)
 9. [Parted Attribute](#parted_attribute)
 
-## [Foreign Key Restrictions](#fkey_restrictions)
+## 17. [Foreign Key Restrictions](#fkey_restrictions)
 1. [Single Foreign Keys](#single_fkey)
 2. [Checking Foreign Keys](#check_fkey)
 3. [Upserting with Foriegn Keys](#upsert_fkey)
 4. [Retrieving Custom Columns via fkey](#retrieve_fkey)
 5. [Multiple Foreign Keys](#multi_fkey)
 
-## [Foreign Key Problem Set](#fkey_problemset)
+## 18. [Foreign Key Problem Set](#fkey_problemset)
 
-## [qSQL](#qsql_header)
+## 19. [qSQL](#qsql_header)
 1. [Select from where](#select_from_where)
 2. [Select by](#select_by)
 3. [Select count](#select_count)
@@ -151,15 +151,28 @@
 12. [Sort Ascending / Descending](#sort_asc_desc)
 13. [Renaming / Reordering Columns](#rename_reorder_columns)
 
-## [qSQL Problem Set](#qsql_problem_set)
+## 20. [qSQL Problem Set](#qsql_problem_set)
 
-## [qSQL Joins](#qsql_joins)
+## 21. [qSQL Joins](#qsql_joins)
 1. [Left Join](#left_join)
 2. [Plus Join](#plus_join)
 3. [Inner Join](#inner_join)
 4. [Union Join](#union_join)
 
-## [qSQL Joins Problem Set](#qsqljoins_problem_set)
+## 22. [qSQL Joins Problem Set](#qsqljoins_problem_set)
+
+## 23. [Adverbs](#adverbs_header)
+1. [Each Both](#eachboth_adverbs)
+2. [Each Monadic](#each_monadic)
+3. [Each Right / Each Left](#eachright_eachleft)
+4. [Scan](#scan_adverb)
+5. [Each Previous](#eachprevious_adverb)
+
+## 23. [Adverbs Problem Set](#adverbs_problemset)
+
+
+
+
 
 <hr>
 
@@ -173,7 +186,7 @@
 * in KDB, all operators are executed RIGHT to LEFT
 
 <a name="assign_intro"></a>
-### 1) Assigning Values to Varibles
+### Assigning Values to Varibles
 ```q
 a: 7
 a
@@ -181,7 +194,7 @@ a
 7
 
 <a name="expression_intro"></a>
-### 2) Expressions
+### Expressions
 ```q
 6*7
 ```
@@ -196,7 +209,7 @@ b
 
 
 <a name="division_intro"></a>
-### 3) Division
+### Division
 * division in KDB is expressed as %
 * always gives a float response
 
@@ -4523,6 +4536,363 @@ ndate|ticker|title|price
 * deletes the size column
 
 <hr>
+
+<a name="adverbs_header"></a>
+## Adverbs
+[Top](#top)
+
+<a name="eachboth_adverbs"></a>
+### Each Both
+* modifies a dyadic function to operate on corresponding pairs of items between lists of equal length
+
+```q
+L: 1 2 3 4 5
+K: 50 60 70 80 90
+L,'K
+```
+
+L|K
+-|-
+1| 50
+2 |60
+3 |70
+4 |80
+5| 90
+
+* joins first elements of L and K
+* lists must be same length
+
+```q
+d1:`p`o`i ! 1 2 3
+d2:`p`o`k ! 4 5 6
+```
+d1
+key|value
+-|-
+p|	1
+o|	2
+i|	3
+
+d2
+key|value
+-|-
+p|	4
+o|	5
+k|	6
+
+```q
+d1,d2
+```
+key|value
+-|-
+p	|4
+o	|5
+i	|3
+k	|6
+
+* when you join dictionaries, the d2 will override anything existing keys in d1 (p, o)
+* acts like an upsert
+
+```q
+d1,'d2
+```
+key|value
+-|-
+p|	1 4
+o|	2 5
+i|	3 
+k| 6
+
+* each both joins the values together
+
+```q
+t1: ( [] a:1 2 3)
+t2: ( [] b:4 5 6)
+```
+
+```q
+t1, t2
+```
+mismatch (because rows have different columns names)
+
+```q
+t1, 't2
+```
+
+a|b
+-|-
+1	|4
+2	|5
+3	|6
+
+* each both will stitch the two tables together
+
+<a name="each_monadic"></a>
+### Each Monadic
+* each modifies a monadic function to make it operate one level deeper
+
+```q
+j: ("race fast, safe car."; 0 1 2; `a`b`c)
+```
+"race fast, safe car." \
+0 1 2 \
+a b c
+
+```q
+reverse j
+```
+* so this reverses the mixed list at the top most level
+
+a b c \
+0 1 2 \
+"race fast, safe car."
+
+```q
+reverse each j
+```
+* reverse within each list
+
+".rac efas , tsaf ecar"
+2 1 0
+c b a
+
+<a name="eachright_eachleft"></a>
+### Each Right / Each Left
+* similar to concatenate
+* x,/: each right; will join left item (x) to each item on right
+* x,\: each left; will join left item (x) to each item on left
+
+```q
+st:("welcome";"to the"; "terminal")
+```
+"welcome" \
+"to the " \
+"terminal" 
+
+```q
+">",/:st
+```
+* joins the left item to each item on right
+
+">welcome" \
+">to the " \
+">terminal" 
+
+```q
+">",st
+```
+* if you simply joined it, it will join it at the top most level of the list
+
+">" \
+"welcome" \
+"to the " \
+"terminal" 
+
+```q
+1 2 +/: 100 200 300
+```
+* each right; since 2 arguments on left, there will be 2 columns
+
+key | value
+-|-
+101 | 102
+201 | 202
+301 | 302
+
+```q
+1 2 +\: 100 200 300
+```
+* each left (the bar tilts towards left); since 3 arguments on right, there will be 3 columns
+
+key | value
+-|-
+101 | 201 | 301
+102 | 202 | 302
+
+```q
+st, \:"--->"
+```
+* each left; adds right hand argument to each of st
+
+"welcome--->" \
+"to the---> " \
+"terminal--->" 
+
+<a name="scan_adverb"></a>
+### Scan
+* useful for calculations such as running totals, running products, where the previous value is used in the next value calculation
+
+```q
+{x + y} \ [1 2 3 4 5]
+{x + y} scan [1 2 3 4 5]
+```
+* 1+0 =1; 1+2 = 3; 3+3=6; 4+6=10; 5+10=15
+* can also use "scan" instead of \
+
+1 3 6 10 15
+
+```q
+{x,y} \ [1 2 3 4 5]
+```
+1 \
+1 2 \
+1 2 3 \
+1 2 3 4 \
+1 2 3 4 5
+
+<a name="eachprevious_adverb"></a>
+### Each Previous
+
+```q
+{x+y}': [1 2 3 4 7]
+```
+0N 3 5 7 11
+
+* O + 1 = ON
+* 1 + 2 = 3
+* 2 + 3 = 5
+* 3 + 4 = 7
+
+```q
+10 + ': 1 2 3 4 7
+```
+11 3 5 7 11
+* 10 + 1 = 11
+* 1 + 2 = 3
+* 2 + 3 = 5
+* 3 + 4 = 7
+
+<hr>
+
+<a name="adverbs_problemset"></a>
+## Adverbs Problem Set
+
+## 1. Given: ("cow"; "fox";"badger") use EACH RIGHT to prepend "the" before each item##
+
+```q
+strs: ("cow";"fox";"badger")
+"the" ,/: strs
+```
+"the cow" \
+"the fox" \
+"the badger"
+
+* x / y = add x to the left of y
+
+<hr>
+
+## 2. Use EACH LEFT to add "jumped" to strs ##
+
+```q
+strs,\: " jumped"
+```
+"cow jumped" \
+"fox jumped" \
+"badger jumped"
+
+* the \: (top points left, so each left). 
+
+<hr>
+
+## 3. Given the nested list: dd: (1 5 10; 200 30 40; 20 23 24), find the max of each list ##
+
+```q
+dd: (1 5 10; 200 30 40; 20 23 24)
+max each dd
+```
+10 200 24
+
+<hr>
+
+## 4. Using EACH PRIOR, create a function that calculates the moving sum with window size of 2 ##
+
+```q
+L: 20 30 4 6 1 2
++': [L]
+20 50 34 10 7 3
+
+alternatively:
+
+```q
+2 msum L
+```
+ or 
+ 
+ ```q
+ {x+y}': [L]
+ 
+```
+
+<hr>
+
+## 5. Use EACH BOTH to join the lists to give (5 8; 7 3; 9 4) ##
+
+numbers: 5 7 9 \
+powers: 8 3 4
+
+```q
+numbers, 'powers
+```
+key| value
+-|-
+5| 8
+7| 3
+9| 4
+
+<hr>
+
+## 6. Use EACH BOTH to raise 5 to the power of 8, 7 to the power of 3, etc. ##
+
+```q
+numbers xexp' powers
+```
+390625 343 6561f
+
+<hr>
+
+## 7. A bank account pays 5% interest a year. Write a function that takes the current balance and returns the new balance after one year. Then use scan\ with that function to display the interest every year, up to 7 years in the future ##
+
+assume starting balance of 100
+
+```q
+{x * 1.05} 100
+```
+105
+
+```q
+{x * 1.05} \ [7; 100.]
+```
+105 \
+110.25\
+115.7625
+
+* use monadic version of scan that takes 2 arguments
+* first argument = how many times to run
+* second argument = starting value for function
+
+<hr>
+
+## 8. Create a function, fib, that takes a fibonnaci sequence as its argument and returns the sequence complete with the next entry ##
+
+```q
+fib: {x, sum -2#x}
+fib 1 1
+```
+1 2 3
+
+<hr>
+
+## 9. Use the over function to create a function fibn to generate a fib sequence n numbers long where n is the functions argument ##
+
+```q
+fibn: {x fib/ 1 1}
+fibn 5
+```
+1 1 2 3 5 8 13
+
+ hr>
+
+
 
 
 [Top](#top)
