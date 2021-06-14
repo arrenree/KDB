@@ -161,16 +161,19 @@
 
 ## 22. [qSQL Joins Problem Set](#qsqljoins_problem_set)
 
-## 23. [Adverbs](#adverbs_header)
+## 23. [Timeseries Tables Joins](#timeseries_joins)
+1. [Asof Time Join](#asof_join)
+2. [Union Time Join](#uniontime_join)
+3. [Window Time Join](#windowtime_join)
+
+## 24. [Adverbs](#adverbs_header)
 1. [Each Both](#eachboth_adverbs)
 2. [Each Monadic](#each_monadic)
 3. [Each Right / Each Left](#eachright_eachleft)
 4. [Scan](#scan_adverb)
 5. [Each Previous](#eachprevious_adverb)
 
-## 23. [Adverbs Problem Set](#adverbs_problemset)
-
-
+## 25. [Adverbs Problem Set](#adverbs_problemset)
 
 
 
@@ -4326,7 +4329,6 @@ x|date |        sym|  price|    size | book
 * no key match for FB or GOOG, so appends new row
 * adds new column book; blank for existing, pulls in value from new
 
-<hr>
 
 <a name="qsqljoins_problem_set"></a>
 ## qSQL Joins Problem Set
@@ -4536,6 +4538,128 @@ ndate|ticker|title|price
 * deletes the size column
 
 <hr>
+
+<a name="timeseries_joins"></a>
+## Timeseries Tables Joins
+[Top](#top)
+
+<a name="asof_join"></a>
+### Asof Time Join
+* joins the closest matches from one table to another
+* syntax = aj [column; source table; lookup table]
+* last item of columns will be less than or equal join
+
+```q
+t: ( [] time: 07:00 08:30 09:59t; sym:`a`a`b; price: 0.9 1.5 1.9; size:100 200 300)
+q: ( [] time: 08:00 09:00 10:00t; sym:`a`b`a; bid: 1 9 4)
+```
+table t
+time|sym|price|size
+-|-|-|-
+07:00:00.000|	a|	0.9|	100
+08:30:00.000|	a|	1.5|	200
+09:59:00.000|	b|	1.9|	300
+
+table q
+time|sym|bid
+-|-|-
+08:00:00.000|	a|	1
+09:00:00.000|	b|	9
+10:00:00.000|	a|	4
+
+```q
+aj [`sym`time; t;q]
+```
+* syntax = aj [column; source table; lookup table]
+* columns = sym, time
+* t = source table
+* q = lookup table
+* column names must match
+
+time|sym|price|size|bid
+-|-|-|-|-
+07:00:00.000|	a|	0.9|	100|	
+08:30:00.000|	a|	1.5|	200	|1
+09:59:00.000|	b|	1.9|	300	|9
+
+* bid column pulled in
+* from trade table, look through each sym, then time (less than or equal to)
+* from trade, found a, but in q, no time less than or equal to 7:00am. so bid = null
+* from trade, found a, found 8:00am <= 8:30, so bid = 1
+* from trade, found b, found 9:00am <=9:59, so bid = 9
+
+```q
+fq: update qtime:time, qsym: sym from q
+ft: update ftime:time, fsym:sym from t
+```
+* create new table fq with columns qtime and qsym
+* create new table ft with columns ftime and fsym
+
+table fq
+
+time|sym|bid|qtime|qsym
+-|-|-|-|-
+08:00:00.000|	a|	1|	08:00:00.000|	a
+09:00:00.000|	b|	9|	09:00:00.000|	b
+10:00:00.000|	a|	4|	10:00:00.000|	a
+
+table ft
+
+time|sym|price|ftime|fsym
+-|-|-|-|-
+07:00:00.000|	a|	0.9|	100|	07:00:00.000|	a
+08:30:00.000	|a|	1.5|	200|	08:30:00.000|	a
+09:59:00.000	|b|	1.9|	300|	09:59:00.000|	b
+
+```q
+aj [`sym`time;ft;fq]
+```
+* ft = source table
+* fq = lookup table
+
+time|sym|price|size|ftime|fsym|bid|qtime|qsym
+-|-|-|-|-|-|-|-|-|
+07:00:00.000|	a|	0.9|	100|	07:00:00.000|	a	|		| |
+08:30:00.000|	a|	1.5	|200|	08:30:00.000|	a	|1	|08:00:00.000|	a
+09:59:00.000|	b|	1.9	|300|	09:59:00.000|	b|	9	|09:00:00.000|	b
+
+ * aj0 is the same as aj, but uses the lookup tables time column
+
+<a name="uniontime_join"></a>
+### Union Time Join
+
+* union join combines all entries from both tables, then can sort by time
+
+```q
+q uj t
+```
+time|sym|bid|price|size
+-|-|-|-|-
+08:00:00.000|	a|	1|	| |	
+09:00:00.000|	b|	9|	| |
+10:00:00.000|	a|	4| | |
+07:00:00.000|	a|		|0.9|	100
+08:30:00.000|	a|		|1.5|	200
+09:59:00.000|	b|		|1.9|	300
+
+```q
+`time xasc q uj t
+```
+time|sym|bid|price|size
+-|-|-|-|-
+07:00:00.000|	a|		|0.9|	100
+08:00:00.000|	a|	1|		|
+08:30:00.000|	a|		|1.5|	200
+09:00:00.000|	b|	9|		|
+09:59:00.000|	b|		|1.9|	300
+10:00:00.000|	a|	4|		|
+
+
+<a name="windowtime_join"></a>
+### Window Time Join
+
+* designed for queries; 2 mins before, 2 mins after
+
 
 <a name="adverbs_header"></a>
 ## Adverbs
