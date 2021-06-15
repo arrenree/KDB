@@ -181,6 +181,7 @@
 
 ## 27. [Case Studies](#casestudies_header)
 1. [Comparing Current Orders against Potential Crosses](#cross_case)
+2. [Netting off buys and sells from same Stock](#nettingbuysells_case)
 
 
 
@@ -5137,6 +5138,40 @@ ric|side|crossableqty
 0001.HK|	Buy|	400
 
 * this is the end result. these are the lines where you can cross 
+
+<hr>
+
+<a name="nettingbuyssells_case"></a>
+### 2. Netting off buys and sells from same Stock
+
+* same stock, multiple lines of buys and sells in the same stock
+* determine what is the net quantity
+
+Given
+```q
+t:([] ric:`AAPL; side:`buy`sell`sell`buy`buy; size:10 30 50 100 90)
+```
+ric | side |size
+-|-|-
+AAPL|	buy|	10
+AAPL|	sell|	30
+AAPL|	sell|	50
+AAPL|	buy|	100
+AAPL|	buy|	90
+
+```q
+select ?[side=`buy;size;neg size] by ric from t
+```
+ric | size
+-|-
+AAPL |	10 -30 -50 100 90
+
+```q
+select sum ?[side=`buy;size;neg size] by ric from t
+```
+ric | size
+-|-
+AAPL |	120
 
 
 
