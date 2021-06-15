@@ -175,6 +175,14 @@
 
 ## 25. [Adverbs Problem Set](#adverbs_problemset)
 
+## 26. [Practical Application](#practicalapplication_header)
+1. [Loading CSV Files](#load_csv)
+
+
+## 27. [Case Studies](#casestudies_header)
+1. [Comparing Current Orders against Potential Crosses](#cross_case)
+
+
 
 
 <hr>
@@ -4282,7 +4290,7 @@ x|`sym`| sector | employees
 2|`MSFT` |Tech      |100      
 
 ```q
-trade pj stock
+trade ij stock
 ```
 * adds columns where the key matches (sym), otherwise remove
 
@@ -5014,8 +5022,121 @@ fibn 5
 ```
 1 1 2 3 5 8 13
 
- hr>
+<hr>
 
+
+<a name="practicalapplication_header"></a>
+## Practical Application
+[Top](#top)
+
+<a name="load_csv"></a>
+### Loading CSV Files
+
+With Column Headers
+
+if a delimiter is enlisted, the first row of the csv file is read as a column header
+
+```q
+("SSJ"; enlist",")0: `sample.csv
+```
+* S=sym
+* J=int
+
+Without Column Headers
+
+if the CSV file contains data but no column names, dont need to enlist a delimiter
+
+```q
+("SSJ";",") 0: `:sample.csv
+```
+
+<hr>
+
+<a name="casestudies_header"></a>
+## Case Studies
+[Top](#top)
+
+
+<a name="cross_case"></a>
+### 1. Comparing Current Orders against Potential Crosses
+
+Objectives:
+1. Pull in CSV file of current orders (trade)
+2. Pull in CSV file of proposed crosses (cross)
+3. For each symbol, check opposing direction, and pull in quantity to cross
+4. Create new column displaying shares that can cross
+5. Retrieve columns in clean format to export back into csv
+
+
+```q
+t:("SSJ";enlist",") 0: `:trade.csv
+```
+t 
+
+ric| side | qty
+-|-|-
+1810.HK|	Buy|	500
+0700.HK|	Buy|	500
+9988.HK|	Buy|	500
+0001.HK|	Buy|	500
+0016.HK|	Buy|	500
+0151.HK|	Buy|	500
+0005.HK|	Buy|	500
+
+
+```q
+c:("SSJ";enlist",") 0: `:cross.csv
+```
+c
+
+ric | brokerside | brokerquantity
+-|-|-
+1810.HK|	Sell|	100
+0700.HK|	Sell|	100
+9988.HK|	Sell|	100
+8888.HK|	Sell|	100
+0016.HK|	Buy|	100
+1234.HK|	Buy|	100
+3033.HK|	Buy|	100
+
+```q
+1!`c
+```
+first set the RIC as a key column in cross file
+
+```q
+A: update crossableqty:?[side=brokerside;0N; qty - brokerquantity] from t lj 1!c
+```
+A
+
+ric|side|qty|brokerside|brokerquantity|crossableqty
+-|-|-|-|-|-
+1810.HK|	Buy|	500|	Sell|	100|	400
+0700.HK|	Buy|	500|	Sell|	100|	400
+9988.HK|	Buy|	500|	Sell|	100|	400
+0001.HK|	Buy|	500|	Sell|	100|	400
+
+```q
+A2: select from A where crossableqty > 0
+```
+ric|side|qty|brokerside|brokerquantity|crossableqty
+-|-|-|-|-|-
+1810.HK|	Buy|	500|	Sell|	100|	400
+0700.HK|	Buy|	500|	Sell|	100|	400
+9988.HK|	Buy|	500|	Sell|	100|	400
+0001.HK|	Buy|	500|	Sell|	100|	400
+
+```q
+select ric, side, crossableqty from A2
+```
+ric|side|crossableqty
+-|-|-
+1810.HK|	Buy|	400
+0700.HK|	Buy|	400
+9988.HK|	Buy|	400
+0001.HK|	Buy|	400
+
+* this is the end result. these are the lines where you can cross 
 
 
 
