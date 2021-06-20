@@ -5305,18 +5305,6 @@ AAPL |	120
 
 <hr>
 
-## 🔵 3. Given the below table t, find the max price per symbol
-
-time | sym | src | price | size
--|-|-|-|-
-2019-03-11T09:00:00.277000|	GOOG|	L|	36.01|	1427
-2019-03-11T09:00:04.123000|	GOOG|	O|	36.01|	708
-2019-03-11T09:00:08.123000|	MSFT|	N|	35.5	|7810
-2019-03-11T09:00:10.123000|	MSFT|	O|	31.1|	1100
-
-
-
-
 ## 🔵 4. 
 
 Given: 
@@ -5330,7 +5318,6 @@ If there is not any price for that particular date, return the latest previous p
 There is no predefined ordering of the source table.
 Try to preserve the column order.
 
-
 Example 1:
 f [t; 2016.01.06]
 
@@ -5339,11 +5326,6 @@ date | sym | price | timestamp
 2016-01-06|	a|	1|	2016-01-06T22:00:00.000
 2016-01-06|	b|	2|	2016-01-06T22:00:00.000
 2016-01-06|	c|	3|	2016-01-06T22:00:00.000
-
-```q
-f:{[t;d] select [-3] last price, max timestamp by date, sym from t where date<=d}
-f[t;2016.01.07]
-```
 
 Example 2:
 
@@ -5354,16 +5336,6 @@ date | sym | price | timestamp
 2016-01-06|	c|	3|	2016-01-06T22:00:00.000
 2016-01-07|	a|	1.2|	2016-01-08T23:00:00.000
 2016-01-07|	b|	2.2 |	2016-01-08T23:00:00.000
-
-```q
-f:{[t;d] select [-3] last price, max timestamp by date, sym from t where date<=d}
-f[t;2016.01.07]
-```
-* sets the date and sym as keys
-* date less than or equal to d (date input)
-* last price + max timestamp
-* select last 3 rows
-
 
 Example 3:
 
@@ -5378,6 +5350,15 @@ date | sym | price | timestamp
 ```q
 f:{[t;d] select last price, max timestamp by date, sym from t where date<=d, timestamp=(max;timestamp) fby date, price=(last;price) fby sym}
 ```
+
+* select last price, max timestamp
+* set date, sym as keys
+* date <=d means look for previous day if current date doesnt satisfy query conditions
+* you want to filter the max timestamp by the date
+* and filter the last price by sym
+
+
+
 
 [Top](#top)
 
