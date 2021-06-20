@@ -16,6 +16,7 @@
 12. [Drop](#drop_intro)
 13. [Larger](#larger_intro)
 14. [Smaller](#smaller_intro)
+15. [Raze](#raze_intro)
 
 ## 2. [Data Types & Casting & Enumeration](#casting_header)
 1. [Datatype Table](#datatype_table)
@@ -181,7 +182,7 @@
 
 ## 27. [Case Studies](#casestudies_header)
 1. [Comparing Current Orders against Potential Crosses](#cross_case)
-2. [Netting off buys and sells from same Stock](#nettingbuysells_case)
+2. [Netting off buys and sells from same Stock](#nettingbuyssells_case)
 
 
 
@@ -189,7 +190,7 @@
 <hr>
 
 <a name="kdbintro_header"></a>
-## KDB Basics
+## 🔴 1. KDB Basics
 [Top](#top)
 
 * KDB is a time series database built upon q
@@ -198,7 +199,7 @@
 * in KDB, all operators are executed RIGHT to LEFT
 
 <a name="assign_intro"></a>
-### Assigning Values to Varibles
+### 🔵 1.1 Assigning Values to Varibles
 ```q
 a: 7
 a
@@ -206,7 +207,7 @@ a
 7
 
 <a name="expression_intro"></a>
-### Expressions
+### 🔵 1.2 Expressions
 ```q
 6*7
 ```
@@ -221,7 +222,7 @@ b
 
 
 <a name="division_intro"></a>
-### Division
+### 🔵 1.3 Division
 * division in KDB is expressed as %
 * always gives a float response
 
@@ -231,18 +232,18 @@ b
 2
 
 <a name="load_intro"></a>
-### Loading Scripts
+### 🔵 1.4 Loading Scripts
 ```q
 \l scriptname.q
 ```
 
 <a name="float_intro"></a>
-### Floats
+### 🔵 1.5 Floats
 * a float is any number with a decimal point
 * remember, division will always return a float response
 
 <a name="til_intro"></a>
-### Til
+### 🔵 1.6 Til
 * til generates integers until value
 * always starts at 0; does NOT include value indicated
 
@@ -257,7 +258,7 @@ til 4
 1 2 3 4
 
 <a name="boolean_intro"></a>
-### Booleans
+### 🔵 1.7 Booleans
 * booleans are true/false statements
 * 0b = false
 * 1b = true
@@ -279,7 +280,7 @@ True, False, True
 * can compare 2 lists of equal length
 
 <a name="over_intro"></a>
-### Over
+### 🔵 1.8 Over
 ```q
 0 +/ 1 2 3
 ```
@@ -295,7 +296,7 @@ True, False, True
 * multiply 5 x 5 = 25
 
 <a name="scan_intro"></a>
-### Scan
+### 🔵 1.9 Scan
 * scan is similar to over /, but instead of returning the final result, returns all values
 
 ```q
@@ -304,7 +305,7 @@ True, False, True
 1 3 6 10
 
 <a name="larger_intro"></a>
-### Larger
+### 🔵 1.10 Larger
 
 ```q
 4 | 5
@@ -326,7 +327,7 @@ max 10 20 30
 * return the largest value over the list
 
 <a name="smaller_intro"></a>
-### Smaller
+### 🔵 1.11 Smaller
 
 ```q
 10 & 2
@@ -348,7 +349,7 @@ min 10 20 30
 * return the smallest value  in this list
 
 <a name="count_intro"></a>
-### Count
+### 🔵 1.12 Count
 
 ```q
 count (til 6; 10 20 30)
@@ -363,7 +364,7 @@ count each (til 6; 10 20 30)
 * count each will count the number of values in each list
 
 <a name="take_intro"></a>
-### Take
+### 🔵 1.13 Take
 
 ```q
 k: 1 2 3 4
@@ -391,7 +392,7 @@ k: 1 2 3 4
 * take 5 values from this list
 
 <a name="drop_intro"></a>
-### Drop
+### 🔵 1.14 Drop
 k: 1 2 3 4
 
 ```q
@@ -406,14 +407,89 @@ k: 1 2 3 4
 1 2
 * drop the last 2 values from list k
 
+<a name="raze_intro"></a>
+### 🔵 1.15 Raze
+
+* raze returns the items of x joined, collapsing one level of nesting
+
+```q
+t: (1 2; 3 4 5)
+```
+1 2 \
+3 4 5
+
+* this is a nested list containing 2 levels
+
+```q
+raze t:(1 2; 3 4 5)
+```
+1 2 3 4 5 
+* collapses 1 level of nesting and joins all items together
+
+```q
+b: (1 2; (3 4; 5 6); 7; 8)
+```
+1 2 \
+3 4 \
+5 6 \
+7 \
+8
+
+```q
+raze b
+```
+* raze will flatten 1 level
+ 
+1 \
+2 \
+3 4 \
+5 6 \
+7 \
+8
+
+```q
+raze/[b]
+```
+* using raze/[x] will flatten all evels
+1 2 3 4 5 6 7 8
+
+```q
+t1: date:(3#2016.01.06;4#2016.01.07;6#2016.01.08)
+```
+t1
+((2016-01-06d;2016-01-06d;2016-01-06d); \
+(2016-01-07d;2016-01-07d;2016-01-07d;2016-01-07d); \
+(2016-01-08d;2016-01-08d;2016-01-08d;2016-01-08d;2016-01-08d;2016-01-08d))
+
+* 3 nested lists; take 3 from x; take 4 from x, take 6 from x
+
+```q
+t2: raze (date:3#2016.01.06;4#2016.01.07;6#2016.01.08)
+```
+t2
+(2016-01-06d; \
+2016-01-06d; \
+2016-01-06d); \
+2016-01-07d; \
+2016-01-07d; \
+2016-01-07d; \
+2016-01-07d; \
+2016-01-08d; \
+2016-01-08d; \
+2016-01-08d; \
+2016-01-08d; \
+2016-01-08d; \
+2016-01-08d)
+
+
 <hr>
 
 <a name="casting_header"></a>
-## Data Types & Casting
+## 🔴 2. Data Types & Casting
 [Top](#top)
 
 <a name="datatype_table"></a>
-### Datatype Table
+### 🔵 Datatype Table
 
 type|	size|	char|	num|	notation|	Null Value|	Positive Infinity
 -|-|-|-|-|-|-
@@ -456,7 +532,7 @@ d.dd
 22i 
 
 <a name="time_type"></a>
-### Time
+### 🔵 Time
 
 Given:
 t: 11:02:58:000
@@ -484,7 +560,7 @@ t.second
 * current timespan
 
 <a name="cast_type"></a>
-### Casting
+### 🔵 Casting
 * casting = changes one datatype to another type that's compatible
 * parsing = converting from a string to a native type
 * x $ y 
@@ -534,7 +610,7 @@ t.second
 0b
 
 <a name="enu_cast"></a>
-### Enumeration
+### 🔵 Enumeration
 * enumeration is converting a list of values to a defined domain which restricts values to that domain
 
 ```q
@@ -560,10 +636,10 @@ cast
 <hr>
 
 <a name="casting_problemset"></a>
-## Casting & Enumeration Problem Set
+## 🔴 Casting & Enumeration Problem Set
 [Top](#top)
 
-**1. What is the syntax to add to a list**
+**🔵 1. What is the syntax to add to a list**
 ```q
 el, : apple
 ```
@@ -571,7 +647,7 @@ el, : apple
 
 <hr>
 
-**2. Show 3 ways to conver float 4.5 to an integer**
+**🔵 2. Show 3 ways to conver float 4.5 to an integer**
 ```q
 `int$4.5
 "i"$4.5
@@ -580,7 +656,7 @@ el, : apple
 
 <hr>
 
-**3. Given strings "2001.02.02" and "2003.08.09", parse the strings into KDB dates**
+**🔵 3. Given strings "2001.02.02" and "2003.08.09", parse the strings into KDB dates**
 ```q
 "D"$("2001.02.02";"2003.08.09")
 ```
@@ -589,7 +665,7 @@ el, : apple
 
 <hr>
 
-**4. Given the mixed list L: ("100.1";"hello";"10"), convert elements to float, char, and int**
+**🔵 4. Given the mixed list L: ("100.1";"hello";"10"), convert elements to float, char, and int**
 ```q
 "F*I"$("100.1";"hello";"10")
 ```
@@ -601,7 +677,7 @@ el, : apple
 
 <hr>
 
-**5. Create empty symbol list s**
+**🔵 5. Create empty symbol list s**
 
 ```q
 s: `symbol$()
@@ -621,14 +697,14 @@ s,:`ooo
 
 <hr>
 
-**6. Create an enumeration t containing values p q r that is restricted to domain s**
+**🔵 6. Create an enumeration t containing values p q r that is restricted to domain s**
 ```q
 s: `symbol$()
 t: `s$`p`q`r
 ```
 * t is now an enumeration which only contain domain s (symbols)
 
-**7. Insert new value u into t**
+**🔵 7. Insert new value u into t**
 
 ```q
 s,:`u
@@ -639,11 +715,11 @@ t,:`u
 <hr>
 
 <a name="lists_header"></a>
-## Lists
+## 🔴 Lists
 [Top](#top)
 
 <a name="simple_list"></a>
-### Simple Lists
+### 🔵 Simple Lists
 ```q
 L1: 1 2 3 4
 L2: 1;2;3;4
@@ -659,7 +735,7 @@ L6: ("a";"b";"c")
 * L6 = list of chars
  
 <a name="mixed_list"></a>
-### Mixed Lists
+### 🔵 Mixed Lists
 ```q
 L7: (1; `p; 200.)
 ```
@@ -672,7 +748,7 @@ type L7
 * null because its a mixed list
 
 <a name="empty_list"></a>
-### Empty Lists
+### 🔵 Empty Lists
 
 ```q
 L8: ()
@@ -681,14 +757,14 @@ count L8
 0
 
 <a name="atom_list"></a>
-### Single Item Lists
+### 🔵 Single Item Lists
 ```q
 L9: enlist `C
 ```
 * have to use enlist for single item lists
 
 <a name="join_lists"></a>
-### Joining Lists
+### 🔵 Joining Lists
 a: 1 2 3
 b: 4 5 6
 ```q
@@ -697,7 +773,7 @@ a,b
 1 2 3 4 5 6
 
 <a name="retrieve_list"></a>
-### Retrieving from Lists
+### 🔵 Retrieving from Lists
 L: 10 20 30
 
 ```q
@@ -713,7 +789,7 @@ L 1 2 3
 * notice you DONT use colons : when retrieving from lists
 
 <a name="update_list"></a>
-### Update List Values
+### 🔵 Update List Values
 L: 10 20 30
 ```q
 L[0 1 2] : 40 50 60
@@ -722,7 +798,7 @@ L[0 1 2] : 40 50 60
 * notice you use colon : to update values
 
 <a name="nest_list"></a>
-### Nested Lists
+### 🔵 Nested Lists
 ```q
 L: 10 20 30 40 50
 K: 0.1 0.2 0.3
@@ -749,7 +825,7 @@ NL [0][0]
 * retrieves list L (index location 0) and the first value from that list (index location 0)
 
 <a name="matrix_list"></a>
-### Matrix
+### 🔵 Matrix
 
 m: (10 20 30; 40 50 60; 70 80 90)
 
@@ -776,10 +852,10 @@ m[ ; 1]
 <hr>
 
 <a name="list_problemset"></a>
-## Lists Problem Set
+## 🔴 Lists Problem Set
 [Top](#top)
 
-**1. What is the difference between 3 ? 10 and 3 ? 10 20 30**
+**🔵 1. What is the difference between 3 ? 10 and 3 ? 10 20 30**
 
 ```q
 3?10
@@ -794,7 +870,7 @@ m[ ; 1]
 
 <hr>
 
-**2. Create a general list containing symbol p, boolean 1b, and long 1000200j**
+**🔵 2. Create a general list containing symbol p, boolean 1b, and long 1000200j**
 
 ```q
 GL: (`p; 1b; 100200j)
@@ -803,7 +879,7 @@ GL: (`p; 1b; 100200j)
 
 <hr>
 
-**3. Given the following**
+**🔵 3. Given the following**
 
 p: 100 200 300 400 500 600
 t: "say hello world to bob"
@@ -817,7 +893,7 @@ m: (1 2 3; 10 20 30; 100 200 300)
 
 <hr>
 
-**4. From t, retrieve the list "sold"**
+**🔵 4. From t, retrieve the list "sold"**
 ```q
 t[0 8 6 14]
 ```
@@ -826,7 +902,7 @@ t[0 8 6 14]
 
 <hr>
 
-**5. Create the nested list ("shoot";"bob") by indexing into t**
+**🔵 5. Create the nested list ("shoot";"bob") by indexing into t**
 ```q
 t?"shoot"
 ```
@@ -846,7 +922,7 @@ t(0 4 8 8 16; 19 8 19)
 
 <hr>
 
-**6. Change the last number in p to 1000**
+**🔵 6. Change the last number in p to 1000**
 ```q
 p[5]: 1000
 ```
@@ -854,7 +930,7 @@ p[5]: 1000
 
 <hr>
 
-**7. Find the 3 highest numbers in p**
+**🔵 7. Find the 3 highest numbers in p**
 ```q
 3#desc p
 ```
@@ -863,7 +939,7 @@ p[5]: 1000
 
 <hr>
 
-**8. Find values of p that are below the mean**
+**🔵 8. Find values of p that are below the mean**
 ```q
 p where p<avg p
 ```
@@ -872,11 +948,11 @@ p where p<avg p
 <hr>
 
 <a name="primitive_header"></a>
-## Primitive Operations
+## 🔴 Primitive Operations
 [Top](#top)
 
 <a name="add_list"></a>
-### Addition
+### 🔵 Addition
 ```q
 10 + 10 20 30
 ```
@@ -894,7 +970,7 @@ length
 * error because different list lengths
 
 <a name="compare_lists"></a>
-### Comparing Lists
+### 🔵 Comparing Lists
 ```q
 1 2 3 = 1 2 3 
 ```
@@ -902,7 +978,7 @@ length
 * comparing 2 lists will result in boolean answer (true true true)
 
 <a name="match_diff"></a>
-### Match and Equal Differences
+### 🔵 Match and Equal Differences
 ```q
 1 2 3 = 1 2 3 
 ```
@@ -916,7 +992,7 @@ length
 * single item return (false)
 
 <a name="basic_operations"></a>
-### Basic Operations
+### 🔵 Basic Operations
 
 l: 10 20 30 40 50 
 
@@ -934,7 +1010,7 @@ x xexp y
 * xexp = to the power of
 
 <a name="mod_operations"></a>
-### Division Remainders Mod
+### 🔵 Division Remainders Mod
 
 ```q
 11 21 31 mod 2
@@ -943,7 +1019,7 @@ x xexp y
 * modulus function returns remainder after dividing it
 
 <a name="running_sums"></a>
-### Running Sums/Moving Windows
+### 🔵 Running Sums/Moving Windows
 ```q
 sums l
 prds 1
@@ -961,7 +1037,7 @@ moving window sum of 3
 moving window max of 3
 
 <a name="contain_ops"></a>
-### Contain
+### 🔵 Contain
 
 ```q
 5 in 1 2 3 4
@@ -970,7 +1046,7 @@ moving window max of 3
 * is x in y? no, so 0
 
 <a name="except_ops"></a>
-### Except
+### 🔵 Except
 
 ```q
 1 2 3 4 except 3
@@ -979,7 +1055,7 @@ moving window max of 3
 * return the list except 3
 
 <a name="inter_ops"></a>
-### Inter
+### 🔵 Inter
 
 ```q
 1 2 3 inter 2 3 4
@@ -988,7 +1064,7 @@ moving window max of 3
 * inter returns values occuring in both lists
 
 <a name="distinct_ops"></a>
-### Distinct
+### 🔵 Distinct
 
 ```q
 distinct `a`a`b`b`c`c
@@ -997,14 +1073,14 @@ a b c
 * distinct only returns distinct values
 
 <a name="reverse_ops"></a>
-### Reverse
+### 🔵 Reverse
 ```q
 reverse 1 2 3
 ```
 3 2 1
 
 <a name="uppercase_ops"></a>
-### Upper/Lowercase
+### 🔵 Upper/Lowercase
 ```q
 upper "adsf"
 lower "ADSF"
@@ -1015,10 +1091,10 @@ adsf
 <hr>
 
 <a name="primitive_problemset"></a>
-## Primitive Operations Problem Set
+## 🔴 Primitive Operations Problem Set
 [Top](#top)
 
-**1. Find index location for a string of chars**
+**🔵 1. Find index location for a string of chars**
 
 ```q
 "hello ryan where is ryan" ss "ryan"
@@ -1028,7 +1104,7 @@ adsf
 
 <hr>
 
-**2. replace "ryan" with "john"**
+**🔵 2. replace "ryan" with "john"**
 ```q
 ssr["hello ryan where is ryan";"ryan";"john"]
 ```
@@ -1038,7 +1114,7 @@ hello johhn where is john
 
 <hr>
 
-**3. Find the number of days in 2004**
+**🔵 3. Find the number of days in 2004**
 ```
 2005.01.01-2004.01.01
 ```
@@ -1046,7 +1122,7 @@ hello johhn where is john
 
 <hr>
 
-**4. Given list L and K, find the common numbers in both lists**
+**🔵 4. Given list L and K, find the common numbers in both lists**
 l: 7 5 13 20 19 17 30
 k: 7 17 200 300 400 1000
 
@@ -1057,7 +1133,7 @@ l inter k
 
 <hr>
 
-**5. Find the sum of the first 5 numbers in l**
+**🔵 5. Find the sum of the first 5 numbers in l**
 ```q
 sum 5#l
 ```
@@ -1065,7 +1141,7 @@ sum 5#l
 
 <hr>
 
-**6. Find the result whhen you remove the last 2 items from k**
+**🔵 6. Find the result whhen you remove the last 2 items from k**
 ```q
 -2_k
 ```
@@ -1073,7 +1149,7 @@ sum 5#l
 
 <hr>
 
-**7. Return only numbers in l that are wholly divisible by 5**
+**🔵 7. Return only numbers in l that are wholly divisible by 5**
 ```q
 l mod 5
 ```
@@ -1087,7 +1163,7 @@ l where 0 = l mod 5
 
 <hr>
 
-**8. Subtract the average of list l from max value in list k**
+**🔵 8. Subtract the average of list l from max value in list k**
 ```q
 max[k] - avg [l] 
 ```
@@ -1095,7 +1171,7 @@ max[k] - avg [l]
 
 <hr>
 
-**9. Generate list p of 1000 random integers between 0 and 100. Find all values in p that are square numbers**
+**🔵 9. Generate list p of 1000 random integers between 0 and 100. Find all values in p that are square numbers**
 ```q
 p: 1000?100
 a: sqrt p
@@ -1118,7 +1194,7 @@ count the number of times p is a whole number
 <hr>
 
 <a name="dict_header"></a>
-## Dictionary
+## 🔴 Dictionary
 [Top](#top)
 
 * a dictionary is constructured from 2 lists of same length using the ! operator
@@ -1126,7 +1202,7 @@ count the number of times p is a whole number
 * right of ! = list of values
 
 <a name="dict_from_list"></a>
-### Constructing a Dictionary from Lists
+### 🔵 Constructing a Dictionary from Lists
 ```q
 k:`apple`plum
 v:`green`purple
@@ -1138,7 +1214,7 @@ apple|	green
 plum|	purple
 
 <a name="retrieve_dict"></a>
-### Retrieving Values
+### 🔵 Retrieving Values
 
 Given dictionary d, 3 ways to retrieve a
 
@@ -1183,7 +1259,7 @@ d @ `a`b`a`
 
 
 <a name="index_retrieve_dict"></a>
-### Index Retrieve
+### 🔵 Index Retrieve
 
 ```q
 dc:`c1`c2!(10 * til 5; 1+ til 3)
@@ -1218,7 +1294,7 @@ c2	|2
 * takes index position 1 from values (2nd column)
 
 <a name="take_dict"></a>
-### Take
+### 🔵 Take
 
 ```q
 2#d
@@ -1256,7 +1332,7 @@ d`a`b
 * have to use enlist when retrieving a single item from dictionary
 
 <a name="drop_dict"></a>
-### Drop
+### 🔵 Drop
 
 ```q
 2_d
@@ -1279,7 +1355,7 @@ B | 2
 C | 3
 
 <a name="upsert_dict"></a>
-### Upsert
+### 🔵 Upsert
 
 ```q
 d [`e]: 99
@@ -1297,7 +1373,7 @@ c|	3
 e|	99
 
 <a name="multi_key_dict"></a>
-### Multi Key Dictionaries
+### 🔵 Multi Key Dictionaries
 
 ```q
 md: (`a`b;`c`d;`e`f) ! 1 2 3
@@ -1312,7 +1388,7 @@ c d	|2
 e f	|3
 
 <a name="repeat_key_dict"></a>
-### Repeat Keys
+### 🔵 Repeat Keys
 * you can technically have multiple repeat keys, but this is NOT recommended
 
 ```q
@@ -1332,7 +1408,7 @@ a
 * if you attempt to retrieve a repeated key, it will only get the first value
 
 <a name="find_dict"></a>
-### Find Operator
+### 🔵 Find Operator
 
 ```q
 d?2
@@ -1341,7 +1417,7 @@ b
 * ? is the find operator
 
 <a name="dict_opt"></a>
-### Dictionary Operators
+### 🔵 Dictionary Operators
 ```q
 sum d
 ```
@@ -1382,10 +1458,10 @@ c|	6
 <hr>
 
 <a name="dict_problemset"></a>
-## Dictionary Problem Set
+## 🔴 Dictionary Problem Set
 [Top](#top)
 
-**1. Given the below dictionary, find the type, the keys, and its values**
+**🔵 1. Given the below dictionary, find the type, the keys, and its values**
 ```q
 d:`p`q`r`s!10 20 40 100
 ```
@@ -1407,7 +1483,7 @@ p q r s \
 
 <hr>
 
-**2. Add new entry u 200 to list d**
+**🔵 2. Add new entry u 200 to list d**
 ```q
 d[`u]: 200
 ```
@@ -1423,13 +1499,13 @@ u| 200
 
 <hr>
 
-**3. Change value of p to 2**
+**🔵 3. Change value of p to 2**
 ```q
 d[`p]:2
 ```
 <hr>
 
-**4. Create dictionary d2, only containing values of p q r from dictionary d**
+**🔵 4. Create dictionary d2, only containing values of p q r from dictionary d**
 ```q
 d2:`p`q`r#d
 ```
@@ -1437,7 +1513,7 @@ d2:`p`q`r#d
 
 <hr>
 
-**5. Add common elements in d2 and d, only return common keys and values**
+**🔵 5. Add common elements in d2 and d, only return common keys and values**
 ```q
 (key[d] inter key[d2]) # d+d2
 ```
@@ -1452,7 +1528,7 @@ r|	80
 
 <hr>
 
-**6. Given the 2 dictionaries below, find those who are greater than 1.7m in height**
+**🔵 6. Given the 2 dictionaries below, find those who are greater than 1.7m in height**
 ```q
 dheight:`john`mark`luke`paul`ian`peter!1.5 1.6 1.7 1.8 1.9 1.4
 dweight:`john`mark`luke`paul`ian`peter!81 72 88 91 55 110
@@ -1502,7 +1578,7 @@ paul ian
 
 <hr>
 
-**7. Find the average height of people who weight over 90**
+**🔵 7. Find the average height of people who weight over 90**
 ```q
 where dweight > 90
 ```
@@ -1520,7 +1596,7 @@ avg dheight where dweight > 90
 
 <hr>
 
-**8. Find the body mass index (weight) / (height x height)**
+**🔵 8. Find the body mass index (weight) / (height x height)**
 ```q
 dweight%dheight*dheight
 ```
@@ -1536,11 +1612,11 @@ peter|	56.1
 <hr>
 
 <a name="functions_header"></a>
-## Functions
+## 🔴 Functions
 [Top](#top)
 
 <a name="define_func"></a>
-### Defining & Calling Functions
+### 🔵 Defining & Calling Functions
 * functions are encased in { }
 ```q
 f: { [a] a * a}
@@ -1568,7 +1644,7 @@ add [3;5]
 * a+b = statement
 
 <a name="anon_function"></a>
-### Anonymous Functions
+### 🔵 Anonymous Functions
 ```q
 {[a] a*a}6
 ```
@@ -1577,7 +1653,7 @@ add [3;5]
 * simply call the argument outside the function { } 
 
 <a name="implicit_argu"></a>
-### Implicit Argument
+### 🔵 Implicit Argument
 ```q
 {x*x}5
 ```
@@ -1596,7 +1672,7 @@ add [3;5]
 * error because you can't skip the y. if only 2 implicit arguments, need to use x, y
 
 <a name="local_global_variables"></a>
-### Local vs Global Variables
+### 🔵 Local vs Global Variables
 ```q
 {a:1; b:2; a+b*x} [12]
 ```
@@ -1623,7 +1699,7 @@ g 1
 * local variable d:20 takes priority over global variable of 10
 
 <a name="projected_func"></a>
-### Projected Functions
+### 🔵 Projected Functions
 ```q
 raise: {x xexp y}
 raise [10; 2 3 4]
@@ -1639,7 +1715,7 @@ g 1 2 3
 * creates a projection of the original raise function
 
 <a name="iftrue_state"></a>
-### If True Statements
+### 🔵 If True Statements
 
 ```q
 if [10>3; a:11; show a*10]
@@ -1655,7 +1731,7 @@ if[10>3; a:11; show a*10; show "hello"]
 * as long as the first condition is true, execute all following statements
 
 <a name="iftrue_else_state"></a>
-### If True/Else Statements
+### 🔵 If True/Else Statements
 
 ```q
 $[1b; show "true"; show "false"]
@@ -1673,7 +1749,7 @@ $[100>1; [show "message"; `a];`b]
 * since true, show everythign  in the [ ]
 
 <a name="add_cond_branch"></a>
-### Adding Conditional Branch Pair
+### 🔵 Adding Conditional Branch Pair
 
 ```q
 {$[x < 0; `negative; x=0; `zero; `positive]}0
@@ -1693,7 +1769,7 @@ $[100>1; [show "message"; `a];`b]
 * skips first condition, returns second condition (positive)
 
 <a name="do_loop"></a>
-### Do Loops
+### 🔵 Do Loops
 ```q
 do[3;show "hi"]
 ```
@@ -1710,7 +1786,7 @@ f:{avg x xexp 1000?2}
 * time the loop 1000x on function f
 
 <a name="while_loop"></a>
-### While Loops
+### 🔵 While Loops
 * while will execute a statement x number of times until statement is no longer true
 ```q
 a:1
@@ -1742,7 +1818,7 @@ key|value
 6|5
 
 <a name="multi_cond_while_loop"></a>
-### Multi Condition While Loops
+### 🔵 Multi Condition While Loops
 
 ```q
 a:1
@@ -1782,10 +1858,10 @@ findprime 10
 <hr>
 
 <a name="func_problem_set"></a>
-## Functions Problem Set
+## 🔴 Functions Problem Set
 [Top](#top)
 
-**1. Create a function volc that accepts 2 arguments (r and h), that returns the volume of the given volc [2;3]** \
+**🔵 1. Create a function volc that accepts 2 arguments (r and h), that returns the volume of the given volc [2;3]** \
 vol of cone = 1/3 * pi * r^2 * h \
 pi = -4 * atan -1**
 
@@ -1801,7 +1877,7 @@ volc[2;3]
 
 <hr>
 
-**2. Write function sph that takes radius and returns the area and volume**\
+**🔵 2. Write function sph that takes radius and returns the area and volume**\
 v = 4/3 * pi * r^3 \
 a = 4 * pi * r^2
 
@@ -1824,7 +1900,7 @@ volume |	12.56
 
 <hr>
 
-**3. Create function setc that takes one argument and sets the global value c to that argument**
+**🔵 3. Create function setc that takes one argument and sets the global value c to that argument**
 ```q
 setc: {c::x}
 setc[10]
@@ -1843,7 +1919,7 @@ c
 
 <hr>
 
-**4. Given raise:{x xexp y}, create function that is projection of the raise. Ex, root[9] = 3**
+**🔵 4. Given raise:{x xexp y}, create function that is projection of the raise. Ex, root[9] = 3**
 ```q
 raise: {x xexp y}
 root: raise[ ; 0.5]
@@ -1856,7 +1932,7 @@ root[9]
 
 <hr>
 
-**5. Convert all entries of list L to a string**
+**🔵 5. Convert all entries of list L to a string**
 * list of long, sym, and boolean
 ```q
 l: (100;`price;1b)
@@ -1870,7 +1946,7 @@ string l
 
 <hr>
 
-**6. Given the string, find and replace "cow" with "kangaroo"**
+**🔵 6. Given the string, find and replace "cow" with "kangaroo"**
 
 ```q
 st: "the cow jumped over the moon"
@@ -1882,7 +1958,7 @@ ssr [st; "cow";"kangaroo"]
 
 <hr>
 
-**7. Create function sayHi that takes 2 arguments, first one name, second one age and behaves as follows:**
+**🔵 7. Create function sayHi that takes 2 arguments, first one name, second one age and behaves as follows:**
 
 sayHi("joe";90] \
 "hello 90 year old joe"
@@ -1900,7 +1976,7 @@ hello 90 year old joe
 
 <hr>
 
-**8. I have a box of 7 eggs, find the median and average weight**
+**🔵 8. I have a box of 7 eggs, find the median and average weight**
 
 eggs: 10 20 30 40 50 60 70
 
@@ -1915,7 +1991,7 @@ avg eggs
 
 <hr>
 
-**9. I sold 2 boxes of eggs. 1 box had 10 eggs and i sold it for 50 each. the other box had 20 eggs and sold it for 100 each. find the average price paid per egg**
+**🔵 9. I sold 2 boxes of eggs. 1 box had 10 eggs and i sold it for 50 each. the other box had 20 eggs and sold it for 100 each. find the average price paid per egg**
 
 ```q
 10 20 wavg 50 100
@@ -1925,7 +2001,7 @@ avg eggs
 
 <hr>
 
-**10. Generate list k of 10 random integers. Find the moving average with window size of 3**
+**🔵 10. Generate list k of 10 random integers. Find the moving average with window size of 3**
 ```
 k: 10?10
 mavg[3;k]
@@ -1949,7 +2025,7 @@ deltas k
 
 <hr>
 
-**11. Create function factw, using a loop to write a factorial function**
+**🔵 11. Create function factw, using a loop to write a factorial function**
 ```q
 factw:{r:i:1; while[i<=x; r*:i; i+:1];r}
 factw 3
@@ -1973,7 +2049,7 @@ i(4) <= x(3) FALSE, so returns r = 6
 
 <hr>
 
-**12. Re-create the factorial function as factp without using loops**
+**🔵 12. Re-create the factorial function as factp without using loops**
 ```q
 factp:{prd 1+til x}
 factp 3
@@ -1984,7 +2060,7 @@ factp 3
 
 <hr>
 
-**13. Demonstrate which calculation is faster, factorial using loops or via KDB**
+**🔵 13. Demonstrate which calculation is faster, factorial using loops or via KDB**
 ```q
 \ts do[1000;factw 12]
 ```
@@ -1999,7 +2075,7 @@ factp 3
 
 <hr>
 
-**14. Create function safefact that wraps factp with protected evaluation to return null On instead of error when calling on a negattive number**
+**🔵 14. Create function safefact that wraps factp with protected evaluation to return null On instead of error when calling on a negattive number**
 ```q
 safefact:{@[factp; x; 0N]}
 safefact -10
@@ -2009,7 +2085,7 @@ safefact -10
 
 <hr>
 
-**15. Write function isPalindrome that returns `yes if single argument is a palindrome list. Otherwise return `no**
+**🔵 15. Write function isPalindrome that returns `yes if single argument is a palindrome list. Otherwise return `no**
 ```q
 isPalindrome:{$[x~reverse x;`yes;`no]}
 isPalindrome 1 2 2 1
@@ -2022,7 +2098,7 @@ yes
 
 <hr>
 
-**16. Find the sum of all multiples of 3 or 5 below 1000**
+**🔵 16. Find the sum of all multiples of 3 or 5 below 1000**
 ```q
 sum where {(0 =x mod 3) or (0 = x mod 5)}[til 1000]
 ```
@@ -2035,11 +2111,11 @@ til 1000 = implicit variable (runs through 0...999)
 <hr>
 
 <a name="tables_header"></a>
-## Tables
+## 🔴 Tables
 [Top](#top)
 
 <a name="dict_to_table"></a>
-### Flipping Dictionary to Table
+### 🔵 Flipping Dictionary to Table
 
 ```q
 d: `company`employees`! (`ford`bmw; 300 100)
@@ -2062,7 +2138,7 @@ bmw	| 100
 * when you flip a dictionary, you get a table
 
 <a name="simple_table"></a>
-### Simple Table
+### 🔵 Simple Table
 
 ```q
 ( [] company: `ford`bmw; employees: 300 100)
@@ -2077,7 +2153,7 @@ bmw	| 100
 * semi colon ; separates next column
 
 <a name="single_row_table"></a>
-### Single Row Table
+### 🔵 Single Row Table
 
 ```q
 ( [] company: enlist `ford; employees: enlist 300)
@@ -2089,7 +2165,7 @@ ford |	300
 * have to use enlist for atoms and single row tables
 
 <a name="mixed_table"></a>
-### Mixed Table
+### 🔵 Mixed Table
 
 ```q
 ( [] syms:`a`b`c; floats: 1.1 2.2 3.3; strings: ("bob"; "jim"; "john"))
@@ -2104,7 +2180,7 @@ c|	3.3	|john
 * strings have to enclose within (" ")
 
 <a name="meta_datatypes_table"></a>
-### Meta / Data Type Table
+### 🔵 Meta / Data Type Table
 
 * meta returns a table where each row is a column
 
@@ -2133,7 +2209,7 @@ employees|	j	|	|
 * changed type to s symbol and i integer
 
 <a name="countrowsimple_table"></a>
-### Count Row Table
+### 🔵 Count Row Table
 
 Given:
 
@@ -2157,7 +2233,7 @@ cols t
 * returns symbol list of columns
 
 <a name="rename_column_table"></a>
-### Rename Column Table xcol
+### 🔵 Rename Column Table xcol
 
 ```q
 `a`b xcol t
@@ -2169,7 +2245,7 @@ ford |	300
 bmw	| 100
 
 <a name="add_column_table"></a>
-### Add Column Table
+### 🔵 Add Column Table
 
 ```q
 select company, employees, newval: 101 from t
@@ -2183,7 +2259,7 @@ bmw	| 100 | 101
 * if you select a column that doesnt exist, it will add it (newval)
 
 <a name="sort_column_table"></a>
-### Sort Column Table (xasc)
+### 🔵 Sort Column Table (xasc)
 
 ```q
 `employees xasc t
@@ -2196,7 +2272,7 @@ ford |	300 | 101
 * will sort ascending by employees
 
 <a name="union_table"></a>
-### Union Table
+### 🔵 Union Table
 
 Given
 
@@ -2231,7 +2307,7 @@ ford| 5
 * any values that do NOT equal, adds as new row
 
 <a name="except_table"></a>
-### Except Table
+### 🔵 Except Table
 
 ```q
 t except u
@@ -2245,7 +2321,7 @@ rover | 100
 * returns remaining rows in table t
 
 <a name="inter_table"></a>
-### Inter Table
+### 🔵 Inter Table
 
 ```q
 t inter u
@@ -2257,7 +2333,7 @@ ferrari| 100
 * only returns rows that match
 
 <a name="distinct_table"></a>
-### Distinct Table
+### 🔵 Distinct Table
 
 ```q
 ([] a: 1 1 2; b: 1 1 3)
@@ -2279,7 +2355,7 @@ a|b
 * will return distinct values per row
 
 <a name="retrieve_table"></a>
-### Retrieve From Table
+### 🔵 Retrieve From Table
 
 Given
 
@@ -2388,7 +2464,7 @@ ford| -105
 * randomly select 2 from table
 
 <a name="insert_table"></a>
-### Insert Table
+### 🔵 Insert Table
 
 ```q
 t: ( [] company: (); employees: () )
@@ -2448,10 +2524,10 @@ t:t,x
 <hr>
 
 <a name="tables_problem_set"></a>
-# Tables Problem Set
+# 🔴 Tables Problem Set
 [Top](#top)
 
-**1. Given:**
+**🔵 1. Given:**
 
 ```q
 stock: ( [] sym: `MS`C`AAPL; sector:`Financial`Financial`Tech; employees: 100 100 100)
@@ -2462,7 +2538,7 @@ MS	|Financial|	100
 C	|Financial	|100
 AAPL|	Tech	|100
 
-**1. Extract the employees numbers (without the header)**
+**🔵 1. Extract the employees numbers (without the header)**
 
 ```q
 stock [ ; `employees]
@@ -2483,7 +2559,7 @@ stock`employees
 
 <hr>
 
-**2. Key the first column in stock table (above)**
+**🔵 2. Key the first column in stock table (above)**
 
 ```q
 1!stock
@@ -2499,7 +2575,7 @@ AAPL|	Tech	|100
 
 <hr>
 
-**3. Display only the first and second rows of the stock table**
+**🔵 3. Display only the first and second rows of the stock table**
 
 ```q
 2#stock
@@ -2516,7 +2592,7 @@ C	|Financial	|100
 
 <hr>
 
-**4. Select the last row of stock table as a dictionary**
+**🔵 4. Select the last row of stock table as a dictionary**
 
 ```q
 last stock
@@ -2529,7 +2605,7 @@ employees | 100
 
 <hr>
 
-**5. Insert GOOG in the tech sector with 100 employees**
+**🔵 5. Insert GOOG in the tech sector with 100 employees**
 
 ```q
 insert [`stock; ([] sym: enlist `GOOG; sector: enlist `tech; employees: enlist 100)]
@@ -2546,7 +2622,7 @@ GOOG | Tech | 100
 
 <hr>
 
-**6. Given:**
+**🔵 6. Given:**
 
 ```q
 boss: ( [] name:`bob`bill`belinda; height: 188 186 174)
@@ -2567,7 +2643,7 @@ jim|	180
 jane|	160
 john|	170
 
-**6. Find the average height of the bosses, the employees, and both the bosses and employees**
+**🔵 6. Find the average height of the bosses, the employees, and both the bosses and employees**
 
 ```q
 avg boss `height
@@ -2589,7 +2665,7 @@ avg (employees, boss) `height
 
 <hr>
 
-**7. Find the 2 tallest employees**
+**🔵 7. Find the 2 tallest employees**
 ```q
 2#`height xdesc employees
 ```
@@ -2602,7 +2678,7 @@ john|	170
 
 <hr>
 
-**8. Given the 2 tables:**
+**🔵 8. Given the 2 tables:**
 
 ```q
 stock: ( [sym:`MS`C`AAPL] sector:`Fin`Fin`Tech; employees: 100 100 100)
@@ -2651,7 +2727,7 @@ dt|sym|price|size
 
 <hr>
 
-**9. Insert the following record into stock**
+**🔵 9. Insert the following record into stock**
 sym|sector|employees
 -|-|-
 FB|	Tech|	100
@@ -2670,7 +2746,7 @@ FB | Tech | 100
 
 <hr>
 
-**10. In the stock table, change the number of employees for C to 300**
+**🔵 10. In the stock table, change the number of employees for C to 300**
 
 ```q
 stock upsert (`C;`Fin;300)
@@ -2701,11 +2777,11 @@ MS|	Fin|	100
 <hr>
 
 <a name="keyed_tables"></a>
-## Keyed Tables
+## 🔴 Keyed Tables
 [Top](#top)
 
 <a name="single_keyed_table"></a>
-### Single Keyed Table
+### 🔵 Single Keyed Table
 
 ```q
 ( [id: `a`b`c`e] name:`jane`jim`kim`john; employer:`citi`citi`ms`ts; age: 11 22 33 44)
@@ -2720,7 +2796,7 @@ id|name|employer|age
 * the [ ] square bracket holds the key columns
 
 <a name="multi_keyed_table"></a>
-### Multi Keyed Table
+### 🔵 Multi Keyed Table
 
 ```q
 kt: ( [id:`a`b`c`d; name:`jane`jim`kim`john] employer:`citi`citi`ms`ts; age: 11 22 33 44)
@@ -2734,7 +2810,7 @@ id|name|employer|age
 `e`|	`john`|	ts|	15
 
 <a name="retrieving_keysvalues"></a>
-### Retrieving Keys/Values
+### 🔵 Retrieving Keys/Values
 ```q
 key kt
 ```
@@ -2758,7 +2834,8 @@ ms|	33
 ts|	44
 
 <a name="changing_keys"></a>
-### Changing Keys
+### 🔵 Changing Keys
+
 Table kt
 id|name|employer|age
 -|-|-|-
@@ -2783,7 +2860,8 @@ id|name|employer|age
 * use backtick kt to change underlying table
 
 <a name="adding_keys"></a>
-### Adding Keys
+### 🔵 Adding Keys
+
 ```q
 1!kt
 ```
@@ -2795,7 +2873,8 @@ id|name|employer|age
 `e`|	john|	ts|	15
 
 <a name="removing_keys"></a>
-### Removing Keys
+### 🔵 Removing Keys
+
 ```q
 () xkey `kt
 ```
@@ -2811,7 +2890,8 @@ c|	kim|	ms|	13
 e|	john|	ts|	15
 
 <a name="upsert_keys"></a>
-### Upserting Keys
+### 🔵 Upserting Keys
+
 Given
 ```q
 nd: ( [id:`e`f] name:`dan`kate; employer:`walmart`walmart; age:200 200)
@@ -2853,7 +2933,8 @@ id|name|employer|age
 * g is new key, so adds new row. since no info, returns null
 
 <a name="upsert_multi_rowkeys"></a>
-### Upserting Multi Rows/Keys
+### 🔵 Upserting Multi Rows/Keys
+
 Given:
 ```q
 et: ([employer:`kx`ms`ms; loc:`NY`NY`HK] size: 10 20 30; area: 1 2 3)
@@ -2878,7 +2959,8 @@ employer|loc|size|area
 * since there was no ms, SG, adds new row 
 
 <a name="retrieve_value_keys"></a>
-### Retrieving Values from Keyed Table
+### 🔵 Retrieving Values from Keyed Table
+
 Given:
 id|name|employer|age
 -|-|-|-
@@ -2941,10 +3023,10 @@ size|area
 <hr>
 
 <a name="keyed_table_problem_set"></a>
-## Keyed Tables Problem Set
+## 🔴 Keyed Tables Problem Set
 [Top](#top)
 
-**1. Create the following keyed table**
+**🔵 1. Create the following keyed table**
 
 table p
 `book` | `ticker`|size
@@ -2964,7 +3046,7 @@ p: ( [book:`A`B`B`C; ticker:`MS`AAPL`MS`C] size:100 200 300 400)
 
 <hr>
 
-**2. Retrieve entries where book is B, using select**
+**🔵 2. Retrieve entries where book is B, using select**
 ```q
 select from p where book=`B
 ```
@@ -2975,7 +3057,7 @@ book | ticker|size
 
 <hr>
 
-**3. Retrieve entries where book is C and ticker is c, using take**
+**🔵 3. Retrieve entries where book is C and ticker is c, using take**
 ```q
 ( [book:enlist`C; ticker:enlist`C]) # p
 ```
@@ -2986,7 +3068,7 @@ book | ticker|size
 * underlying table p has 2 keyed columns (book and ticker)
 * you cannot retrieve 2 keyed columns if underlying table only has 1 key column
 
-**4. Upsert the following values**
+**🔵 4. Upsert the following values**
 
 table p
 
@@ -3012,11 +3094,11 @@ upsert [p; ([book:`C`D; ticker:`C`MS]size:400 500)]
 <hr>
 
 <a name="table_attributes"></a>
-## Table Attributes
+## 🔴 Table Attributes
 [Top](#top)
 
 <a name="set_attribute_creation"></a>
-### Setting Attributes During Creation
+### 🔵 Setting Attributes During Creation
 ```q
 l:`s# 1 2 3 4 5 
 ```
@@ -3032,7 +3114,7 @@ attr l
 * 's means sorted attribute applied
 
 <a name="apply_attribute_data"></a>
-### Applying Attribute to Existing Data
+### 🔵 Applying Attribute to Existing Data
 ```q
 k: 1 2 3 4 5
 ```
@@ -3087,7 +3169,7 @@ val	|j|
 * under attributes for column time, s sorted has been applied
 
 <a name="clear_attribute"></a>
-### Clear Attributes
+### 🔵 Clear Attributes
 ```q
 @ [`.;`k;`#]
 ```
@@ -3124,7 +3206,7 @@ k: til 1000000
 * applying sort applies a binary search. start in the middle, (ex 5), less than that, so checks mid (ex 3), more, so 4
 
 <a name="sort_attribute"></a>
-### Sorted Attribute
+### 🔵 Sorted Attribute
 * sorted attribute applied to list or column to specify data is sorted in ascending order
 * the underlying list must already be in ascending order, otherwise error
 * `s# attribute only maintained during append that maintain the sort requirement, otherwise lost
@@ -3169,7 +3251,7 @@ attr list
 s-fail
 
 <a name="unique_attribute"></a>
-### Unique Attribute
+### 🔵 Unique Attribute
 * unique attribute applied to a list where all values must be unique (no same values)
 
 ```q
@@ -3200,7 +3282,7 @@ attr lu
 * loses unique attribute since 4 already exists
 
 <a name="group_attribute"></a>
-### Grouped Attribute
+### 🔵 Grouped Attribute
 * groups same identifiers together for faster searches
 
 ```q
@@ -3232,7 +3314,7 @@ key|value
 * stores lookup table from values to indices where they occur
 
 <a name="parted_attribute"></a>
-### Parted Attribute
+### 🔵 Parted Attribute
 * parted attribute marks a list of having same value occuring in sequential block
 * enables faster searches
 
@@ -3262,13 +3344,13 @@ attr lp
 <hr>
 
 <a name="fkey_restrictions"></a>
-## Foreign Key Restrictions
+## 🔵 Foreign Key Restrictions
 [Top](#top)
 
 * Foreign keys restrict the values that are allowed in a column
 
 <a name="single_fkey"></a>
-### Single Foreign Keys
+### 🔵 Single Foreign Keys
 
 Given:
 
@@ -3309,7 +3391,7 @@ update `company$employer from `employee
 * the values in column employee must exist in domain company table
 
 <a name="check_fkey"></a>
-### Checking Foreign Keys
+### 🔵 Checking Foreign Keys
 
 ```q
 meta employee
@@ -3332,7 +3414,7 @@ key|value
 employer|company
 
 <a name="upsert_fkey"></a>
-### Upserting with Foreign Keys
+### 🔵 Upserting with Foreign Keys
 ```q
 upsert[employee; ( [] name:`james`claire; employer:`RBS`RBS)]
 ```
@@ -3373,7 +3455,7 @@ claire | RBS
 * now you can append james and claire
 
 <a name="retrieve_fkey"></a>
-### Retrieving Columns via fkey
+### 🔵 Retrieving Columns via fkey
 company table
 
 sym | advice | level
@@ -3409,7 +3491,7 @@ arthur|	KX|	BUY|	10
 greg|	MS|	SELL|	90
 
 <a name="multi_fkey"></a>
-### Multiple Foreign Keys
+### 🔵 Multiple Foreign Keys
 ```q
 office: ([sym:`TS`KX`C; loc:`LDN`NY`LDN] employees:10+3?1000)
 ```
@@ -3482,10 +3564,10 @@ arthur|	KX|	NY	|1|	KX|	NY
 <hr>
 
 <a name="fkey_problemset"></a>
-## Foreign Key Problem Set
+## 🔴 Foreign Key Problem Set
 [Top](#top)
 
-**1. Given the following table**
+**🔵 1. Given the following table**
 
 book table
 
@@ -3505,7 +3587,7 @@ date|time|sym|price|size|cond|bookId
 2021.01.01|09:00|UPS|34|100| A| lefhe
 2021.01.01|09:00|A|56|100| C| bfjnf
 
-**1. Insert a foreign key column into the trade table called owner, linking trade and book table, using bookID**
+**🔵 1. Insert a foreign key column into the trade table called owner, linking trade and book table, using bookID**
 ```q
 update owner: `book$bookId from `trade
 ```
@@ -3525,7 +3607,7 @@ c | t|f|a
 -|-|-|-
 owner | | book|
 
-**2. Join the book table onto the trade table and add the name of person who did trade**
+**🔵 2. Join the book table onto the trade table and add the name of person who did trade**
 ```q
 update owner.name from trade
 ```
@@ -3542,11 +3624,11 @@ date|time|sym|price|size|cond|bookId | owner|name
 <hr>
 
 <a name="qsql_header"></a>
-## qSQL
+## 🔴 qSQL
 [Top](#top)
 
 <a name="select_from_where"></a>
-### Select from where
+### 🔵 Select from where
 
 Load the trades.q script first
 
@@ -3607,7 +3689,7 @@ sym|date|time|price|size|cond
 `AAPL`|	2021-06-02|	17:29:58.262 |	76.18	|22500	|A
 
 <a name="select_by"></a>
-### Select By
+### 🔵 Select By
 
 ```q
 select first price, first time by date from trade where sym=`AAPL
@@ -3633,7 +3715,7 @@ date|open|high|low|close
 `2021-05-30`|	60.88	|109.98	| 50.0	| 90.49
 
 <a name="select_count"></a>
-### Select Count 
+### 🔵 Select Count 
 
 ```q
 select count i, max prirce by date, time.hh from trade where sym=`RBS
@@ -3646,7 +3728,7 @@ date|hh|x|prrice
 * i is a virtual column that returns the number of rows (as column x)
 
 <a name="using_ops_functions"></a>
-### Using Operations and Functions 
+### 🔵 Using Operations and Functions 
 
 ```q
 select price by date from trade where sym=`AAPL, price < avg price
@@ -3680,7 +3762,7 @@ d | price
 `1b` | 0.12 0.43 0.32
 
 <a name="in_function"></a>
-### In Function
+### 🔵 In Function
 
 ```q
 select from trade where sym in `AAPL`RBS
@@ -3694,7 +3776,7 @@ date|time|sym|price|size|cond
 2021-05-30|	09:30:03.025 |	AAPL |	78.66 |	19000	| A
 
 <a name="within_function"></a>
-### Within Function
+### 🔵 Within Function
 
 ```q
 select from trade where sym=`RBS, price within 95 100
@@ -3718,7 +3800,7 @@ date|time|sym|price|size|cond
 2021-05-30|	11:44:03.025 |	AAPL |	98.66 |	19000	| A
 
 <a name="xbar_function"></a>
-### Xbar Function
+### 🔵 Xbar Function
 * xbar allows for custom sized boundaries
 
 ```q
@@ -3734,7 +3816,7 @@ date|time|x|price
 `2021-05-30`|	`11:44:03.025` |	123 |	98.66 
 
 <a name="exec"></a>
-### Exec Query
+### 🔵 Exec Query
 
 ```q
 exec price from trade where date=.z.d, sym=`AAPL
@@ -3787,7 +3869,7 @@ sym | cond | price
 `KX` | `C` | 32
 
 <a name="update_statement"></a>
-### Update
+### 🔵 Update
 
 ```q
 tt:100?trade
@@ -3858,7 +3940,7 @@ date|time|sym|price|size | cond| maxprice
 * adds new column max price
 
 <a name="delete_columns"></a>
-### Delete Columns
+### 🔵 Delete Columns
 * cannot have by or where clause
 
 Given table tt
@@ -3892,7 +3974,7 @@ UBS | 41| 31.2| D
 * deletes multiple columns from the table
 
 <a name="delete_rows"></a>
-### Delete Rows
+### 🔵 Delete Rows
 Given table tt
 
 date|time|sym|price|size | cond| maxprice
@@ -3920,7 +4002,7 @@ date|time|sym|price|size | cond| maxprice
 * deletes all rows
 
 <a name="sort_asc_desc"></a>
-### Sort Ascending / Descending 
+### 🔵 Sort Ascending / Descending 
 
 ```q
 `sym`price xasc tt
@@ -3945,7 +4027,7 @@ date|time|sym|price|size | cond
 * first sorts descending by sym, then by price
 
 <a name="rename_reorder_columns"></a>
-### Renaming / Reordering Columns
+### 🔵 Renaming / Reordering Columns
 
 ```q
 `new1`new2 xcol tt
@@ -4002,10 +4084,10 @@ date| sym| time | price | size | cond
 <hr>
 
 <a name="qsql_problem_set"></a>
-## qSQL Problem Set
+## 🔴 qSQL Problem Set
 [Top](#top)
 
-**1. Extract from trade table, trades for MS greater than 1,000 in size**
+**🔵 1. Extract from trade table, trades for MS greater than 1,000 in size**
 
 ```q
 select from trade where sym=`MS, size >1000
@@ -4020,7 +4102,7 @@ dt|sym|price|size
 * sym has to be back tick MS
 <hr>
 
-**2. From the trade table, find the total size of all trades and the average price paid per sym**
+**🔵 2. From the trade table, find the total size of all trades and the average price paid per sym**
 
 ```q
 select total: sum size, avg price by sym from trade
@@ -4039,7 +4121,7 @@ sym|total | price
 
 <hr>
 
-**3. From the trade table, find the trade that was largest size for each sym**
+**🔵 3. From the trade table, find the trade that was largest size for each sym**
 
 ```q
 select from (update mx:max size by sym from trade) where size = mx
@@ -4073,7 +4155,7 @@ date|time|sym|price|size|cond
 
 <hr>
 
-**4. From the trade table, select the latest trade for each sym, and include all details**
+**🔵 4. From the trade table, select the latest trade for each sym, and include all details**
 
 ```q
 select last date, last price, last size by sym from trade
@@ -4097,7 +4179,7 @@ AAPL|	2021-06-03|	87.54| 49100 | C
 
 <hr>
 
-**5. Find all trades that have sym GOOG**
+**🔵 5. Find all trades that have sym GOOG**
 
 ```q
 select from trade where sym=`GOOG
@@ -4109,7 +4191,7 @@ GOOG|	2021-06-03|	87.54| 49100 | C
 
 <hr>
 
-**6. Find all trades that have sym GOOG or RBS or A**
+**🔵 6. Find all trades that have sym GOOG or RBS or A**
 
 ```q
 select from trade where sym in `GOOG`RBS`A
@@ -4122,7 +4204,7 @@ A|	2021-06-03|	87.54| 49100 | C
 
 <hr>
 
-**7. Find all trades for google that had a price between 70 and 80**
+**🔵 7. Find all trades for google that had a price between 70 and 80**
 
 ```q
 select from trade where sym=`GOOG, price within 70 80
@@ -4136,7 +4218,7 @@ GOOG|	2021-06-03|	78 | 49100 | C
 
 <hr>
 
-**8. Count the number of trades and total size of trades per hour for sym RBS**
+**🔵 8. Count the number of trades and total size of trades per hour for sym RBS**
 
 ```q
 select NumberTrades: count i, totalSize: sum size by time.hh from trade where sym=`RBS
@@ -4154,7 +4236,7 @@ hh|NumberTrades|totalSize
 
 <hr>
 
-**9. Select the number of trades and total size of trades every 30 mins for the sym RBS**
+**🔵 9. Select the number of trades and total size of trades every 30 mins for the sym RBS**
 
 ```q
 select numbertrades: count i, totalsize: sum size by 30 xbar time.minute from trade where sym=`RBS
@@ -4170,7 +4252,7 @@ minute|numbertrades|totalsize
 
 <hr>
 
-**10. Find all trades for `A where the price was cheaper than the average for that day**
+**🔵 10. Find all trades for `A where the price was cheaper than the average for that day**
 
 ```q
 a: update avgPrice: avg price by date from select from trade where sym=`A
@@ -4179,11 +4261,11 @@ a: update avgPrice: avg price by date from select from trade where sym=`A
 <hr>
 
 <a name="qsql_joins"></a>
-## qSQL Joins
+## 🔴 qSQL Joins
 [Top](#top)
 
 <a name="left_join"></a>
-### qSQL Join Left 
+### 🔵 qSQL Join Left 
 
 * syntax = **source table** lj **lookup table** (must be keyed)
 * for each row in **source**, find corresponding values in **lookup** (keyed)
@@ -4231,7 +4313,7 @@ x|date |      time |        sym|  price|    size|  cond| sector |   employees
 * will always be same number of rows as source table (5)
 
 <a name="plus_join"></a>
-### qSQL Plus Join 
+### 🔵 qSQL Plus Join 
 
 * finds the same value across 2 tables, adds their values
 
@@ -4271,7 +4353,7 @@ x|`sym`| sector | employees
 * if value doesnt exist (RBS) just leave as is
 
 <a name="inner_join"></a>
-### qSQL Inner Join 
+### 🔵 qSQL Inner Join 
 
 * similar to left join, but **only returns rows where matches occur**
 
@@ -4303,7 +4385,7 @@ x|date |        sym|  price|    size  | sector | employees
 * removes row UBS since no match
 
 <a name="union_join"></a>
-### qSQL Union Join 
+### 🔵 qSQL Union Join 
 
 * adds ALL rows/columns together
 * if key matches, will upsert (update or insert)
@@ -4340,7 +4422,7 @@ x|date |        sym|  price|    size | book
 
 
 <a name="qsqljoins_problem_set"></a>
-## qSQL Joins Problem Set
+## 🔴 qSQL Joins Problem Set
 [Top](#top)
 
 ```q
@@ -4355,7 +4437,7 @@ x|date |        sym|  price|    size | book
 * **stock** (headers = sym, sector, employees)\
 * **trade** (headers = dt, sym, price, size)
 
-**1. Find the total value of trades by sector, include those who's sector is unknown (totalvalue = price x size)**
+**🔵 1. Find the total value of trades by sector, include those who's sector is unknown (totalvalue = price x size)**
 
 * the columns you need are price x size (trade table) and sector (stock table) 
 * need to use left join because you want to keep the same number of rows, and add in the relevant columns
@@ -4396,7 +4478,7 @@ unknown|	1958.0
 
 <hr>
 
-**2. Combine trades from trade and fbTrades Table into a table t2, sorted by date. Include all columns**
+**🔵 2. Combine trades from trade and fbTrades Table into a table t2, sorted by date. Include all columns**
 
 * include all columns, so we use union join
 
@@ -4429,7 +4511,7 @@ dt|sym|price|size|book
 
 <hr>
 
-**3. Find the highest and lowest price in the trade table for each sym**
+**🔵 3. Find the highest and lowest price in the trade table for each sym**
 
 ```q
 select max price by sym from trade
@@ -4453,7 +4535,7 @@ MS|	254.0
 
 <hr>
 
-**4. Find the 2 highest trade prices for each sym**
+**🔵 4. Find the 2 highest trade prices for each sym**
 
 ```q
 ungroup select 2 sublist desc price by sym from trade
@@ -4484,7 +4566,7 @@ MS|	260 255f
 
 <hr>
 
-**5. Find the average daily price for each sym in trade table. Join the newsItems table to show only those items where the sym had a newsItem on that date**
+**🔵 5. Find the average daily price for each sym in trade table. Join the newsItems table to show only those items where the sym had a newsItem on that date**
 
 * from trade table, find avg price. then join the newsItem table where matches date and sym
 * so date and sym need to be keys in the newsItems table
@@ -4521,7 +4603,7 @@ dt| sym| price|title
 
 <hr>
 
-**6. Take the newsItems table and join the trade table to bring in the latest price for each ticker**
+**🔵 6. Take the newsItems table and join the trade table to bring in the latest price for each ticker**
 
 ```q
 aj [`ticker`ndate;newsItems; `ndate`ticker xcol trade]
@@ -4549,11 +4631,11 @@ ndate|ticker|title|price
 <hr>
 
 <a name="timeseries_joins"></a>
-## Timeseries Tables Joins
+## 🔴 Timeseries Tables Joins
 [Top](#top)
 
 <a name="asof_join"></a>
-### Asof Time Join
+### 🔵 Asof Time Join
 * joins the closest matches from one table to another
 * syntax = aj [column; source table; lookup table]
 * last item of columns will be less than or equal join
@@ -4635,7 +4717,7 @@ time|sym|price|size|ftime|fsym|bid|qtime|qsym
  * aj0 is the same as aj, but uses the lookup tables time column
 
 <a name="uniontime_join"></a>
-### Union Time Join
+### 🔵 Union Time Join
 
 * union join combines all entries from both tables, then can sort by time
 
@@ -4665,17 +4747,17 @@ time|sym|bid|price|size
 
 
 <a name="windowtime_join"></a>
-### Window Time Join
+### 🔵 Window Time Join
 
 * designed for queries; 2 mins before, 2 mins after
 
 
 <a name="adverbs_header"></a>
-## Adverbs
+## 🔴 Adverbs
 [Top](#top)
 
 <a name="eachboth_adverbs"></a>
-### Each Both
+### 🔵 Each Both
 * modifies a dyadic function to operate on corresponding pairs of items between lists of equal length
 
 ```q
@@ -4761,7 +4843,7 @@ a|b
 * each both will stitch the two tables together
 
 <a name="each_monadic"></a>
-### Each Monadic
+### 🔵 Each Monadic
 * each modifies a monadic function to make it operate one level deeper
 
 ```q
@@ -4790,7 +4872,7 @@ reverse each j
 c b a
 
 <a name="eachright_eachleft"></a>
-### Each Right / Each Left
+### 🔵 Each Right / Each Left
 * similar to concatenate
 * x,/: each right; will join left item (x) to each item on right
 * x,\: each left; will join left item (x) to each item on left
@@ -4852,7 +4934,7 @@ st, \:"--->"
 "terminal--->" 
 
 <a name="scan_adverb"></a>
-### Scan
+### 🔵 Scan
 * useful for calculations such as running totals, running products, where the previous value is used in the next value calculation
 
 ```q
@@ -4874,7 +4956,7 @@ st, \:"--->"
 1 2 3 4 5
 
 <a name="eachprevious_adverb"></a>
-### Each Previous
+### 🔵 Each Previous
 
 ```q
 {x+y}': [1 2 3 4 7]
@@ -4898,9 +4980,10 @@ st, \:"--->"
 <hr>
 
 <a name="adverbs_problemset"></a>
-## Adverbs Problem Set
+## 🔴 Adverbs Problem Set
+[Top](#top)
 
-## 1. Given: ("cow"; "fox";"badger") use EACH RIGHT to prepend "the" before each item##
+## 🔵 1. Given: ("cow"; "fox";"badger") use EACH RIGHT to prepend "the" before each item##
 
 ```q
 strs: ("cow";"fox";"badger")
@@ -4914,7 +4997,7 @@ strs: ("cow";"fox";"badger")
 
 <hr>
 
-## 2. Use EACH LEFT to add "jumped" to strs ##
+## 🔵 2. Use EACH LEFT to add "jumped" to strs ##
 
 ```q
 strs,\: " jumped"
@@ -4927,7 +5010,7 @@ strs,\: " jumped"
 
 <hr>
 
-## 3. Given the nested list: dd: (1 5 10; 200 30 40; 20 23 24), find the max of each list ##
+## 🔵 3. Given the nested list: dd: (1 5 10; 200 30 40; 20 23 24), find the max of each list ##
 
 ```q
 dd: (1 5 10; 200 30 40; 20 23 24)
@@ -4937,7 +5020,7 @@ max each dd
 
 <hr>
 
-## 4. Using EACH PRIOR, create a function that calculates the moving sum with window size of 2 ##
+## 🔵 4. Using EACH PRIOR, create a function that calculates the moving sum with window size of 2 ##
 
 ```q
 L: 20 30 4 6 1 2
@@ -4958,7 +5041,7 @@ alternatively:
 
 <hr>
 
-## 5. Use EACH BOTH to join the lists to give (5 8; 7 3; 9 4) ##
+## 🔵 5. Use EACH BOTH to join the lists to give (5 8; 7 3; 9 4) ##
 
 numbers: 5 7 9 \
 powers: 8 3 4
@@ -4974,7 +5057,7 @@ key| value
 
 <hr>
 
-## 6. Use EACH BOTH to raise 5 to the power of 8, 7 to the power of 3, etc. ##
+## 🔵 6. Use EACH BOTH to raise 5 to the power of 8, 7 to the power of 3, etc. ##
 
 ```q
 numbers xexp' powers
@@ -4983,7 +5066,7 @@ numbers xexp' powers
 
 <hr>
 
-## 7. A bank account pays 5% interest a year. Write a function that takes the current balance and returns the new balance after one year. Then use scan\ with that function to display the interest every year, up to 7 years in the future ##
+## 🔵 7. A bank account pays 5% interest a year. Write a function that takes the current balance and returns the new balance after one year. Then use scan\ with that function to display the interest every year, up to 7 years in the future ##
 
 assume starting balance of 100
 
@@ -5015,7 +5098,7 @@ fib 1 1
 
 <hr>
 
-## 9. Use the over function to create a function fibn to generate a fib sequence n numbers long where n is the functions argument ##
+## 🔵 9. Use the over function to create a function fibn to generate a fib sequence n numbers long where n is the functions argument ##
 
 ```q
 fibn: {x fib/ 1 1}
@@ -5027,11 +5110,11 @@ fibn 5
 
 
 <a name="practicalapplication_header"></a>
-## Practical Application
+## 🔴 Practical Application
 [Top](#top)
 
 <a name="load_csv"></a>
-### Loading CSV Files
+### 🔵 Loading CSV Files
 
 With Column Headers
 
@@ -5054,12 +5137,12 @@ if the CSV file contains data but no column names, dont need to enlist a delimit
 <hr>
 
 <a name="casestudies_header"></a>
-## Case Studies
+## 🔴 Case Studies
 [Top](#top)
 
 
 <a name="cross_case"></a>
-### 1. Comparing Current Orders against Potential Crosses
+### 🔵 1. Comparing Current Orders against Potential Crosses
 
 Objectives:
 1. Pull in CSV file of current orders (trade)
@@ -5142,7 +5225,7 @@ ric|side|crossableqty
 <hr>
 
 <a name="nettingbuyssells_case"></a>
-### 2. Netting off buys and sells from same Stock
+### 🔵 2. Netting off buys and sells from same Stock
 
 * same stock, multiple lines of buys and sells in the same stock
 * determine what is the net quantity
