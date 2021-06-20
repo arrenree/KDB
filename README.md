@@ -5305,18 +5305,32 @@ AAPL |	120
 
 <hr>
 
-## 🔵 4. 
+## 🔵 3. Turn 2 lists of symbols into one longer list. 
+AAPL IBM VOD and O N L -> AAPL.O IBM.N VOD.L
+
+* convert O N L into strings
+* concatenate . to each element
+* convert APPL IBM VOD into strings
+* concatenate the 2 lists of strings together
+* convert the strings back into symbols
+* 
+
+```q
+L1: `AAPL`IBM`VOD
+L2:`O`N`L
+
+
+
+## 🔵 4. Create a function that will return latest prices (with max timestamp within the date) for the date.
+If there is not any price for that particular date, return the latest previous price
+There is no predefined ordering of the source table.
+Try to preserve the column order.
 
 Given: 
 
 ```q
 t: ([] date:raze (3#2016.01.06;4#2016.01.07;6#2016.01.08); sym:`a`b`c`a`b`a`b`a`b`c`a`b`c; price:1 2 3 1.1 2.1 1.2 2.2 1.3 2.3 3.2 1.4 2.4 3.3; timestamp:raze (3#2016.01.06T22:00:00.000; 2#2016.01.07T22:00:00.000; 2#2016.01.08T23:00:00.000; 3#2016.01.08T22:00:00.000; 3#2016.01.06T22:30:00.000))
 ```
-
-Create a function that will return latest prices (with max timestamp within the date) for the date.
-If there is not any price for that particular date, return the latest previous price
-There is no predefined ordering of the source table.
-Try to preserve the column order.
 
 Example 1:
 f [t; 2016.01.06]
