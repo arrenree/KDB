@@ -1,5 +1,7 @@
 # Allen's Notes for KDB+
 <a name="top"></a>
+[bottom](#bottom)
+
 
 ## 1. [KDB Basics](#kdbintro_header)
 1. [Assigning Values to Variable](#assign_intro)
@@ -151,6 +153,7 @@
 11. [Delete rows](#delete_rows)
 12. [Sort Ascending / Descending](#sort_asc_desc)
 13. [Renaming / Reordering Columns](#rename_reorder_columns)
+14. [Filter By fby](#fby_sql)
 
 ## 20. [qSQL Problem Set](#qsql_problem_set)
 
@@ -4080,7 +4083,51 @@ date| sym| time | price | size | cond
 `2021.01.02` | `JPM` | 1:45 | 34 | 342 | A
 
 * make date and sym key columns
-* 
+
+<a name="fby_sql"></a>
+### 🔵 Filter by fby
+
+* fby aggregates values from one list based on group defined in another
+* (aggr;d) fby g
+* aggr = aggregate function = max, min, etc
+* d = list or column name
+* g = another column name
+
+
+
+
+Given the following table, find the max price per symbol
+
+time | sym | src | price | size
+-|-|-|-|-
+2019-03-11T09:00:00.277000 |	GOOG |	L|	36.01|	1427
+2019-03-11T09:00:04.123000 |	GOOG |	O|	36.01|	708
+2019-03-11T09:00:08.123000 |	MSFT |	N|	35.5|	7810
+2019-03-11T09:00:10.123000 |	MSFT |	O|	31.1|	1100
+
+```q
+select from t where price=(max;price) fby sym
+```
+time | sym | src | price | size
+-|-|-|-|-
+2019-03-11T09:00:00.277000 |	GOOG |	L|	36.01|	1427
+2019-03-11T09:00:04.123000 |	GOOG |	O|	36.01|	708
+2019-03-11T09:00:08.123000 |	MSFT |	N|	35.5|	7810
+
+* this is not correct, since there are still 2 GOOG (since both same "max" price)
+* you can add another fby filter for time
+
+```q
+select from t where price=(max;price) fby sym, time=(max;time) fby sym
+```
+time | sym | src | price | size
+-|-|-|-|-
+2019-03-11T09:00:04.123000	GOOG	O	36.01	708
+2019-03-11T09:00:08.123000	MSFT	N	35.5	7810
+
+* in this case, you filtered max price by sym, and max time by sym
+
+
 <hr>
 
 <a name="qsql_problem_set"></a>
@@ -5256,7 +5303,82 @@ ric | size
 -|-
 AAPL |	120
 
+<hr>
 
+## 🔵 3. Given the below table t, find the max price per symbol
+
+time | sym | src | price | size
+-|-|-|-|-
+2019-03-11T09:00:00.277000|	GOOG|	L|	36.01|	1427
+2019-03-11T09:00:04.123000|	GOOG|	O|	36.01|	708
+2019-03-11T09:00:08.123000|	MSFT|	N|	35.5	|7810
+2019-03-11T09:00:10.123000|	MSFT|	O|	31.1|	1100
+
+
+
+
+## 🔵 4. 
+
+Given: 
+
+```q
+t: ([] date:raze (3#2016.01.06;4#2016.01.07;6#2016.01.08); sym:`a`b`c`a`b`a`b`a`b`c`a`b`c; price:1 2 3 1.1 2.1 1.2 2.2 1.3 2.3 3.2 1.4 2.4 3.3; timestamp:raze (3#2016.01.06T22:00:00.000; 2#2016.01.07T22:00:00.000; 2#2016.01.08T23:00:00.000; 3#2016.01.08T22:00:00.000; 3#2016.01.06T22:30:00.000))
+```
+
+Create a function that will return latest prices (with max timestamp within the date) for the date.
+If there is not any price for that particular date, return the latest previous price
+There is no predefined ordering of the source table.
+Try to preserve the column order.
+
+
+Example 1:
+f [t; 2016.01.06]
+
+date | sym | price | timestamp
+-|-|-|-
+2016-01-06|	a|	1|	2016-01-06T22:00:00.000
+2016-01-06|	b|	2|	2016-01-06T22:00:00.000
+2016-01-06|	c|	3|	2016-01-06T22:00:00.000
+
+```q
+f:{[t;d] select [-3] last price, max timestamp by date, sym from t where date<=d}
+f[t;2016.01.07]
+```
+
+Example 2:
+
+f [t; 2016.01.07]
+
+date | sym | price | timestamp
+-|-|-|-
+2016-01-06|	c|	3|	2016-01-06T22:00:00.000
+2016-01-07|	a|	1.2|	2016-01-08T23:00:00.000
+2016-01-07|	b|	2.2 |	2016-01-08T23:00:00.000
+
+```q
+f:{[t;d] select [-3] last price, max timestamp by date, sym from t where date<=d}
+f[t;2016.01.07]
+```
+* sets the date and sym as keys
+* date less than or equal to d (date input)
+* last price + max timestamp
+* select last 3 rows
+
+
+Example 3:
+
+f [t; 2016.01.08]
+
+date | sym | price | timestamp
+-|-|-|-
+2016-01-08|	a|	1.3|	2016-01-08T22:00:00.000
+2016-01-08|	b|	2.3|	2016-01-08T22:00:00.000
+2016-01-08|	c|	3.2|	2016-01-08T22:00:00.000
+
+```q
+f:{[t;d] select last price, max timestamp by date, sym from t where date<=d, timestamp=(max;timestamp) fby date, price=(last;price) fby sym}
+```
 
 [Top](#top)
 
+<a name="bottom"></a>
