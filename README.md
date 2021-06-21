@@ -5318,8 +5318,36 @@ AAPL IBM VOD and O N L -> AAPL.O IBM.N VOD.L
 ```q
 L1: `AAPL`IBM`VOD
 L2:`O`N`L
+```
 
+```q
+string L2
+S2: ".",/: string L2
+```
+("O";"N";"L")
+(".O";".N";".L")
 
+* first convert L2 from list of syms to list of strings
+* use EACH RIGHT ,/: to concatenate . to list of L2 strings
+
+```q
+S1: String L1
+S,'S2
+"S" $ (S1,'S2)
+```
+("AAPL";"IBM";"VOD")
+("AAPL.O";"IBM.N";"VOD.L")
+
+* convert L1 to strings (so you can concatenate L1 and L2)
+* use EACH BOTH ADVERB to join each elemnt of S1 to each elemnt of S2
+* cast the list of strings back to list of syms
+
+```q
+`AAPL.O`IBM.N`VOD.L
+```
+* final answer
+
+<hr> 
 
 ## 🔵 4. Create a function that will return latest prices (with max timestamp within the date) for the date.
 If there is not any price for that particular date, return the latest previous price
