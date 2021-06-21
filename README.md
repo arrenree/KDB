@@ -4804,25 +4804,29 @@ time|sym|bid|price|size
 [Top](#top)
 
 <a name="eachboth_adverbs"></a>
-### 🔵 Each Both
+### 🔵 Each Both ,'
 * modifies a dyadic function to operate on corresponding pairs of items between lists of equal length
+* acts like concatenate between 2 lists
+
+### EACH BOTH - 2 lists of integers
 
 ```q
-L: 1 2 3 4 5
-K: 50 60 70 80 90
+L: 1 2 3
+K: 50 60 70
 L,'K
 ```
+(1 50;2 60;3 70)
 
 L|K
 -|-
 1| 50
 2 |60
 3 |70
-4 |80
-5| 90
 
-* joins first elements of L and K
+* concatenates the first elements of L and to first element of K
 * lists must be same length
+
+### EACH BOTH - 2 dictionaries
 
 ```q
 d1:`p`o`i ! 1 2 3
@@ -4852,8 +4856,8 @@ o	|5
 i	|3
 k	|6
 
-* when you join dictionaries, the d2 will override anything existing keys in d1 (p, o)
-* acts like an upsert
+* when you simply JOIN dictionaries, the d2 will override anything existing keys in d1 (p, o)
+* acts like an UPSERT
 
 ```q
 d1,'d2
@@ -4865,7 +4869,9 @@ o|	2 5
 i|	3 
 k| 6
 
-* each both joins the values together
+* EACH BOTH will join the values together
+
+### EACH BOTH - Tables
 
 ```q
 t1: ( [] a:1 2 3)
@@ -4875,7 +4881,7 @@ t2: ( [] b:4 5 6)
 ```q
 t1, t2
 ```
-mismatch (because rows have different columns names)
+can't simply join; mismatch (because rows have different columns names)
 
 ```q
 t1, 't2
@@ -4888,6 +4894,7 @@ a|b
 3	|6
 
 * each both will stitch the two tables together
+
 
 <a name="each_monadic"></a>
 ### 🔵 Each Monadic
