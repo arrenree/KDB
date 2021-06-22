@@ -5525,6 +5525,20 @@ y|	a|	1.2|	200|1.15| 150| 1.15
 y|	b|	2.0|	50|2.05| 150| 2.06667
 y|	c|	3.3|	200|3.2| 150| 3.18
 
+```q
+update avg_price_by_sym: avg price by sym from `t4
+update avg_price_by_ex: avg size by ex from `t4
+update wavg_price_by_sym: size wavg price by sym from `t4
+```
+sym|ex|prirce|size| avg_price_by_sym| avg_size_by_ex | wavg_price_by_sym
+-|-|-|-|-|-|-
+a|	x|	1.1|	200|	1.15|	200|	1.15
+b|	x|	2.1|	100|	2.05|	200|	2.0667
+c|	x|	3.1|	300|	3.2	|200	|3.18
+a|	y|	1.2|	200|	1.15|	150|	1.15
+b|	y|	2.0|	50	|2.05	|150	|2.0667
+c|	y|	3.3|	200|	3.2	|150	|3.18
+
 
 
 [Top](#top)
