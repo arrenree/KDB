@@ -5406,6 +5406,124 @@ f:{[t;d] select last price, max timestamp by date, sym from t where date<=d, tim
 * you want to filter the max timestamp by the date
 * and filter the last price by sym
 
+## 🔵 5. Given the 2 tables:
+
+```q
+t1: ([] sym:`a`b`c;ex:`x)
+t2:([] ex:`y;sym:`a`b`c)
+
+ps:(( [] `a`b`c`a`b`c; ex:`x`x`x`y`y`y; price: 1.1 2.1 3.1 1.2 2 3.3); ( [] sym:`a`b`c`a`b`c; ex:`x`x`x`y`y`y; size: 200 100 300 200 50 200))
+```
+
+## Part 1: Join the first two tables using t1 schema ##
+
+Desired Result:
+
+sym | ex
+-|-
+a | x
+b |x
+c |x
+a |y
+b |y
+c |y
+
+```q
+t3: t1,t2
+```
+sym | ex
+-|-
+a|	x
+b|	x
+c|	x
+a|	y
+b|	y
+c|	y
+
+## Part 2: Join list of tables to newly created table using sym and ex as a keys
+
+Desired Result:
+
+sym | ex | price | size
+-|-|-|-
+a|	x| 1.1 | 200
+b|	x|2.1|100
+c|	x|3.1|300
+a|	y|1.2|200
+b|	y|2|50
+c|	y|3.3|200
+
+```q
+ps1:2!first ps
+ps2:2!last ps
+```
+* you want to split up list of tables ps into 2 separate tables by using first ps, last ps
+* use 2! to set the sym and ex columns as keys
+
+ps1
+
+sym|ex|price
+-|-|-
+`a`|`x`|	1.1
+`b`|	`x`|	2.1
+`c`|	`x`|	3.1
+`a`|	`y`|	1.2
+`b`|	`y`|	2.0
+`c`|	`y`|	3.3
+
+ps2
+
+sym|ex|size
+-|-|-
+`a`|`x`|	200
+`b`|	`x`|	100
+`c`|	`x`|	300
+`a`|	`y`|	200
+`b`|	`y`|	50
+`c`|	`y`|	200
+
+```q
+ps3:ps1 lj ps2
+```
+* join the ps1 and ps2 tables back together to make table ps3
+
+sym|ex|price|size
+-|-|-|-
+`a`|`x`|1.1|	200
+`b`|	`x`|	2.1|100
+`c`|	`x`|	3.1|300
+`a`|	`y`|	1.2|200
+`b`|	`y`|	2| 50
+`c`|	`y`|	3.3| 200
+
+```q
+t4: t3 lj ps3
+```
+
+* use left join to join ps3 to t3
+
+sym|ex|prirce|size
+-|-|-|-
+x|	a|	1.1|	200
+x|	b|	2.1|	100
+x|	c|	3.1|	300
+y|	a|	1.2|	200
+y|	b|	2.0|	50
+y|	c|	3.3|	200
+
+
+## Part 3: Add 3 new columns: avg_price_by_sym, avg_size_by_ex, wavg_price_by_sym (weighted by size)
+
+Desired Result:
+
+sym|ex|prirce|size| avg_price_by_sym| avg_size_by_ex | wavg_price_by_sym
+-|-|-|-|-|-|-
+x|	a|	1.1|	200 | 1.15 | 200 | 1.15
+x|	b|	2.1|	100|2.05| 200| 2.0667
+x|	c|	3.1|	300|3.2| 200| 3.18
+y|	a|	1.2|	200|1.15| 150| 1.15
+y|	b|	2.0|	50|2.05| 150| 2.06667
+y|	c|	3.3|	200|3.2| 150| 3.18
 
 
 
