@@ -5159,8 +5159,147 @@ fibn 5
 
 <hr>
 
+<a name="importexport_header"></a>
+## 26. 🔴 Importing and Exporting Data
+[Top](#top)
+
+<a name="txt_import"></a>
+### 🔵 26.1) Importing TXT files
+
+Assume you have a txt file in your directory called test.txt
+
+```q
+hopen `:test.txt
+read0 `:test.txt
+```
+
+* file handler = a temporary reference number that an OS assigns to a file requested by a user to be opened
+* hopen function will open the txt file
+* read0 function will read the txt file
+
+<a name="txt_export"></a>
+### 🔵 26.2) Exporting TXT files
+
+to write to txt, simply use hopen to get the file handle, store the file handle, and store strings to it
+
+```q
+fh:hopen `:hi.txt
+fh "10"
+fh "20"
+neg[fh] "30"
+read0 `:hi.txt
+```
+"1020" \
+"30"
+
+* by putting neg[fh], you enter into a new line
+
+```q
+hclose fh
+```
+closes the file handle so you can no longer edit it
+
+
+<a name="tables_exportformat"></a>
+### 🔵 26.3) Exporting tables as txt, csv, excel, and xml files
+
+given table cars:
+```q
+cars: ( [] maker: `Ford`Tesla`Honda; price: 100 200 300; weight: 1000 2000 3000)
+```
+maker|price|weight|
+-|-|-
+Ford|	100|	1000
+Tesla|	200|	2000
+Honda|	300|	3000
+
+```q
+save `cars.txt
+save `cars.csv
+save `cars.xls
+save `cars.xml
+```
+* this will automatically save and export your table to any of the file types in your directory
+
+```q
+save `$"newdir/cars.txt"
+```
+* this will create a new filepath and directory for your file to save your file
+* the new folder will be called "newdir"
+
+<a name="export_tablenewname"></a>
+### 🔵 26.4) Exporting tables with a new name
+
+```q
+`carsnewname.csv 0: "," 0: cars
+```
+maker,price,weight \
+Ford,100,1000 \
+Tesla,200,2000 \
+Honda,300,3000
+
+* by using the 0: function, you can rename your file to anything you want (carsnewname)
+
+<a name="csv_import"></a>
+### 🔵 26.5) Importing CSV Files
+
+Assume you have a file called nyse_20110621.csv on your computer
+
+```q
+("**********"; ",") 0: `:nyse_20110621.csv
+```
+* so the 0: loads the file on the right hand side
+* the **** are just KDB datatype layers; one * for each column
+* this will interpret all values as strings, allowing for easy way to check the data
+
+"symbol" | "A"
+-|-
+"date" |"21-june-2011"
+"open" | "14.94"
+"high" | "15.94"
+"low" |"13.43"
+"close" | "24.52"
+"volume"| "100"
+
+```q
+("SSFFFFJ"; ",") 0: `:nyse_20110621.csv
+```
+* replace the * with the datatype (string string, float float, long etc)
+* interprets the values more sensibly
+
+symbol | A
+-|-
+date |21-june-2011
+open | 14.94
+high | 15.94
+low |13.43
+close | 24.52
+volume| 100
+
+```q
+("SSFFFFJ"; enlist ",") 0: `:nyse_20110621.csv
+```
+* by adding in the enlist, you are treating the first column as a header
+* converts it into a table
+
+symbol | date | open | high | low | close | volume
+-|-|-|-|-|-|-
+A|	21-Jun-2011|	48.7|	50.32|	48.67|	49.82|	3509600
+AA|	21-Jun-2011|	14.94	|15.42|	14.92|	15.37|	18310600
+
+<a name="csv_largeimport"></a>
+### 🔵 26.6) Importing large CSV Files
+
+```q
+0N! "hello"
+```
+"hello"
+* 0N! is a function that outputs its argument
+* 
+
+
 <a name="casestudies_header"></a>
-## 26. 🔴 Case Studies
+## 27. 🔴 Case Studies
 [Top](#top)
 
 <a name="load_csv"></a>
