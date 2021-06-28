@@ -179,13 +179,10 @@
 
 ## 25. [Adverbs Problem Set](#adverbs_problemset)
 
-## 26. [Practical Application](#practicalapplication_header)
+## 26. [Case Studies](#casestudies_header)
 1. [Loading CSV Files](#load_csv)
-
-
-## 27. [Case Studies](#casestudies_header)
-1. [Comparing Current Orders against Potential Crosses](#cross_case)
-2. [Netting off buys and sells from same Stock](#nettingbuyssells_case)
+2. [Comparing Current Orders against Potential Crosses](#cross_case)
+3. [Netting off buys and sells from same Stock](#nettingbuyssells_case)
 
 
 
@@ -488,7 +485,7 @@ t2
 <hr>
 
 <a name="casting_header"></a>
-## 🔴 2. Data Types & Casting
+## 🔴 2. Data Types & Casting 
 [Top](#top)
 
 <a name="datatype_table"></a>
@@ -639,7 +636,7 @@ cast
 <hr>
 
 <a name="casting_problemset"></a>
-## 🔴 Casting & Enumeration Problem Set
+## 🔴 3. Data Types & Casting & Enumeration Problem Set
 [Top](#top)
 
 **🔵 1. What is the syntax to add to a list**
@@ -718,7 +715,7 @@ t,:`u
 <hr>
 
 <a name="lists_header"></a>
-## 🔴 Lists
+## 🔴 4. Lists
 [Top](#top)
 
 <a name="simple_list"></a>
@@ -855,7 +852,7 @@ m[ ; 1]
 <hr>
 
 <a name="list_problemset"></a>
-## 🔴 Lists Problem Set
+## 🔴 5. Lists Problem Set
 [Top](#top)
 
 **🔵 1. What is the difference between 3 ? 10 and 3 ? 10 20 30**
@@ -951,7 +948,7 @@ p where p<avg p
 <hr>
 
 <a name="primitive_header"></a>
-## 🔴 Primitive Operations
+## 🔴 6. Primitive Operations
 [Top](#top)
 
 <a name="add_list"></a>
@@ -1094,7 +1091,7 @@ adsf
 <hr>
 
 <a name="primitive_problemset"></a>
-## 🔴 Primitive Operations Problem Set
+## 🔴 7. Primitive Operations Problem Set
 [Top](#top)
 
 **🔵 1. Find index location for a string of chars**
@@ -1197,7 +1194,7 @@ count the number of times p is a whole number
 <hr>
 
 <a name="dict_header"></a>
-## 🔴 Dictionary
+## 🔴 8. Dictionary
 [Top](#top)
 
 * a dictionary is constructured from 2 lists of same length using the ! operator
@@ -1461,7 +1458,7 @@ c|	6
 <hr>
 
 <a name="dict_problemset"></a>
-## 🔴 Dictionary Problem Set
+## 🔴 9. Dictionary Problem Set
 [Top](#top)
 
 **🔵 1. Given the below dictionary, find the type, the keys, and its values**
@@ -1615,7 +1612,7 @@ peter|	56.1
 <hr>
 
 <a name="functions_header"></a>
-## 🔴 Functions
+## 🔴 10. Functions
 [Top](#top)
 
 <a name="define_func"></a>
@@ -1861,7 +1858,7 @@ findprime 10
 <hr>
 
 <a name="func_problem_set"></a>
-## 🔴 Functions Problem Set
+## 🔴 11. Functions Problem Set
 [Top](#top)
 
 **🔵 1. Create a function volc that accepts 2 arguments (r and h), that returns the volume of the given volc [2;3]** \
@@ -2114,7 +2111,7 @@ til 1000 = implicit variable (runs through 0...999)
 <hr>
 
 <a name="tables_header"></a>
-## 🔴 Tables
+## 🔴 12. Tables
 [Top](#top)
 
 <a name="dict_to_table"></a>
@@ -2527,7 +2524,7 @@ t:t,x
 <hr>
 
 <a name="tables_problem_set"></a>
-# 🔴 Tables Problem Set
+# 🔴 13. Tables Problem Set
 [Top](#top)
 
 **🔵 1. Given:**
@@ -2780,7 +2777,7 @@ MS|	Fin|	100
 <hr>
 
 <a name="keyed_tables"></a>
-## 🔴 Keyed Tables
+## 🔴 14. Keyed Tables
 [Top](#top)
 
 <a name="single_keyed_table"></a>
@@ -3026,7 +3023,7 @@ size|area
 <hr>
 
 <a name="keyed_table_problem_set"></a>
-## 🔴 Keyed Tables Problem Set
+## 🔴 15. Keyed Tables Problem Set
 [Top](#top)
 
 **🔵 1. Create the following keyed table**
@@ -3097,7 +3094,7 @@ upsert [p; ([book:`C`D; ticker:`C`MS]size:400 500)]
 <hr>
 
 <a name="table_attributes"></a>
-## 🔴 Table Attributes
+## 🔴 16. Table Attributes
 [Top](#top)
 
 <a name="set_attribute_creation"></a>
@@ -3347,7 +3344,7 @@ attr lp
 <hr>
 
 <a name="fkey_restrictions"></a>
-## 🔵 Foreign Key Restrictions
+## 🔴 17. Foreign Key Restrictions
 [Top](#top)
 
 * Foreign keys restrict the values that are allowed in a column
@@ -3567,7 +3564,7 @@ arthur|	KX|	NY	|1|	KX|	NY
 <hr>
 
 <a name="fkey_problemset"></a>
-## 🔴 Foreign Key Problem Set
+## 🔴 18. Foreign Key Problem Set
 [Top](#top)
 
 **🔵 1. Given the following table**
@@ -3627,7 +3624,7 @@ date|time|sym|price|size|cond|bookId | owner|name
 <hr>
 
 <a name="qsql_header"></a>
-## 🔴 qSQL
+## 🔴 19. qSQL
 [Top](#top)
 
 <a name="select_from_where"></a>
@@ -4131,7 +4128,7 @@ time | sym | src | price | size
 <hr>
 
 <a name="qsql_problem_set"></a>
-## 🔴 qSQL Problem Set
+## 🔴 20. qSQL Problem Set
 [Top](#top)
 
 **🔵 1. Extract from trade table, trades for MS greater than 1,000 in size**
@@ -4308,7 +4305,7 @@ a: update avgPrice: avg price by date from select from trade where sym=`A
 <hr>
 
 <a name="qsql_joins"></a>
-## 🔴 qSQL Joins
+## 🔴 21. qSQL Joins
 [Top](#top)
 
 <a name="left_join"></a>
@@ -4469,7 +4466,7 @@ x|date |        sym|  price|    size | book
 
 
 <a name="qsqljoins_problem_set"></a>
-## 🔴 qSQL Joins Problem Set
+## 🔴 22. qSQL Joins Problem Set
 [Top](#top)
 
 ```q
@@ -4678,7 +4675,7 @@ ndate|ticker|title|price
 <hr>
 
 <a name="timeseries_joins"></a>
-## 🔴 Timeseries Tables Joins
+## 🔴 23. Timeseries Tables Joins
 [Top](#top)
 
 <a name="asof_join"></a>
@@ -4800,7 +4797,7 @@ time|sym|bid|price|size
 
 
 <a name="adverbs_header"></a>
-## 🔴 Adverbs
+## 🔴 24. Adverbs
 [Top](#top)
 
 <a name="eachboth_adverbs"></a>
@@ -5034,7 +5031,7 @@ st, \:"--->"
 <hr>
 
 <a name="adverbs_problemset"></a>
-## 🔴 Adverbs Problem Set
+## 🔴 25. Adverbs Problem Set
 [Top](#top)
 
 ## 🔵 1. Given: ("cow"; "fox";"badger") use EACH RIGHT to prepend "the" before each item##
@@ -5162,13 +5159,12 @@ fibn 5
 
 <hr>
 
-
-<a name="practicalapplication_header"></a>
-## 🔴 Practical Application
+<a name="casestudies_header"></a>
+## 26. 🔴 Case Studies
 [Top](#top)
 
 <a name="load_csv"></a>
-### 🔵 Loading CSV Files
+### 🔵 1. Loading CSV Files
 
 With Column Headers
 
@@ -5190,13 +5186,8 @@ if the CSV file contains data but no column names, dont need to enlist a delimit
 
 <hr>
 
-<a name="casestudies_header"></a>
-## 🔴 Case Studies
-[Top](#top)
-
-
 <a name="cross_case"></a>
-### 🔵 1. Comparing Current Orders against Potential Crosses
+### 🔵 2. Comparing Current Orders against Potential Crosses
 
 Objectives:
 1. Pull in CSV file of current orders (trade)
@@ -5279,7 +5270,7 @@ ric|side|crossableqty
 <hr>
 
 <a name="nettingbuyssells_case"></a>
-### 🔵 2. Netting off buys and sells from same Stock
+### 🔵 3. Netting off buys and sells from same Stock
 
 * same stock, multiple lines of buys and sells in the same stock
 * determine what is the net quantity
@@ -5312,7 +5303,7 @@ AAPL |	120
 
 <hr>
 
-## 🔵 3. Turn 2 lists of symbols into one longer list. 
+## 🔵 4. Turn 2 lists of symbols into one longer list. 
 AAPL IBM VOD and O N L -> AAPL.O IBM.N VOD.L
 
 * convert O N L into strings
@@ -5356,7 +5347,7 @@ S,'S2
 
 <hr> 
 
-## 🔵 4. Create a function that will return latest prices (with max timestamp within the date) for the date.
+## 🔵 5. Create a function that will return latest prices (with max timestamp within the date) for the date.
 If there is not any price for that particular date, return the latest previous price
 There is no predefined ordering of the source table.
 Try to preserve the column order.
@@ -5406,7 +5397,7 @@ f:{[t;d] select last price, max timestamp by date, sym from t where date<=d, tim
 * you want to filter the max timestamp by the date
 * and filter the last price by sym
 
-## 🔵 5. Given the 2 tables:
+## 🔵 6. Given the 2 tables:
 
 ```q
 t1: ([] sym:`a`b`c;ex:`x)
@@ -5540,7 +5531,7 @@ b|	y|	2.0|	50	|2.05	|150	|2.0667
 c|	y|	3.3|	200|	3.2	|150	|3.18
 
 
-## 🔵 6. Given the table:
+## 🔵 7. Given the table:
 
 ```q
 orders: ( [] order:10*1 + til 8; sym:`NYSE`NYSE,6#`NASDAQ; start: 08:00 09:00 09:00 08:00 10:00 12:30 13:30 18:00; end:11:00 13:00 15:30 13:30 11:30 13:30 14:30 19:00)
