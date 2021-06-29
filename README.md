@@ -179,12 +179,17 @@
 
 ## 25. [Adverbs Problem Set](#adverbs_problemset)
 
-## 26. [Case Studies](#casestudies_header)
+## 26. [Import and Exporting Data](#importexport_header)
+1. [Importing TXT Files](#txt_import)
+2. [Exporting TXT Files](#txt_export)
+3. [Exporting Tables as txt, csv, excel, and xml files](#tables_exportformat)
+4. [Exporting Tables with New Name](#export_tablenewname)
+5. [Importing CSV Files](#csv_import)
+
+## 27. [Case Studies](#casestudies_header)
 1. [Loading CSV Files](#load_csv)
 2. [Comparing Current Orders against Potential Crosses](#cross_case)
 3. [Netting off buys and sells from same Stock](#nettingbuyssells_case)
-
-
 
 
 <hr>
@@ -5287,15 +5292,6 @@ symbol | date | open | high | low | close | volume
 A|	21-Jun-2011|	48.7|	50.32|	48.67|	49.82|	3509600
 AA|	21-Jun-2011|	14.94	|15.42|	14.92|	15.37|	18310600
 
-<a name="csv_largeimport"></a>
-### 🔵 26.6) Importing large CSV Files
-
-```q
-0N! "hello"
-```
-"hello"
-* 0N! is a function that outputs its argument
-* 
 
 
 <a name="casestudies_header"></a>
