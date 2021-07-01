@@ -5292,6 +5292,73 @@ symbol | date | open | high | low | close | volume
 A|	21-Jun-2011|	48.7|	50.32|	48.67|	49.82|	3509600
 AA|	21-Jun-2011|	14.94	|15.42|	14.92|	15.37|	18310600
 
+<a name="Splayedtable_header"></a>
+## 26. 🔴 Splayed Table
+[Top](#top)
+
+* splaying a table in kdb+ allows saving a table with separate files for each column
+* this reduces memory required as columns are only memory mapped as needed
+* you cannot splay a table that is keyed! must 0! to remove key first
+
+Given Table T:
+```q
+t: ([] a: 1 2 3; b: .z.d+1 3 5)
+```
+a|b
+-|-
+1|	2021-06-30
+2|	2021-07-02
+3|	2021-07-04
+
+
+```q
+set[`:splay/t/; t]
+```
+* set = saves binary / splayed tables
+* first argument = file path. splay is the folder name (make sure you have / after t to SPLAY the table)
+* t = the data you want to save
+* the table (t) becomes a folder, and each column becomes a file
+* the .d file is a list that contains the column names
+
+```q
+get `:splay/t/a
+```
+1 2 3
+
+* the get syntax will return the values in that column
+
+```q
+get `:splay/t/.d
+```
+a b
+
+* the .d file contains thhe name of all columns
+
+Any sym column you want splayed must first be enumerated
+enumerate = converting a list of values to a defined domain which restricts values to that domain
+
+Assume trade table t
+
+```q
+sy: exec distinct sym from trade
+```
+C MSFT RBS A B BAC etc.
+
+* exec will return your query in a single row (instead of column)
+
+```q
+update sym: `sy$sym from `trade
+```
+* this will enumerate all the syms from trade table to the domain of sy
+
+```q
+set[`:trade/; trade]
+```
+* now you can save your trade table as a splayed table
+
+
+
+
 
 
 <a name="casestudies_header"></a>
