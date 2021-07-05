@@ -186,10 +186,15 @@
 4. [Exporting Tables with New Name](#export_tablenewname)
 5. [Importing CSV Files](#csv_import)
 
-## 27. [Case Studies](#casestudies_header)
+## 27. [Splayed Tables](#splayedtable_header)
+
+## 28. [Case Studies](#casestudies_header)
 1. [Loading CSV Files](#load_csv)
 2. [Comparing Current Orders against Potential Crosses](#cross_case)
 3. [Netting off buys and sells from same Stock](#nettingbuyssells_case)
+
+## 29. [Bitcoin Side Project](#bitcoin_header)
+
 
 
 <hr>
@@ -5293,7 +5298,7 @@ A|	21-Jun-2011|	48.7|	50.32|	48.67|	49.82|	3509600
 AA|	21-Jun-2011|	14.94	|15.42|	14.92|	15.37|	18310600
 
 <a name="Splayedtable_header"></a>
-## 26. 🔴 Splayed Table
+## 27. 🔴 Splayed Table
 [Top](#top)
 
 * splaying a table in kdb+ allows saving a table with separate files for each column
@@ -5356,13 +5361,10 @@ set[`:trade/; trade]
 ```
 * now you can save your trade table as a splayed table
 
-
-
-
-
+<hr>
 
 <a name="casestudies_header"></a>
-## 27. 🔴 Case Studies
+## 28. 🔴 Case Studies
 [Top](#top)
 
 <a name="load_csv"></a>
@@ -5749,6 +5751,17 @@ order | sym | start | end
 60|	NASDAQ|	12:30|	13:30
 70|	NASDAQ|	13:30|	14:30
 80|	NASDAQ|	18:00|	19:00
+
+
+<hr>
+
+<a name="bitcoin_header"></a>
+## 29. 🔴 Bitcoin - Side Project
+[Top](#top)
+
+
+
+
 
 
 
