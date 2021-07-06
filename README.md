@@ -2,7 +2,6 @@
 <a name="top"></a>
 [bottom](#bottom)
 
-
 ## 1. [KDB Basics](#kdbintro_header)
 1. [Assigning Values to Variable](#assign_intro)
 2. [Expressions](#expression_intro)
@@ -3638,7 +3637,7 @@ date|time|sym|price|size|cond|bookId | owner|name
 [Top](#top)
 
 <a name="select_from_where"></a>
-### 🔵 Select from where
+### 🔵 19.1) Select from where
 
 Load the trades.q script first
 
@@ -3699,7 +3698,7 @@ sym|date|time|price|size|cond
 `AAPL`|	2021-06-02|	17:29:58.262 |	76.18	|22500	|A
 
 <a name="select_by"></a>
-### 🔵 Select By
+### 🔵 19.2) Select By
 
 ```q
 select first price, first time by date from trade where sym=`AAPL
@@ -3725,7 +3724,7 @@ date|open|high|low|close
 `2021-05-30`|	60.88	|109.98	| 50.0	| 90.49
 
 <a name="select_count"></a>
-### 🔵 Select Count 
+### 🔵 19.3) Select Count 
 
 ```q
 select count i, max prirce by date, time.hh from trade where sym=`RBS
@@ -3738,7 +3737,7 @@ date|hh|x|prrice
 * i is a virtual column that returns the number of rows (as column x)
 
 <a name="using_ops_functions"></a>
-### 🔵 Using Operations and Functions 
+### 🔵 19.4) Using Operations and Functions 
 
 ```q
 select price by date from trade where sym=`AAPL, price < avg price
@@ -3772,7 +3771,7 @@ d | price
 `1b` | 0.12 0.43 0.32
 
 <a name="in_function"></a>
-### 🔵 In Function
+### 🔵 19.5) In Function
 
 ```q
 select from trade where sym in `AAPL`RBS
@@ -3786,7 +3785,7 @@ date|time|sym|price|size|cond
 2021-05-30|	09:30:03.025 |	AAPL |	78.66 |	19000	| A
 
 <a name="within_function"></a>
-### 🔵 Within Function
+### 🔵 19.6) Within Function
 
 ```q
 select from trade where sym=`RBS, price within 95 100
@@ -3810,7 +3809,7 @@ date|time|sym|price|size|cond
 2021-05-30|	11:44:03.025 |	AAPL |	98.66 |	19000	| A
 
 <a name="xbar_function"></a>
-### 🔵 Xbar Function
+### 🔵 19.7) Xbar Function
 * xbar allows for custom sized boundaries
 
 ```q
@@ -3826,7 +3825,7 @@ date|time|x|price
 `2021-05-30`|	`11:44:03.025` |	123 |	98.66 
 
 <a name="exec"></a>
-### 🔵 Exec Query
+### 🔵 19.8) Exec Query
 
 ```q
 exec price from trade where date=.z.d, sym=`AAPL
@@ -3879,7 +3878,7 @@ sym | cond | price
 `KX` | `C` | 32
 
 <a name="update_statement"></a>
-### 🔵 Update
+### 🔵 19.9) Update
 
 ```q
 tt:100?trade
@@ -3950,7 +3949,7 @@ date|time|sym|price|size | cond| maxprice
 * adds new column max price
 
 <a name="delete_columns"></a>
-### 🔵 Delete Columns
+### 🔵 19.10) Delete Columns
 * cannot have by or where clause
 
 Given table tt
@@ -3984,7 +3983,7 @@ UBS | 41| 31.2| D
 * deletes multiple columns from the table
 
 <a name="delete_rows"></a>
-### 🔵 Delete Rows
+### 🔵 19.11) Delete Rows
 Given table tt
 
 date|time|sym|price|size | cond| maxprice
@@ -4012,7 +4011,7 @@ date|time|sym|price|size | cond| maxprice
 * deletes all rows
 
 <a name="sort_asc_desc"></a>
-### 🔵 Sort Ascending / Descending 
+### 🔵 19.12) Sort Ascending / Descending 
 
 ```q
 `sym`price xasc tt
@@ -4037,7 +4036,7 @@ date|time|sym|price|size | cond
 * first sorts descending by sym, then by price
 
 <a name="rename_reorder_columns"></a>
-### 🔵 Renaming / Reordering Columns
+### 🔵 19.13) Renaming / Reordering Columns
 
 ```q
 `new1`new2 xcol tt
@@ -4092,16 +4091,13 @@ date| sym| time | price | size | cond
 * make date and sym key columns
 
 <a name="fby_sql"></a>
-### 🔵 Filter by fby
+### 🔵 19.14) Filter by fby
 
 * fby aggregates values from one list based on group defined in another
 * (aggr;d) fby g
 * aggr = aggregate function = max, min, etc
 * d = list or column name
 * g = another column name
-
-
-
 
 Given the following table, find the max price per symbol
 
