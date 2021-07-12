@@ -5530,7 +5530,7 @@ S2: ".",/: string L2
 
 ```q
 S1: String L1
-S,'S2
+S1,'S2
 "S" $ (S1,'S2)
 ```
 ("AAPL";"IBM";"VOD")
@@ -5603,7 +5603,7 @@ f:{[t;d] select last price, max timestamp by date, sym from t where date<=d, tim
 t1: ([] sym:`a`b`c;ex:`x)
 t2:([] ex:`y;sym:`a`b`c)
 
-ps:(( [] `a`b`c`a`b`c; ex:`x`x`x`y`y`y; price: 1.1 2.1 3.1 1.2 2 3.3); ( [] sym:`a`b`c`a`b`c; ex:`x`x`x`y`y`y; size: 200 100 300 200 50 200))
+ps:(( [] sym:`a`b`c`a`b`c; ex:`x`x`x`y`y`y; price: 1.1 2.1 3.1 1.2 2 3.3); ( [] sym:`a`b`c`a`b`c; ex:`x`x`x`y`y`y; size: 200 100 300 200 50 200))
 ```
 
 ## Part 1: Join the first two tables using t1 schema ##
