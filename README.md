@@ -1625,7 +1625,7 @@ peter|	56.1
 [Top](#top)
 
 <a name="define_func"></a>
-### 🔵 Defining & Calling Functions
+### 🔵 10.1 Defining & Calling Functions
 * functions are encased in { }
 ```q
 f: { [a] a * a}
@@ -1653,7 +1653,7 @@ add [3;5]
 * a+b = statement
 
 <a name="anon_function"></a>
-### 🔵 Anonymous Functions
+### 🔵 10.2 Anonymous Functions
 ```q
 {[a] a*a}6
 ```
@@ -1662,7 +1662,7 @@ add [3;5]
 * simply call the argument outside the function { } 
 
 <a name="implicit_argu"></a>
-### 🔵 Implicit Argument
+### 🔵 10.3 Implicit Argument
 ```q
 {x*x}5
 ```
@@ -1681,7 +1681,7 @@ add [3;5]
 * error because you can't skip the y. if only 2 implicit arguments, need to use x, y
 
 <a name="local_global_variables"></a>
-### 🔵 Local vs Global Variables
+### 🔵 10.4 Local vs Global Variables
 ```q
 {a:1; b:2; a+b*x} [12]
 ```
@@ -1708,7 +1708,7 @@ g 1
 * local variable d:20 takes priority over global variable of 10
 
 <a name="projected_func"></a>
-### 🔵 Projected Functions
+### 🔵 10.5 Projected Functions
 ```q
 raise: {x xexp y}
 raise [10; 2 3 4]
@@ -1724,7 +1724,7 @@ g 1 2 3
 * creates a projection of the original raise function
 
 <a name="iftrue_state"></a>
-### 🔵 If True Statements
+### 🔵 10.6 If True Statements
 
 ```q
 if [10>3; a:11; show a*10]
@@ -1740,7 +1740,7 @@ if[10>3; a:11; show a*10; show "hello"]
 * as long as the first condition is true, execute all following statements
 
 <a name="iftrue_else_state"></a>
-### 🔵 If True/Else Statements
+### 🔵 10.7 If True/Else Statements
 
 ```q
 $[1b; show "true"; show "false"]
@@ -1758,7 +1758,7 @@ $[100>1; [show "message"; `a];`b]
 * since true, show everythign  in the [ ]
 
 <a name="add_cond_branch"></a>
-### 🔵 Adding Conditional Branch Pair
+### 🔵 10.8 Adding Conditional Branch Pair
 
 ```q
 {$[x < 0; `negative; x=0; `zero; `positive]}0
@@ -1778,7 +1778,7 @@ $[100>1; [show "message"; `a];`b]
 * skips first condition, returns second condition (positive)
 
 <a name="do_loop"></a>
-### 🔵 Do Loops
+### 🔵 10.9 Do Loops
 ```q
 do[3;show "hi"]
 ```
@@ -1795,7 +1795,7 @@ f:{avg x xexp 1000?2}
 * time the loop 1000x on function f
 
 <a name="while_loop"></a>
-### 🔵 While Loops
+### 🔵 10.10 While Loops
 * while will execute a statement x number of times until statement is no longer true
 ```q
 a:1
@@ -1827,7 +1827,7 @@ key|value
 6|5
 
 <a name="multi_cond_while_loop"></a>
-### 🔵 Multi Condition While Loops
+### 🔵 10.11 Multi Condition While Loops
 
 ```q
 a:1
