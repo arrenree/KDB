@@ -139,20 +139,24 @@
 ## 18. [Foreign Key Problem Set](#fkey_problemset)
 
 ## 19. [qSQL](#qsql_header)
-1. [Select from where](#select_from_where)
-2. [Select by](#select_by)
-3. [Select count](#select_count)
-4. [Using operations and functions](#using_ops_functions)
-5. [In function](#in_function)
-6. [Within function](#within_function)
-7. [xbar function](#xbar_function)
-8. [Exec query](#exec)
-9. [Update](#update_statement)
-10. [Delete columns](#delete_columns)
-11. [Delete rows](#delete_rows)
-12. [Sort Ascending / Descending](#sort_asc_desc)
-13. [Renaming / Reordering Columns](#rename_reorder_columns)
-14. [Filter By fby](#fby_sql)
+1. [Select Template](#select_template)
+2. [Adding a new column using Select](#selectadd_template)
+3. [Virtual Column i](#qsqlvirtuali_template)
+4. [Select using [ ] ](#qsqlselectmaxmin_template)
+5. [Select from where](#select_from_where)
+6. [Select by](#select_by)
+7. [Select count](#select_count)
+8. [Using operations and functions](#using_ops_functions)
+9. [In function](#in_function)
+10. [Within function](#within_function)
+11. [xbar function](#xbar_function)
+12. [Exec query](#exec)
+13. [Update](#update_statement)
+14. [Delete columns](#delete_columns)
+15. [Delete rows](#delete_rows)
+16. [Sort Ascending / Descending](#sort_asc_desc)
+17. [Renaming / Reordering Columns](#rename_reorder_columns)
+18. [Filter By fby](#fby_sql)
 
 ## 20. [qSQL Problem Set](#qsql_problem_set)
 
@@ -3636,14 +3640,81 @@ date|time|sym|price|size|cond|bookId | owner|name
 ## 🔴 19. qSQL
 [Top](#top)
 
-<a name="select_from_where"></a>
-### 🔵 19.1) Select from where
-
 Load the trades.q script first
-
 ```q
 \l trades.q
 ```
+<a name="select_template"></a>
+### 🔵 19.1) Select Template
+
+```q
+select a by b from t where c
+```
+* result of a select is a table
+* each phrase (a, b, c) is a comma separated value
+* order of evaluation is left to right
+* the sub phrases (comma separated) are evaluated right to left
+
+```q
+select from trade
+```
+* this will select the whole table
+
+```q
+select sym, price from trade
+```
+* this will select the sym and price columns only
+
+<a name="selectadd_template"></a>
+### 🔵 19.2) Adding a new column using select
+
+```q
+select sym, price, size, total:price*size from trade
+```
+* if you select a column name that doesnt exist, it will append it
+* in this case, total will be returned
+
+<a name="qsqlvirtuali_template"></a>
+### 🔵 19.3) Virtual Column i
+
+* q provides a virtual column i which represents the offset of each record
+
+```q
+select i, sym, price from trade
+```
+
+x | sym | price   
+--|-------|-------
+0 | C    |107.2018
+1 | MSFT |96.87488
+2 | RBS  |97.11338
+3 | A    |100.35  
+4 | B    |55.82187
+
+<a name="qsqlselectmaxmin_template"></a>
+### 🔵 19.4) Select using [ ]
+
+* select [] can be used to get the first n or last n records of a table
+* select [n m] can be used to get records starting from n and upto count m from n
+
+```q
+select [4] from trade
+```
+* selects the first 4 records
+
+```q
+select [-3] from trade
+```
+* selects the last 3 records
+
+```q
+select [1 4] from trade
+```
+* skips 0, returns 1, 2, 3, 4
+
+<a name="select_from_where"></a>
+### 🔵 19.5) Select from where
+
 General Rules
 * column =
 * sym=`A 
@@ -3698,7 +3769,7 @@ sym|date|time|price|size|cond
 `AAPL`|	2021-06-02|	17:29:58.262 |	76.18	|22500	|A
 
 <a name="select_by"></a>
-### 🔵 19.2) Select By
+### 🔵 19.6) Select By
 
 ```q
 select first price, first time by date from trade where sym=`AAPL
@@ -3724,7 +3795,7 @@ date|open|high|low|close
 `2021-05-30`|	60.88	|109.98	| 50.0	| 90.49
 
 <a name="select_count"></a>
-### 🔵 19.3) Select Count 
+### 🔵 19.7) Select Count 
 
 ```q
 select count i, max prirce by date, time.hh from trade where sym=`RBS
@@ -3737,7 +3808,7 @@ date|hh|x|prrice
 * i is a virtual column that returns the number of rows (as column x)
 
 <a name="using_ops_functions"></a>
-### 🔵 19.4) Using Operations and Functions 
+### 🔵 19.8) Using Operations and Functions 
 
 ```q
 select price by date from trade where sym=`AAPL, price < avg price
@@ -3771,7 +3842,7 @@ d | price
 `1b` | 0.12 0.43 0.32
 
 <a name="in_function"></a>
-### 🔵 19.5) In Function
+### 🔵 19.9) In Function
 
 ```q
 select from trade where sym in `AAPL`RBS
@@ -3785,7 +3856,7 @@ date|time|sym|price|size|cond
 2021-05-30|	09:30:03.025 |	AAPL |	78.66 |	19000	| A
 
 <a name="within_function"></a>
-### 🔵 19.6) Within Function
+### 🔵 19.10) Within Function
 
 ```q
 select from trade where sym=`RBS, price within 95 100
@@ -3809,7 +3880,7 @@ date|time|sym|price|size|cond
 2021-05-30|	11:44:03.025 |	AAPL |	98.66 |	19000	| A
 
 <a name="xbar_function"></a>
-### 🔵 19.7) Xbar Function
+### 🔵 19.11) Xbar Function
 * xbar allows for custom sized boundaries
 
 ```q
@@ -3825,7 +3896,7 @@ date|time|x|price
 `2021-05-30`|	`11:44:03.025` |	123 |	98.66 
 
 <a name="exec"></a>
-### 🔵 19.8) Exec Query
+### 🔵 19.12) Exec Query
 
 ```q
 exec price from trade where date=.z.d, sym=`AAPL
@@ -3878,7 +3949,7 @@ sym | cond | price
 `KX` | `C` | 32
 
 <a name="update_statement"></a>
-### 🔵 19.9) Update
+### 🔵 19.13) Update
 
 ```q
 tt:100?trade
@@ -3949,7 +4020,7 @@ date|time|sym|price|size | cond| maxprice
 * adds new column max price
 
 <a name="delete_columns"></a>
-### 🔵 19.10) Delete Columns
+### 🔵 19.14) Delete Columns
 * cannot have by or where clause
 
 Given table tt
@@ -3983,7 +4054,7 @@ UBS | 41| 31.2| D
 * deletes multiple columns from the table
 
 <a name="delete_rows"></a>
-### 🔵 19.11) Delete Rows
+### 🔵 19.15) Delete Rows
 Given table tt
 
 date|time|sym|price|size | cond| maxprice
@@ -4011,7 +4082,7 @@ date|time|sym|price|size | cond| maxprice
 * deletes all rows
 
 <a name="sort_asc_desc"></a>
-### 🔵 19.12) Sort Ascending / Descending 
+### 🔵 19.16) Sort Ascending / Descending 
 
 ```q
 `sym`price xasc tt
@@ -4036,7 +4107,7 @@ date|time|sym|price|size | cond
 * first sorts descending by sym, then by price
 
 <a name="rename_reorder_columns"></a>
-### 🔵 19.13) Renaming / Reordering Columns
+### 🔵 19.17) Renaming / Reordering Columns
 
 ```q
 `new1`new2 xcol tt
@@ -4091,7 +4162,7 @@ date| sym| time | price | size | cond
 * make date and sym key columns
 
 <a name="fby_sql"></a>
-### 🔵 19.14) Filter by fby
+### 🔵 19.18) Filter by fby
 
 * fby aggregates values from one list based on group defined in another
 * (aggr;d) fby g
