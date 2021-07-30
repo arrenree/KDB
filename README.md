@@ -3637,7 +3637,7 @@ date|time|sym|price|size|cond|bookId | owner|name
 <hr>
 
 <a name="qsql_header"></a>
-## 🔴 19. qSQL
+## 🔴   19. qSQL
 [Top](#top)
 
 **4 Types of Queries**
@@ -3660,15 +3660,14 @@ delete a by b from t where c
 * where c - apply filtering conditions
 * by b - group by columns b
 
-
-**Select Template**
+### 🔸 Select Template
 * the result of a select statement is a table
 * each phrase (a, b, c) is a comma separated value
 * order of evaluation is left to right
 * the sub phrases (comma separated values) in a phrase are evaluated from right to left individually
 * where is a conditional clause for the records
 
-**Multiple where subphrases**
+### Multiple where subphrases
 ```q
 select from trade where size>300, price>100
 ```
@@ -3691,20 +3690,105 @@ select i, sym, price from trade where i>5
 select price, i by sym from trade
 ```
 
-**Analytics on Grouped Data**
-
-
-
-
-
-
-
-
-
-Load the trades.q script first
+### Analytics on Grouped Data
 ```q
-\l trades.q
+select max price by sym from trade
 ```
+```q
+select price by sym from trade
+```
+```q
+ungroup select price by sym from trade
+```
+
+### xbar
+rounds right argument down to nearest multiple of left argument
+```q
+7 xbar 10 20 30 40 50
+7 14 28 35 39
+```
+```q
+5 xbar 11:00 + 0 3 5 11
+11:00 11:00 11:05 11:10
+```
+remember, it evaluates right to left (so 11+0 3 5 11), then does 5 xbar
+```q
+select price by sym, 240 xbar time.minute from trade
+```
+```q
+select avg price by sym, 240 xbar time.minute from trade
+```
+
+### 🔸 Exec Template
+* exec from one column returns a list
+* exec from more than one column returns a dictionary
+* one diff between select and exec is the column lists do not have to be rectangular to return a result
+
+```q
+exec sym from trade
+`GOOG`GOOG`MSFT
+```
+```q
+exec sym, price, size from trade
+```
+* exec from multiple columns returns a dictionary
+```q
+exec price by sym from trade
+```
+exec with single column with by clause returns a dictionary
+
+
+### Select vs Exec
+```q
+cnc: ([] city:`toronto`london`ny`vancouver; country:`canada`england`usa`canada)
+```
+city | country
+-|-
+toronto|	canada
+london	|england
+ny|	usa
+vancouver|	canada
+
+```q
+exec city, distinct country from cnc
+```
+key|value
+-|-
+city|	toronto london ny vancouver
+country|	canada england usa
+
+```q
+select city, distinct country from cnc
+```
+error because select expects the columns to have the same length
+
+### 🔸 Update Template
+* update phrase updates a pre-existing column in t with value evaluated with an assignemtn
+* if column doesnt exist, gets joined to the result at the end of column list
+* original table unaffected unless the data is persisted by using backtick
+
+```q
+update price: 10.0 from trade
+```
+this will update all prices to 10
+```q
+update price:10.0 from trade where sym in `AAPL`GOOG
+```
+this will update prices to 10 for AAPL and GOOG 
+uses where clause - updates only the filtered records
+
+```q
+update vol:price*size from trade where sym in `AAPL`GOOG
+```
+new column vol is added 
+
+```q
+update price:avg price by sym from trade where sym in `AAPL`GOOG
+```
+updates the price to average price, grouped by sym 
+
+
+
 <a name="select_template"></a>
 ### 🔵 19.1) Select Template
 
