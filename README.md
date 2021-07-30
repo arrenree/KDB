@@ -3640,6 +3640,67 @@ date|time|sym|price|size|cond|bookId | owner|name
 ## 🔴 19. qSQL
 [Top](#top)
 
+**4 Types of Queries**
+
+```q
+select:
+select a by b from t where c
+
+update:
+select a by b from t where c
+
+exec
+exec a by b from t where c
+
+delete
+delete a by b from t where c
+```
+* select/update/exec/delete - the columns(original or modified by functions) returned
+* from t - from table you want to run the query on
+* where c - apply filtering conditions
+* by b - group by columns b
+
+
+**Select Template**
+* the result of a select statement is a table
+* each phrase (a, b, c) is a comma separated value
+* order of evaluation is left to right
+* the sub phrases (comma separated values) in a phrase are evaluated from right to left individually
+* where is a conditional clause for the records
+
+**Multiple where subphrases**
+```q
+select from trade where size>300, price>100
+```
+```q
+select from trade where sym in `AAPL`GOOG
+```
+```q
+select from trade where price within (200:300)
+```
+```q
+select from trade where (price>100) and size>300
+```
+```q
+select from trade where (price>100) or size> 300
+```
+```q
+select i, sym, price from trade where i>5
+```
+```q
+select price, i by sym from trade
+```
+
+**Analytics on Grouped Data**
+
+
+
+
+
+
+
+
+
 Load the trades.q script first
 ```q
 \l trades.q
