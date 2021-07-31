@@ -4311,7 +4311,7 @@ date| sym| time | price | size | cond
 
 * fby aggregates values from one list based on group defined in another
 * (aggr;d) fby g
-* aggr = aggregate function = max, min, etc
+* aggr = aggregate function = max, min, sums, etc.
 * d = list or column name
 * g = another column name
 
@@ -4346,6 +4346,11 @@ time | sym | src | price | size
 
 * in this case, you filtered max price by sym, and max time by sym
 
+```q
+update num: (sums;num) fby sym from`sym`time xasc timeline
+```
+* aggregate running sums by sym
+* backtick sym, time xasc timeline sorts the timeline table ascending first by sym, then by time
 
 <hr>
 
