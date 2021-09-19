@@ -4921,6 +4921,7 @@ t: ( [] time: 07:00 08:30 09:59t; sym:`a`a`b; price: 0.9 1.5 1.9; size:100 200 3
 q: ( [] time: 08:00 09:00 10:00t; sym:`a`b`a; bid: 1 9 4)
 ```
 table t
+
 time|sym|price|size
 -|-|-|-
 07:00:00.000|	a|	0.9|	100
@@ -4928,6 +4929,7 @@ time|sym|price|size
 09:59:00.000|	b|	1.9|	300
 
 table q
+
 time|sym|bid
 -|-|-
 08:00:00.000|	a|	1
