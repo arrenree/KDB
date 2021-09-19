@@ -2850,6 +2850,7 @@ ts|	44
 ### 🔵 Changing Keys
 
 Table kt
+
 id|name|employer|age
 -|-|-|-
 `a`|	jane|	citi|	11
@@ -2975,6 +2976,7 @@ employer|loc|size|area
 ### 🔵 Retrieving Values from Keyed Table
 
 Given:
+
 id|name|employer|age
 -|-|-|-
 `a`|	jane|	citi|	11
@@ -3005,7 +3007,9 @@ id|name|employer|age
 * notice it also returns the key column (id)
 
 Given:
+
 Table et
+
 employer|loc|size|area
 -|-|-|-
 `kx`|	`NY`|	10|	1
@@ -3042,6 +3046,7 @@ size|area
 **🔵 1. Create the following keyed table**
 
 table p
+
 `book` | `ticker`|size
 -|-|-
 `A`| `MS`| 100
