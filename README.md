@@ -5027,7 +5027,61 @@ time|sym|bid|price|size
 <a name="windowtime_join"></a>
 ### 🔵 Window Time Join
 
-* designed for queries; 2 mins before, 2 mins after
+Given:
+
+table t:
+
+time | sym | price
+-|-|-
+09:00:00.000 |	a|	10.0
+09:04:00.000|	a	|11.0
+09:12:00.000|	a	|12.0
+09:13:00.000|	a	|13.0
+
+table q:
+
+time|sym|bid
+-|-|-
+09:00:00.000|	a|	10.0
+09:01:00.000|	a	|10.0
+09:02:00.000|	a|	11.0
+09:03:00.000|	a|	11.0
+09:04:00.000|	a|	13.0
+09:05:00.000|	b|	13.0
+09:06:00.000|	b|	14.0
+09:07:00.000|	b|	14.0
+09:08:00.000|	a|	16.0
+09:09:00.000|	a|	16.0
+09:10:00.000|	a|	17.0
+09:11:00.000|	a|	17.0
+09:12:00.000|	a|	17.0
+
+```q
+windows:flip t.time +\: -00:02 00:02t
+```
+08:58:00.000t;09:02:00.000t;09:10:00.000t;09:11:00.000t);(09:02:00.000t;09:06:00.000t;09:14:00.000t;09:15:00.000t
+
+* from table t, produce a time interval 2 mins +\- for each row of time
+* pairs of time values to specify the interval time values
+
+
+```q
+wj[windows;`sym`time;t;(q;(::;`bid))]
+```
+
+time|sym|price|bid
+-|-|-|-
+09:00:00.000|	a|	10.0|	10 10 11f
+09:04:00.000|	a|	11.0|	11 11 13f
+09:12:00.000|	a|	12.0|	17 17 17f
+09:13:00.000|	a|	13.0|	17 17f
+
+windows interval you create
+columns you want to match on (sym, time) within source table t
+
+start new list, look up values from table q, 
+:: = return the value itself, return value of bid column
+
 
 
 <a name="adverbs_header"></a>
