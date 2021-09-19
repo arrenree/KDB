@@ -5027,6 +5027,8 @@ time|sym|bid|price|size
 <a name="windowtime_join"></a>
 ### 🔵 Window Time Join
 
+* wj pulls in values from that time window
+
 Given:
 
 table t:
@@ -5045,16 +5047,16 @@ time|sym|bid
 09:00:00.000|	a|	10.0
 09:01:00.000|	a	|10.0
 09:02:00.000|	a|	11.0
-09:03:00.000|	a|	11.0
+09:03:00.000|	a|	13.0
 09:04:00.000|	a|	13.0
-09:05:00.000|	b|	13.0
+09:05:00.000|	b|	14.0
 09:06:00.000|	b|	14.0
-09:07:00.000|	b|	14.0
-09:08:00.000|	a|	16.0
-09:09:00.000|	a|	16.0
+09:07:00.000|	b|	15.0
+09:08:00.000|	a|	15.0
+09:09:00.000|	a|	17.0
 09:10:00.000|	a|	17.0
-09:11:00.000|	a|	17.0
-09:12:00.000|	a|	17.0
+09:11:00.000|	a|	18.0
+09:12:00.000|	a|	18.0
 
 ```q
 windows:flip t.time +\: -00:02 00:02t
@@ -5072,16 +5074,34 @@ wj[windows;`sym`time;t;(q;(::;`bid))]
 time|sym|price|bid
 -|-|-|-
 09:00:00.000|	a|	10.0|	10 10 11f
-09:04:00.000|	a|	11.0|	11 11 13f
-09:12:00.000|	a|	12.0|	17 17 17f
-09:13:00.000|	a|	13.0|	17 17f
+09:04:00.000|	a|	11.0|	11 13 13f
+09:12:00.000|	a|	12.0|	17 18 18f
+09:13:00.000|	a|	13.0|	18 18f
 
-windows interval you create
-columns you want to match on (sym, time) within source table t
+* wj will output same number of rows as original table t
+* windows - interval pairs you created
+* columns you want to match on (sym, time) within source table t
+* start new list, look up values from table q (lookup table)
+* :: = return all values from the bid column
+* 1st row, looks up in table q, any syms (a) from 8:58 to 9:02, and returns the bid
+* 2nd row, looks up in table q any syms (a) from 9:02 to 9:06, and returns the bid 
 
-start new list, look up values from table q, 
-:: = return the value itself, return value of bid column
+```q
+wj[windows;`sym`time;t;(q;(::;`bid); (avg;`bid); (count;`bid))]
+```
+* can perform functions! 
 
+time | sym | bid | bid
+-|-|-|-
+09:00:00.000|	a|	10.0|	10 10 11f	3
+09:04:00.000|	a|	11.0|	11 11 13f	3
+09:12:00.000|	a|	12.0|	17 17 17f	3
+09:13:00.000|	a|	13.0|	17 17f	2
+
+
+wj vs wj1
+* wj pulls in prevailing values not within time window
+* wj1 strictly excludes values outside the interval (for ex, if time interval was 10:00 - 10:15)
 
 
 <a name="adverbs_header"></a>
