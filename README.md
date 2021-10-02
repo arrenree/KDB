@@ -188,6 +188,7 @@
 3. [Exporting / Saving Tables as txt, csv, excel, and xml files](#tables_exportformat)
 4. [Exporting / Saving Tables with New Name](#export_tablenewname)
 5. [Importing CSV Files](#csv_import)
+6. [Saving to Binary Files](#binaryfile_export)
 
 ## 27. [Splayed Tables](#splayedtable_header)
 
@@ -5486,7 +5487,7 @@ read0 `:test.txt
 * read0 function will read the txt file
 
 <a name="txt_export"></a>
-### 🔵 26.2) Exporting / Saving TXT files
+### 🔵 26.2a) Exporting / Saving TXT files
 
 to write to txt, simply use hopen to get the file handle, store the file handle, and store strings to it
 
@@ -5509,6 +5510,42 @@ closes the file handle so you can no longer edit it
 
 
 <a name="tables_exportformat"></a>
+
+### 🔵 26.2b) Saving TXT files
+There are 2 ways to save to text: save function or 0 operator
+
+1) save function (save `name.csv)
+2) 0: operator 
+ 
+0: is more flexible and powerful, allowing selection of a table subset and any name of file desired.
+The benefit of exporting to CSV is that for transferring data to other systems their support is ubiquitous. However the space requirement of converting each digit of a number to separate characters is significant.
+
+trade
+
+date |       time |        sym|  price |   size | cond
+-|-|-|-|-|-
+2013.09.28| 09:30:02.553 | C |   107.2018 | 63500 | B
+2013.09.28| 09:30:02.701| MSFT | 96.87488 | 1700  | B
+2013.09.28| 09:30:02.743| RBS |  97.11338 | 80700 | C
+2013.09.28| 09:30:02.758| A   | 100.35    | 50300 | B
+2013.09.28| 09:30:02.907| B   | 55.82187  | 92700 | A
+
+```q
+save `trade.csv
+/ syntax is save backtick filename.csv
+/ this will be saved to your q folder
+```
+
+```q
+";" 0: trade / converts table to list of strings separated by semi colons
+`newfilename.csv 0: ";" 0: trade / saves to csv file
+```
+
+0: allows you to choose custom separaters and file names
+; is what you are separating items with
+trade = table name
+
+
 ### 🔵 26.3) Exporting / Saving tables as txt, csv, excel, and xml files
 
 Given table cars:
@@ -5594,6 +5631,13 @@ symbol | date | open | high | low | close | volume
 -|-|-|-|-|-|-
 A|	21-Jun-2011|	48.7|	50.32|	48.67|	49.82|	3509600
 AA|	21-Jun-2011|	14.94	|15.42|	14.92|	15.37|	18310600
+
+
+<a name="binaryfile_export"></a>
+### 🔵 26.6) Saving to Binary Files
+
+
+
 
 <a name="Splayedtable_header"></a>
 ## 27. 🔴 Splayed Table
