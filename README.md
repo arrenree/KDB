@@ -183,10 +183,10 @@
 ## 25. [Adverbs Problem Set](#adverbs_problemset)
 
 ## 26. [Import and Exporting Data](#importexport_header)
-1. [Importing TXT Files](#txt_import)
-2. [Exporting TXT Files](#txt_export)
-3. [Exporting Tables as txt, csv, excel, and xml files](#tables_exportformat)
-4. [Exporting Tables with New Name](#export_tablenewname)
+1. [Importing / Loading TXT Files](#txt_import)
+2. [Exporting / Saving TXT Files](#txt_export)
+3. [Exporting / Saving Tables as txt, csv, excel, and xml files](#tables_exportformat)
+4. [Exporting / Saving Tables with New Name](#export_tablenewname)
 5. [Importing CSV Files](#csv_import)
 
 ## 27. [Splayed Tables](#splayedtable_header)
@@ -5468,7 +5468,7 @@ fibn 5
 <hr>
 
 <a name="importexport_header"></a>
-## 26. 🔴 Importing and Exporting Data
+## 26. 🔴 Importing and Exporting / Saving Data
 [Top](#top)
 
 <a name="txt_import"></a>
@@ -5486,7 +5486,7 @@ read0 `:test.txt
 * read0 function will read the txt file
 
 <a name="txt_export"></a>
-### 🔵 26.2) Exporting TXT files
+### 🔵 26.2) Exporting / Saving TXT files
 
 to write to txt, simply use hopen to get the file handle, store the file handle, and store strings to it
 
@@ -5509,7 +5509,7 @@ closes the file handle so you can no longer edit it
 
 
 <a name="tables_exportformat"></a>
-### 🔵 26.3) Exporting tables as txt, csv, excel, and xml files
+### 🔵 26.3) Exporting / Saving tables as txt, csv, excel, and xml files
 
 given table cars:
 ```q
@@ -5536,7 +5536,7 @@ save `$"newdir/cars.txt"
 * the new folder will be called "newdir"
 
 <a name="export_tablenewname"></a>
-### 🔵 26.4) Exporting tables with a new name
+### 🔵 26.4) Exporting / Saving tables with a new name
 
 ```q
 `carsnewname.csv 0: "," 0: cars
