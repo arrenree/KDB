@@ -5511,7 +5511,7 @@ closes the file handle so you can no longer edit it
 <a name="tables_exportformat"></a>
 ### 🔵 26.3) Exporting / Saving tables as txt, csv, excel, and xml files
 
-given table cars:
+Given table cars:
 ```q
 cars: ( [] maker: `Ford`Tesla`Honda; price: 100 200 300; weight: 1000 2000 3000)
 ```
