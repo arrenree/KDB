@@ -5635,7 +5635,20 @@ AA|	21-Jun-2011|	14.94	|15.42|	14.92|	15.37|	18310600
 
 <a name="binaryfile_export"></a>
 ### 🔵 26.6) Saving to Binary Files
+Binary files are a direct byte stream that is similar to kdb's in-memory representation of data. 
+Features include:
 
+1) Requires significantly less space than a text file (kdb+ supports compression) 
+2) Quicker to save load
+3) Reading / writing is simply streaming bytes, it is extremely fast.
+4) We use get / set to read/write.
+5) You can append and upsert.
+6) Once loaded in, the entire entity is stored in memory.
+
+```q
+set[filepath; data] / save data to selected filepath
+/ filepath = symbol beginning with `: that specifies a file location using / as folder separators
+/ data = any format of data structure is supported (tables, dictionaries, lists, atoms, etc)
 
 
 
