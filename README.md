@@ -5176,6 +5176,7 @@ i|	3
 k| 6
 
 * EACH BOTH will join the values together
+* retains the keys, and combines the values together
 
 ### EACH BOTH - Tables
 
@@ -5204,7 +5205,8 @@ a|b
 
 <a name="each_monadic"></a>
 ### 🔵 Each Monadic
-* each modifies a monadic function to make it operate one level deeper
+
+each modifies a monadic function to make it operate one level deeper
 
 ```q
 j: ("race fast, safe car."; 0 1 2; `a`b`c)
@@ -5216,7 +5218,7 @@ a b c
 ```q
 reverse j
 ```
-* so this reverses the mixed list at the top most level
+so this reverses the mixed list at the top most level
 
 a b c \
 0 1 2 \
@@ -5225,7 +5227,7 @@ a b c \
 ```q
 reverse each j
 ```
-* reverse within each list
+reverse within each list
 
 ".rac efas , tsaf ecar"
 2 1 0
@@ -5236,6 +5238,36 @@ c b a
 * similar to concatenate
 * x,/: each right; will join left item (x) to each item on right
 * x,\: each left; will join left item (x) to each item on left
+
+### each left ,\:
+x, \:y / each left, returns a list of each element from x with all of y
+so pegs to x (left) to each element of y (right)
+
+```q
+l: 1 2 3
+k: `a`b`c
+l,\:k
+
+/ returns:
+/ 1`a`b`c
+/ 2`a`b`c
+/ 3`a`b`c
+```
+
+### each right ,/:
+x,/:y / each right, returns a list of all the x with each element of y
+so pegs to y (right) to each element of x (left)
+
+```q
+l: 1 2 3
+k: `a`b`c
+l,/:k
+
+/ returns:
+/ 1 2 3`a
+/ 1 2 3`b
+/ 1 2 3`c
+```
 
 ```q
 st:("welcome";"to the"; "terminal")
