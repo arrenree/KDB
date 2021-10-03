@@ -5649,6 +5649,39 @@ Features include:
 set[filepath; data] / save data to selected filepath
 / filepath = symbol beginning with `: that specifies a file location using / as folder separators
 / data = any format of data structure is supported (tables, dictionaries, lists, atoms, etc)
+```
+
+```q
+set[`:q/trade;trade]
+/ filepath is q folder, trade binary file
+/ trade table
+/ this will save as binary file to your q file path
+```
+
+Assume dictionary d
+```q
+d: `p`o`i!1 2 3
+
+set[`:q/dict;d]
+/ this will save as dictionary d to your folder
+```
+
+<a name="binaryfile_export"></a>
+### 🔵 26.7) Retrieving / Loading Binary Files
+
+```q
+get `:q/dict
+/ this will load the dict dictionary 
+```
+
+key | value
+-|-
+p|	1
+o	|2
+i	|3
+
+
+
 
 
 
