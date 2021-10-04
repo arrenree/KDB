@@ -4318,26 +4318,41 @@ date| sym| time | price | size | cond
 * fby aggregates values from one list based on group defined in another
 * (aggr;d) fby g
 * aggr = aggregate function = max, min, sums, etc.
-* d = list or column name
+* d = column name
 * g = another column name
+
+### fby Example 1
+
+```q
+city:`NY`NY`LA`SF`LA`SF`NY
+temp:32 31 75 69 70 68 12
+
+(min;temp) fby city
+/ returns
+/ 12 12 70 68 12
+```
+so this calculates the min temp for every city (12 for NYC)
+
+
+### fby Example 2
 
 Given the following table, find the max price per symbol
 
 time | sym | src | price | size
 -|-|-|-|-
-2019-03-11T09:00:00.277000 |	GOOG |	L|	36.01|	1427
-2019-03-11T09:00:04.123000 |	GOOG |	O|	36.01|	708
-2019-03-11T09:00:08.123000 |	MSFT |	N|	35.5|	7810
-2019-03-11T09:00:10.123000 |	MSFT |	O|	31.1|	1100
+2019-03-11 |	GOOG |	L|	36.01|	1427
+2019-03-11 |	GOOG |	O|	36.01|	708
+2019-03-11 |	MSFT |	N|	35.5|	7810
+2019-03-11 |	MSFT |	O|	31.1|	1100
 
 ```q
 select from t where price=(max;price) fby sym
 ```
 time | sym | src | price | size
 -|-|-|-|-
-2019-03-11T09:00:00.277000 |	GOOG |	L|	36.01|	1427
-2019-03-11T09:00:04.123000 |	GOOG |	O|	36.01|	708
-2019-03-11T09:00:08.123000 |	MSFT |	N|	35.5|	7810
+2019-03-11 |	GOOG |	L|	36.01|	1427
+2019-03-11 |	GOOG |	O|	36.01|	708
+2019-03-11 |	MSFT |	N|	35.5|	7810
 
 * this is not correct, since there are still 2 GOOG (since both same "max" price)
 * you can add another fby filter for time
