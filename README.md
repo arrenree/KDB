@@ -197,7 +197,7 @@
 2. [Comparing Current Orders against Potential Crosses](#cross_case)
 3. [Netting off buys and sells from same Stock](#nettingbuyssells_case)
 
-## 29. [Bitcoin Side Project](#bitcoin_header)
+## 29. [Random Questions](#random_questions)
 
 
 
@@ -6187,22 +6187,101 @@ order | sym | start | end
 70|	NASDAQ|	13:30|	14:30
 80|	NASDAQ|	18:00|	19:00
 
-
-
-
-
-
-
 <hr>
 
-<a name="bitcoin_header"></a>
-## 29. 🔴 Bitcoin - Side Project
+<a name="random_questions"></a>
+## 29. 🔴 Random Questions
 [Top](#top)
 
+### What is an Atom vs a List?
 
+an atom is an irreducible value of a specific data type <br >
+a list is an ordered sequence of items
 
+### What is the difference between a sym and a string?
 
+A sym is an atomic entity and can hold an arbitrary length of a text string. The nature of symbol is atomic, if you split it, then you actually create two different symbols. It is represented by prefixing it with a back-tick. Smaller in size than a char <br >
 
+A string is a list of chars. Represented by " " double parathesis
+
+### What is casting? Cast an int to a float
+
+casting converts one datatype to another
+
+```q
+`int$3.0 / cast float to int
+3
+```
+
+### What happens when you cast a date to an int?
+
+```q
+`int$2000.10.04
+3
+/ casts as dates from 2000.01.01
+```
+
+### What is a common reason for casting time to seconds or minutes?
+
+A common use of casting is for performing aggregations. We can bucket data stored from milliseconds to seconds to minutes (effectively, rounding up). This allows us to get the average price per minute.
+
+```q
+t:([] time:`#asc .z.t + 10?100000; price:asc 100.+til 10)
+
+t
+time         price
+------------------
+11:31:49.745 100
+11:31:49.856 101
+11:32:05.188 102
+11:32:09.395 103
+11:32:11.325 104
+11:32:24.285 105
+11:32:45.249 106
+11:32:55.355 107
+11:33:18.703 108
+11:33:18.855 109
+```
+```q
+select avg price by `minute$time from t
+time | price
+-----| -----
+11:31| 100.5
+11:32| 104.5
+11:33| 108.5
+```
+
+### What is parsing?
+
+Parsing is converting a string to another datatype.
+
+```q
+l:("1.00001"; "200"; "3.1417")
+"FIF"$l
+
+1.00001 / float
+200 / int
+3.1417 / float
+```
+
+### What are the common operators?
+
+```q
+#   / take
+_   / drop
+?   / find, randomize
+@   / apply
+!   / dictionary, key, unkey, 
+$   / cast, enumerate
+,   / join
+^   / fill
+```
+
+### What is a dictionary and a table? How are they related?
+
+Dictionaries are a data structure that maps from any domain to a range of values. Contains a ! to separate keys and values. <br >
+
+A table is a flipped dictionary. Column names are equal to length vectors of data.
 
 
 
