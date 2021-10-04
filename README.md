@@ -6281,8 +6281,124 @@ $   / cast, enumerate
 
 Dictionaries are a data structure that maps from any domain to a range of values. Contains a ! to separate keys and values. <br >
 
-A table is a flipped dictionary. Column names are equal to length vectors of data.
+A table is a flipped dictionary. Column names are equal to length vectors of data. Tables are encased by parathesis ( ) and contain brackets [ ] which assigns the key.
 
+
+### Show 3 ways to retrieve values from a dictionary
+
+```q
+d: `a`b`c!1 2 3
+
+d[`a] = 1
+d@`a = 1
+d `a = 1
+```
+
+### What happen swhen you try retrieving from a dictionary that has non-unique keys?
+
+```q
+d: `a`b`c`a!1 2 3 4
+d[`a] = 1 / returns the first entry
+```
+### Take first 2 items from dict. retrieve value from key 'c
+
+```q
+d: `a`b`c!1 2 3
+2 # d / returns a dictionary of first 2 rows
+(enlist `c) # d / have to use enlist when retrieving single domain
+```
+
+### How do you upsert different keys/values from the original dict's datatype?
+The upserted keys and values must match in type. <br >
+Way around this is to keep dictionary generic using null item
+
+```q
+dz: enlist[::]!enlist[::]
+dz
+dz[`a]:100
+dz[100]:`a
+
+key value
+a 100
+100 a
+```
+
+
+
+
+
+
+### What are some common table functions?
+
+```q
+t:([] company:`ford`bmw; employees:300 100)
+t
+type t               / what datatypes the table is
+count t              / return number of rows
+cols t               / retrieve symbol list of column names
+meta t               / shows info on type, foreign keys, and attributes
+`employees xasc t    / sorts table by employee column
+```
+### Show examples of union, except, and inter function on tables
+
+```q
+t:([] company:`ford`bmw`benz; employees:100 200 300)
+u: ([] company:`ford`bmw`ferrari; employees:100 200 400)
+```
+table t
+
+company | employees
+-|-
+ford	|100
+bmw	|200
+benz	|300
+
+
+table u
+company | employees
+-|-
+ford	|100
+bmw	|200
+ferrari	|400
+
+```q
+t union u / combines every key and value
+
+ford 100
+bmw 200
+benz 300
+ferrari	400
+```
+
+```q
+t except u / returns item in t NOT in u
+
+benz 300
+```
+
+```q
+t inter u / returns only common elements in both t and u
+
+ford 100
+bmw 200
+```
+
+### Show 2 ways to insert data into a table
+
+```q
+t:([] company:(); employees:())
+insert[`t; (`ferrari;8)]
+insert[`t; ([] company:`subaru`hyundai; employees:55 56)]
+```
+both work; second example specifies column names
+
+
+### Show how to append using table joins , (comma)
+
+```q
+t:([] company:(); employees:())
+t:t,([] company:`bmw`skoda; employees:200 300)
+```
 
 
 [Top](#top)
