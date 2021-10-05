@@ -6400,6 +6400,24 @@ t:([] company:(); employees:())
 t:t,([] company:`bmw`skoda; employees:200 300)
 ```
 
+### what is the difference between equals = and match ~
+
+```q
+4 = 4.0
+1b / true
+
+4 ~ 4.0
+0b / false. match is a lot more strict.
+```
+
+### what is the difference between a table and a keyed table?
+
+A table is a flipped dictionary. Column names are equal length to vectors of data. <br >
+
+A keyed table is a dictionary from one table of keys to another table of values with an equal number of rows.
+
+
+
 
 [Top](#top)
 
