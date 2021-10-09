@@ -6193,16 +6193,37 @@ order | sym | start | end
 ## 29. 🔴 Random Questions
 [Top](#top)
 
+<hr> 
+
 ### What is an Atom vs a List?
 
 an atom is an irreducible value of a specific data type <br >
 a list is an ordered sequence of items
+
+<hr> 
+
+### What is a dictionary and a table? How are they related?
+
+Dictionaries are a data structure that maps from a domain to a range of values. Contains a ! to separate keys and values. <br >
+
+A table is a flipped dictionary. Vectors of data are organized by columns. Tables are encased by parathesis ( ) and contain brackets [ ] which assigns the key.
+
+<hr> 
+
+### what is the difference between a table and a keyed table?
+
+A table is a flipped dictionary. Vectors of data are organized by columns. <br >
+
+A keyed table is a dictionary mapping a table of key records to a table of value records.
+
 
 ### What is the difference between a sym and a string?
 
 A sym is an atomic entity and can hold an arbitrary length of a text string. The nature of symbol is atomic, if you split it, then you actually create two different symbols. It is represented by prefixing it with a back-tick. Smaller in size than a char <br >
 
 A string is a list of chars. Represented by " " double parathesis
+
+<hr> 
 
 ### What is casting? Cast an int to a float
 
@@ -6213,6 +6234,8 @@ casting converts one datatype to another
 3
 ```
 
+<hr> 
+
 ### What happens when you cast a date to an int?
 
 ```q
@@ -6220,6 +6243,8 @@ casting converts one datatype to another
 3
 / casts as dates from 2000.01.01
 ```
+
+<hr> 
 
 ### What is a common reason for casting time to seconds or minutes?
 
@@ -6251,6 +6276,8 @@ time | price
 11:33| 108.5
 ```
 
+<hr> 
+
 ### What is parsing?
 
 Parsing is converting a string to another datatype.
@@ -6264,6 +6291,8 @@ l:("1.00001"; "200"; "3.1417")
 3.1417 / float
 ```
 
+<hr> 
+
 ### What are the common operators?
 
 ```q
@@ -6276,12 +6305,7 @@ $   / cast, enumerate
 ,   / join
 ^   / fill
 ```
-
-### What is a dictionary and a table? How are they related?
-
-Dictionaries are a data structure that maps from any domain to a range of values. Contains a ! to separate keys and values. <br >
-
-A table is a flipped dictionary. Column names are equal to length vectors of data. Tables are encased by parathesis ( ) and contain brackets [ ] which assigns the key.
+<hr> 
 
 
 ### Show 3 ways to retrieve values from a dictionary
@@ -6294,12 +6318,17 @@ d@`a = 1
 d `a = 1
 ```
 
-### What happen swhen you try retrieving from a dictionary that has non-unique keys?
+<hr> 
+
+### What happens when you try retrieving from a dictionary that has non-unique keys?
 
 ```q
 d: `a`b`c`a!1 2 3 4
 d[`a] = 1 / returns the first entry
 ```
+
+<hr> 
+
 ### Take first 2 items from dict. retrieve value from key 'c
 
 ```q
@@ -6307,6 +6336,8 @@ d: `a`b`c!1 2 3
 2 # d / returns a dictionary of first 2 rows
 (enlist `c) # d / have to use enlist when retrieving single domain
 ```
+
+<hr> 
 
 ### How do you upsert different keys/values from the original dict's datatype?
 The upserted keys and values must match in type. <br >
@@ -6323,10 +6354,7 @@ a 100
 100 a
 ```
 
-
-
-
-
+<hr> 
 
 ### What are some common table functions?
 
@@ -6339,6 +6367,9 @@ cols t               / retrieve symbol list of column names
 meta t               / shows info on type, foreign keys, and attributes
 `employees xasc t    / sorts table by employee column
 ```
+
+<hr> 
+
 ### Show examples of union, except, and inter function on tables
 
 ```q
@@ -6383,6 +6414,8 @@ ford 100
 bmw 200
 ```
 
+<hr> 
+
 ### Show 2 ways to insert data into a table
 
 ```q
@@ -6392,6 +6425,7 @@ insert[`t; ([] company:`subaru`hyundai; employees:55 56)]
 ```
 both work; second example specifies column names
 
+<hr> 
 
 ### Show how to append using table joins , (comma)
 
@@ -6399,6 +6433,8 @@ both work; second example specifies column names
 t:([] company:(); employees:())
 t:t,([] company:`bmw`skoda; employees:200 300)
 ```
+
+<hr> 
 
 ### what is the difference between equals = and match ~
 
@@ -6410,11 +6446,7 @@ t:t,([] company:`bmw`skoda; employees:200 300)
 0b / false. match is a lot more strict.
 ```
 
-### what is the difference between a table and a keyed table?
-
-A table is a flipped dictionary. Column names are equal length to vectors of data. <br >
-
-A keyed table is a dictionary from one table of keys to another table of values with an equal number of rows.
+<hr> 
 
 
 
