@@ -5943,46 +5943,45 @@ AAPL |	120
 <hr>
 
 ## 🔵 4. Turn 2 lists of symbols into one longer list. 
-AAPL IBM VOD and O N L -> AAPL.O IBM.N VOD.L
 
-* convert O N L into strings
-* concatenate . to each element
+```q
+`AAPL`IBM`VOD and `O`N`L
+
+/ expected outcome
+AAPL.O IBM.N VOD.L
+```
+
+* convert syms O N L into strings
+* add . to each element of O N L
 * convert APPL IBM VOD into strings
 * concatenate the 2 lists of strings together
 * convert the strings back into symbols
-* 
+* strings are NOT a datatype
 
 ```q
 L1: `AAPL`IBM`VOD
-L2:`O`N`L
+L2:`O`N`L 
+
+string L2 / convert from sym to string
+/ ("O";"N";"L")
+
+s2: ".",/: string L2 / using EACH RIGHT to add . to every element of O N L
+/ (".O";".N";".L")
+
+s1: String L1 / convert sym to string
+/ ("AAPL";"IBM";"VOD")
+
+S1,'S2 / using EACH BOTH joins each element of s1 to each element of s2
+/ ("AAPL.O";"IBM.N";"VOD.L")
+
+"S" $ (S1,'S2) / cast back to sym
+/ `AAPL.O`IBM.N`VOD.L
 ```
 
-```q
-string L2
-S2: ".",/: string L2
-```
-("O";"N";"L")
-(".O";".N";".L")
-
-* first convert L2 from list of syms to list of strings
-* use EACH RIGHT ,/: to concatenate . to list of L2 strings
-
-```q
-S1: String L1
-S1,'S2
-"S" $ (S1,'S2)
-```
-("AAPL";"IBM";"VOD")
-("AAPL.O";"IBM.N";"VOD.L")
-
-* convert L1 to strings (so you can concatenate L1 and L2)
+* convert L1 and L2 to strings (so you can add . and later join)
 * use EACH BOTH ADVERB to join each elemnt of S1 to each elemnt of S2
 * cast the list of strings back to list of syms
 
-```q
-`AAPL.O`IBM.N`VOD.L
-```
-* final answer
 
 <hr> 
 
