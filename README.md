@@ -6245,6 +6245,22 @@ casting converts one datatype to another
 
 <hr> 
 
+### Convert syms a b c to a String
+
+```q
+string `a`b`c
+("a","b","c")
+/ simply use the string function
+```
+
+### How do you cast a string to a sym?
+
+```q
+`$"a","b","c"
+"S"$"a","b","c"
+`abc
+```
+
 ### What is a common reason for casting time to seconds or minutes?
 
 A common use of casting is for performing aggregations. We can bucket data stored from milliseconds to seconds to minutes (effectively, rounding up). This allows us to get the average price per minute.
