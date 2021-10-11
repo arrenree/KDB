@@ -6032,8 +6032,11 @@ f:{[t;d] select last price, max timestamp by date, sym from t where date<=d, tim
 * select last price, max timestamp
 * set date, sym as keys
 * date <=d means look for previous day if current date doesnt satisfy query conditions
-* you want to filter the max timestamp by the date
-* and filter the last price by sym
+* the FBY is the most important part of this problem. 
+* the ORDER of the FBY also matters a lot. 
+* you want to filter the LAST PRICE by sym, then
+* you want to filter the MAX TIMESTAMP by the date
+
 
 ## 🔵 6. Given the 2 tables:
 
