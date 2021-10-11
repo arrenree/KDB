@@ -4321,6 +4321,22 @@ date| sym| time | price | size | cond
 * d = column name
 * g = another column name
 
+```q
+(sum;price) fby sym
+(sums;price) fby sym
+(max;price) fby sym
+(last;price) fby sym
+(first;price) fby sym
+(max;price) fby sym
+(avg;price) fby sym
+```
+
+```q
+price = (last;price) fby sym
+price < (last;price) fby sym
+price > (last;price) fby sym
+```
+
 ### fby Example 1
 
 ```q
@@ -6199,37 +6215,49 @@ order | sym | start | end
 
 ### What is an Atom vs a List?
 
-an atom is an irreducible value of a specific data type <br >
-a list is an ordered sequence of items
+```q
+An atom - is an irreducible value of a specific data type
+A list -  is an ordered sequence of items
+```
 
 <hr> 
 
 ### What is a dictionary and a table? How are they related?
 
-Dictionaries are a data structure that maps from a domain to a range of values. Contains a ! to separate keys and values. <br >
+```q
+Dictionaries are a data structure that maps from a domain to a range of values. 
+Contains a ! to separate keys and values.
 
-A table is a flipped dictionary. Vectors of data are organized by columns. Tables are encased by parathesis ( ) and contain brackets [ ] which assigns the key.
+A table is a flipped dictionary. Vectors of data are organized by columns. 
+Tables are encased by parathesis ( ) and contain brackets [ ] which assigns the key.
+```
 
 <hr> 
 
 ### what is the difference between a table and a keyed table?
 
-A table is a flipped dictionary. Vectors of data are organized by columns. <br >
+```q
+A table - is a flipped dictionary. Vectors of data are organized by columns.
 
-A keyed table is a dictionary mapping a table of key records to a table of value records.
-
+A keyed table - is a table of keyed records mapped to a table of value records.
+```
 
 ### What is the difference between a sym and a string?
 
-A sym is an atomic entity and can hold an arbitrary length of a text string. The nature of symbol is atomic, if you split it, then you actually create two different symbols. It is represented by prefixing it with a back-tick. Smaller in size than a char <br >
+```q
+A sym -  is an atomic entity holding text. Represented with a back tick. 
+Smaller in size than a char.
 
-A string is a list of chars. Represented by " " double parathesis
+A string - is a list of chars. Represented by " " double parathesis
+```
 
 <hr> 
 
 ### What is casting? Cast an int to a float
 
+```q
 casting converts one datatype to another
+```
 
 ```q
 `int$3.0 / cast float to int
