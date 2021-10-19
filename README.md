@@ -17,8 +17,7 @@
 12. [Drop](#drop_intro)
 13. [Larger](#larger_intro)
 14. [Smaller](#smaller_intro)
-15. [Raze](#raze_intro)
-16. [+:](#pluscolon)
+15. [+:](#pluscolon)
 
 ## 2. [Data Types & Casting & Enumeration](#casting_header)
 1. [Datatype Table](#datatype_table)
@@ -43,7 +42,7 @@
 11. [Find Operator](#find_list)
 12. [Random Operator](#random_list)
 13. [Count Operator](#count_list)
-14. 
+14. [Raze](#raze_intro)
 
 ## 5. [Lists Problem Set](#list_problemset)
 
@@ -427,81 +426,6 @@ k: 1 2 3 4
 1 2
 * drop the last 2 values from list k
 
-<a name="raze_intro"></a>
-### 🔵 1.15 Raze
-
-* raze returns the items of x joined, collapsing one level of nesting
-
-```q
-t: (1 2; 3 4 5)
-```
-1 2 \
-3 4 5
-
-* this is a nested list containing 2 levels
-
-```q
-raze t:(1 2; 3 4 5)
-```
-1 2 3 4 5 
-* collapses 1 level of nesting and joins all items together
-
-```q
-b: (1 2; (3 4; 5 6); 7; 8)
-```
-1 2 \
-3 4 \
-5 6 \
-7 \
-8
-
-```q
-raze b
-```
-* raze will flatten 1 level
- 
-1 \
-2 \
-3 4 \
-5 6 \
-7 \
-8
-
-```q
-raze/[b]
-```
-* using raze/[x] will flatten all evels
-1 2 3 4 5 6 7 8
-
-```q
-t1: date:(3#2016.01.06;4#2016.01.07;6#2016.01.08)
-```
-t1
-((2016-01-06d;2016-01-06d;2016-01-06d); \
-(2016-01-07d;2016-01-07d;2016-01-07d;2016-01-07d); \
-(2016-01-08d;2016-01-08d;2016-01-08d;2016-01-08d;2016-01-08d;2016-01-08d))
-
-* 3 nested lists; take 3 from x; take 4 from x, take 6 from x
-
-```q
-t2: raze (date:3#2016.01.06;4#2016.01.07;6#2016.01.08)
-```
-t2
-(2016-01-06d; \
-2016-01-06d; \
-2016-01-06d); \
-2016-01-07d; \
-2016-01-07d; \
-2016-01-07d; \
-2016-01-07d; \
-2016-01-08d; \
-2016-01-08d; \
-2016-01-08d; \
-2016-01-08d; \
-2016-01-08d; \
-2016-01-08d)
-
-
 <hr>
 
 <a name="pluscolon"></a>
@@ -518,7 +442,6 @@ x*:3
 / is the same as
 x:x*3
 ```
-
 
 <a name="casting_header"></a>
 ## 🔴 2. Data Types & Casting 
@@ -1057,6 +980,41 @@ count each (1 2 3; 4 5 6)
 / counts number of elements in each nested list
 ```
 
+<a name="raze_intro"></a>
+### 🔵 4.14 Raze
+
+Raze collapses one level of nesting
+
+```q
+t: (1 2; 3 4 5) / this is a nested list containing 2 levels
+
+raze t:(1 2; 3 4 5)
+1 2 3 4 5 
+
+/ collapses 1 level of nesting and joins all items together
+```
+
+```q
+b: (1 2; (3 4; 5 6); 7; 8)
+1 2
+3 4
+5 6
+7
+8
+
+raze/[b]
+1 2 3 4 5 6 7 8
+
+/ using raze/[x] will flatten all levels
+```
+
+```q
+string `a`b`c
+"a","b","c"
+
+raze string `a`b`c
+"abc"
+```
 
 <hr>
 
