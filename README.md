@@ -1119,7 +1119,7 @@ p where p<avg p
 [Top](#top)
 
 <a name="add_list"></a>
-### 🔵 Addition
+### 🔵 6.1 Addition
 ```q
 10 + 10 20 30
 ```
@@ -1137,7 +1137,7 @@ length
 * error because different list lengths
 
 <a name="compare_lists"></a>
-### 🔵 Comparing Lists
+### 🔵 6.2 Comparing Lists
 ```q
 1 2 3 = 1 2 3 
 ```
@@ -1145,7 +1145,7 @@ length
 * comparing 2 lists will result in boolean answer (true true true)
 
 <a name="match_diff"></a>
-### 🔵 Match and Equal Differences
+### 🔵 6.3 Match and Equal Differences
 ```q
 Equals
 1 2 3 = 1 2 3 
@@ -1162,7 +1162,7 @@ Match
 * single item return (false)
 
 <a name="basic_operations"></a>
-### 🔵 Basic Operations
+### 🔵 6.4 Basic Operations
 
 l: 10 20 30 40 50 
 
@@ -1180,7 +1180,7 @@ x xexp y
 * xexp = to the power of
 
 <a name="mod_operations"></a>
-### 🔵 Division Remainders Mod
+### 🔵 6.5 Division Remainders Mod
 
 ```q
 11 21 31 mod 2
@@ -1189,7 +1189,7 @@ x xexp y
 * modulus function returns remainder after dividing it
 
 <a name="running_sums"></a>
-### 🔵 Running Sums/Moving Windows
+### 🔵 6.6 Running Sums/Moving Windows
 ```q
 sums l
 prds 1
@@ -1207,7 +1207,7 @@ moving window sum of 3
 moving window max of 3
 
 <a name="contain_ops"></a>
-### 🔵 Contain
+### 🔵 6.7 Contain
 
 ```q
 5 in 1 2 3 4
@@ -1216,7 +1216,7 @@ moving window max of 3
 * is x in y? no, so 0
 
 <a name="except_ops"></a>
-### 🔵 Except
+### 🔵 6.8 Except
 
 ```q
 1 2 3 4 except 3
@@ -1225,7 +1225,7 @@ moving window max of 3
 * return the list except 3
 
 <a name="inter_ops"></a>
-### 🔵 Inter
+### 🔵 6.9 Inter
 
 ```q
 1 2 3 inter 2 3 4
@@ -1234,7 +1234,7 @@ moving window max of 3
 * inter returns values occuring in both lists
 
 <a name="distinct_ops"></a>
-### 🔵 Distinct
+### 🔵 6.10 Distinct
 
 ```q
 distinct `a`a`b`b`c`c
@@ -1243,20 +1243,22 @@ a b c
 * distinct only returns distinct values
 
 <a name="reverse_ops"></a>
-### 🔵 Reverse
+### 🔵 6.11 Reverse
 ```q
 reverse 1 2 3
 ```
 3 2 1
 
 <a name="uppercase_ops"></a>
-### 🔵 Upper/Lowercase
+### 🔵 6.12 Upper/Lowercase
+
 ```q
 upper "adsf"
 lower "ADSF"
-```
+
 ADSF
 adsf
+```
 
 <hr>
 
@@ -1264,7 +1266,7 @@ adsf
 ## 🔴 7. Primitive Operations Problem Set
 [Top](#top)
 
-**🔵 1. Find index location for a string of chars**
+**🔵 7.1 Find index location for a string of chars**
 
 ```q
 "hello ryan where is ryan" ss "ryan"
@@ -1274,7 +1276,7 @@ adsf
 
 <hr>
 
-**🔵 2. replace "ryan" with "john"**
+**🔵 7.2 replace "ryan" with "john"**
 ```q
 ssr["hello ryan where is ryan";"ryan";"john"]
 ```
@@ -1284,7 +1286,7 @@ hello johhn where is john
 
 <hr>
 
-**🔵 3. Find the number of days in 2004**
+**🔵 7.3 Find the number of days in 2004**
 ```
 2005.01.01-2004.01.01
 ```
@@ -1292,7 +1294,7 @@ hello johhn where is john
 
 <hr>
 
-**🔵 4. Given list L and K, find the common numbers in both lists**
+**🔵 7.4 Given list L and K, find the common numbers in both lists**
 l: 7 5 13 20 19 17 30
 k: 7 17 200 300 400 1000
 
@@ -1303,7 +1305,7 @@ l inter k
 
 <hr>
 
-**🔵 5. Find the sum of the first 5 numbers in l**
+**🔵 7.5 Find the sum of the first 5 numbers in l**
 ```q
 sum 5#l
 ```
@@ -1311,7 +1313,7 @@ sum 5#l
 
 <hr>
 
-**🔵 6. Find the result whhen you remove the last 2 items from k**
+**🔵 7.6 Find the result whhen you remove the last 2 items from k**
 ```q
 -2_k
 ```
@@ -1319,7 +1321,7 @@ sum 5#l
 
 <hr>
 
-**🔵 7. Return only numbers in l that are wholly divisible by 5**
+**🔵 7.7 Return only numbers in l that are wholly divisible by 5**
 ```q
 l mod 5
 ```
@@ -1333,7 +1335,7 @@ l where 0 = l mod 5
 
 <hr>
 
-**🔵 8. Subtract the average of list l from max value in list k**
+**🔵 7.8 Subtract the average of list l from max value in list k**
 ```q
 max[k] - avg [l] 
 ```
@@ -1341,7 +1343,7 @@ max[k] - avg [l]
 
 <hr>
 
-**🔵 9. Generate list p of 1000 random integers between 0 and 100. Find all values in p that are square numbers**
+**🔵 7.9 Generate list p of 1000 random integers between 0 and 100. Find all values in p that are square numbers**
 ```q
 p: 1000?100
 a: sqrt p
@@ -1367,12 +1369,12 @@ count the number of times p is a whole number
 ## 🔴 8. Dictionary
 [Top](#top)
 
-* a dictionary is constructured from 2 lists of same length using the ! operator
+* A dictionary is a mapping between a list of keys and a list of values of the same length
 * left of ! = list of keys
 * right of ! = list of values
 
 <a name="dict_from_list"></a>
-### 🔵 Constructing a Dictionary from Lists
+### 🔵 8.1 Constructing a Dictionary from Lists
 ```q
 k:`apple`plum
 v:`green`purple
@@ -1384,7 +1386,7 @@ apple|	green
 plum|	purple
 
 <a name="retrieve_dict"></a>
-### 🔵 Retrieving Values
+### 🔵 8.2 Retrieving Values from Dictionaries
 
 Given dictionary d, 3 ways to retrieve a
 
@@ -1399,41 +1401,38 @@ c|	3
 
 ```q
 d[`a]
-```
-```q
 d`a
-```
-```q
 d@`a
-```
 
-* all 3 syntax work for retrieving values in a dictionary
+/ all 3 syntax work for retrieving values in a dictionary
+```
 
 ```q
 key d
-```
 a b c
-* retrieves all keys in d
+
+/ retrieves all keys in d
+```
 
 ```q
 value d
-```
 1 2 3
-* retrieves all values in d
+
+/ retrieves all values in d
+```
 
 ```q
 d @ `a`b`a`
-```
 1 2 1 1
-* can retrieve multiple values
 
+/ can retrieve multiple values
+```
 
 <a name="index_retrieve_dict"></a>
-### 🔵 Index Retrieve
+### 🔵 8.3 Index Retrieve
 
 ```q
 dc:`c1`c2!(10 * til 5; 1+ til 3)
-dc
 ```
 key | value
 -|-
@@ -1442,72 +1441,75 @@ c2	|1 2 3
 
 ```q
 dc[`c2]
-```
 1 2 3 
-* retrieves list c2
+
+/ retrieves list c2
+```
 
 ```q
 dc[`c2;2]
-```
 3
-* retrieves from list c2, index position 2 (0 1 2)
-*
+
+/ retrieves from list c2, index position 2 (0 1 2)
+```
 
 ```q
 dc[ ; 1]
+
+/ takes index position 1 from values (2nd column)
 ```
 key|value
 -|-
 c1	|10
 c2	|2 
 
-* takes index position 1 from values (2nd column)
-
 <a name="take_dict"></a>
-### 🔵 Take
+### 🔵 8.4 Take
 
 ```q
 2#d
+
+/ take first 2 entries from d
 ```
 
 key | value
 -|-
 a | 1
 b |2
-
-* take first 2 entries from d
 
 ```q
 `a`b#d
+
+/ take keys `a and `b and its values from d
 ```
 
 key | value
 -|-
 a | 1
-b |2
-
-* take subset from d
+b | 2
 
 ```q
 d`a`b
-```
 1 2
-* retrieve symbol a b from d
+
+/ retrieve keys `a and `b and return its values from d
+```
 
 ```q
 (enlist`a)#d
-```
 1
 
-* have to use enlist when retrieving a single item from dictionary
+/ have to use enlist when retrieving a single item from dictionary
+```
 
 <a name="drop_dict"></a>
-### 🔵 Drop
+### 🔵 8.5 Drop
 
 ```q
 2_d
+
+/ drop first 2 rows from dictionary d
 ```
-* drop first 2 rows from d
 
 key | value
 -|-
@@ -1515,25 +1517,28 @@ C | 3
 
 
 ```q
-`a`h`g_d
+d: `a`b`c ! 1 2 3
+
+`b _ d
+
+/ drop key `b and its value (2)
 ```
-* drop values from symbols a, h, and g
 
 key | value
 -|-
-B | 2
-C | 3
+a | 1
+c | 3
 
 <a name="upsert_dict"></a>
-### 🔵 Upsert
+### 🔵 8.6 Upsert
 
 ```q
 d [`e]: 99
-d
+
+/ upsert = update insert
+/ if key exists, will update value
+/ if key doesn't exist, will insert new key + value
 ```
-* update / insert value
-* if key exists, will update value
-* if key doesn't exist, will insert new key + value
 
 key|value
 -|-
@@ -1543,7 +1548,7 @@ c|	3
 e|	99
 
 <a name="multi_key_dict"></a>
-### 🔵 Multi Key Dictionaries
+### 🔵 8.7 Multi Key Dictionaries
 
 ```q
 md: (`a`b;`c`d;`e`f) ! 1 2 3
@@ -1558,12 +1563,16 @@ c d	|2
 e f	|3
 
 <a name="repeat_key_dict"></a>
-### 🔵 Repeat Keys
-* you can technically have multiple repeat keys, but this is NOT recommended
+### 🔵 8.8 Repeat Keys
+
+You can technically have multiple repeat keys, but this is NOT recommended
 
 ```q
 dk: 1 2 3 1 ! `a`b`c`d
+
+/ notice key 1 is repeated
 ```
+
 key|values
 -|-
 1|	a
@@ -1573,28 +1582,40 @@ key|values
 
 ```q
 dk[1]
-```
 a
-* if you attempt to retrieve a repeated key, it will only get the first value
+
+/ if you attempt to retrieve a repeated key, it will only return the first value
+```
 
 <a name="find_dict"></a>
-### 🔵 Find Operator
+### 🔵 8.9 Find Operator ?
 
 ```q
 d?2
-```
 b
-* ? is the find operator
+
+/ ? is the find operator
+/ from dictionary d, find key 2, return its value (b)
+```
 
 <a name="dict_opt"></a>
-### 🔵 Dictionary Operators
+### 🔵 8.10 Dictionary Operators
 ```q
+d: `a`b`c ! 1 2 3
+
 sum d
-```
 6
+
+avg d
+2
+```
+
 ```q
 neg d
+
+/ turns all values negative
 ```
+
 key|value
 -|-
 a|	-1
@@ -1603,7 +1624,10 @@ c|	-3
 
 ```q
 d%100
+
+/ divides all values by 100
 ```
+
 key|value
 -|-
 a|	0.01
@@ -1611,11 +1635,11 @@ b|	0.02
 c|	0.03
 
 ```q
+Adding / Joining Dictionaries
+
 d1:`a`b`c!1 2 3
 d2:`a`b`c!1 2 3
-```
 
-```q
 d1+d2
 d1,d2
 ```
