@@ -597,7 +597,29 @@ t.second
 * x $ y 
 * x = target type
 * y = source type
-* so you are casting y to x
+* Casting y to x
+
+```q
+Casting strings to sym
+
+/ "a","b","c" are strings
+
+"S" $ "a","b","c"
+`abc
+```
+
+```q
+Converting syms to strings 
+
+/ `abc is a sym
+
+string `abc
+"abc"
+```
+
+
+
+
 
 ```q
 `date$2
