@@ -39,6 +39,7 @@
 7. [Update List Values](#update_list)
 8. [Nested Lists](#nest_list)
 9. [Matrix](#matrix_list)
+10. [Sublist](#sublist_list)
 
 ## 5. [Lists Problem Set](#list_problemset)
 
@@ -520,7 +521,7 @@ x:x*3
 [Top](#top)
 
 <a name="datatype_table"></a>
-### 🔵 Datatype Table
+### 🔵 2.1 Datatype Table
 
 type|	size|	char|	num|	notation|	Null Value|	Positive Infinity
 -|-|-|-|-|-|-
@@ -563,7 +564,7 @@ d.dd
 22i 
 
 <a name="time_type"></a>
-### 🔵 Time
+### 🔵 2.2 Time
 
 Given:
 t: 11:02:58:000
@@ -591,7 +592,7 @@ t.second
 * current timespan
 
 <a name="cast_type"></a>
-### 🔵 Casting
+### 🔵 2.3 Casting
 * casting = changes one datatype to another type that's compatible
 * parsing = converting from a string to a native type
 * x $ y 
@@ -616,10 +617,6 @@ Converting syms to strings
 string `abc
 "abc"
 ```
-
-
-
-
 
 ```q
 `date$2
@@ -663,7 +660,7 @@ string `abc
 0b
 
 <a name="enu_cast"></a>
-### 🔵 Enumeration
+### 🔵 2.4 Enumeration
 * enumeration is converting a list of values to a defined domain which restricts values to that domain
 
 ```q
@@ -692,7 +689,7 @@ cast
 ## 🔴 3. Data Types & Casting & Enumeration Problem Set
 [Top](#top)
 
-**🔵 1. What is the syntax to add to a list**
+**🔵 3.1 What is the syntax to add to a list**
 ```q
 el, : apple
 ```
@@ -700,7 +697,7 @@ el, : apple
 
 <hr>
 
-**🔵 2. Show 3 ways to conver float 4.5 to an integer**
+**🔵 3.2 Show 3 ways to conver float 4.5 to an integer**
 ```q
 `int$4.5
 "i"$4.5
@@ -709,7 +706,7 @@ el, : apple
 
 <hr>
 
-**🔵 3. Given strings "2001.02.02" and "2003.08.09", parse the strings into KDB dates**
+**🔵 3.3 Given strings "2001.02.02" and "2003.08.09", parse the strings into KDB dates**
 ```q
 "D"$("2001.02.02";"2003.08.09")
 ```
@@ -718,7 +715,7 @@ el, : apple
 
 <hr>
 
-**🔵 4. Given the mixed list L: ("100.1";"hello";"10"), convert elements to float, char, and int**
+**🔵 3.4 Given the mixed list L: ("100.1";"hello";"10"), convert elements to float, char, and int**
 ```q
 "F*I"$("100.1";"hello";"10")
 ```
@@ -730,7 +727,7 @@ el, : apple
 
 <hr>
 
-**🔵 5. Create empty symbol list s**
+**🔵 3.5 Create empty symbol list s**
 
 ```q
 s: `symbol$()
@@ -750,14 +747,14 @@ s,:`ooo
 
 <hr>
 
-**🔵 6. Create an enumeration t containing values p q r that is restricted to domain s**
+**🔵 3.6 Create an enumeration t containing values p q r that is restricted to domain s**
 ```q
 s: `symbol$()
 t: `s$`p`q`r
 ```
 * t is now an enumeration which only contain domain s (symbols)
 
-**🔵 7. Insert new value u into t**
+**🔵 3.7 Insert new value u into t**
 
 ```q
 s,:`u
@@ -917,13 +914,43 @@ m[ ; 1]
 20 50 80
 * ignores row (blank), retrieves index 1 location for column (2nd column)
 
+
+<a name="sublist_list"></a>
+### 🔵 4.10 Sublist
+
+```q
+2 sublist 1 2 3 4 5
+1 2
+/ takes first 2
+```
+
+```q
+-2 sublist 1 2 3 4 5
+4 5
+/ takes last 2
+```
+
+```q
+10 sublist 1 2 3 4 5
+1 2 3 4 5
+/ take only what's available
+```
+
+```q
+2 2 sublist 1 2 3 4 5
+3 4
+/ from index position 2, take 2 items
+```
+
+
+
 <hr>
 
 <a name="list_problemset"></a>
 ## 🔴 5. Lists Problem Set
 [Top](#top)
 
-**🔵 1. What is the difference between 3 ? 10 and 3 ? 10 20 30**
+**🔵 5.1 What is the difference between 3 ? 10 and 3 ? 10 20 30**
 
 ```q
 3?10
@@ -938,7 +965,7 @@ m[ ; 1]
 
 <hr>
 
-**🔵 2. Create a general list containing symbol p, boolean 1b, and long 1000200j**
+**🔵 5.2 Create a general list containing symbol p, boolean 1b, and long 1000200j**
 
 ```q
 GL: (`p; 1b; 100200j)
@@ -947,7 +974,7 @@ GL: (`p; 1b; 100200j)
 
 <hr>
 
-**🔵 3. Given the following**
+**🔵 5.3 Given the following**
 
 p: 100 200 300 400 500 600
 t: "say hello world to bob"
@@ -961,7 +988,7 @@ m: (1 2 3; 10 20 30; 100 200 300)
 
 <hr>
 
-**🔵 4. From t, retrieve the list "sold"**
+**🔵 5.4 From t, retrieve the list "sold"**
 ```q
 t[0 8 6 14]
 ```
@@ -970,7 +997,7 @@ t[0 8 6 14]
 
 <hr>
 
-**🔵 5. Create the nested list ("shoot";"bob") by indexing into t**
+**🔵 5.5 Create the nested list ("shoot";"bob") by indexing into t**
 ```q
 t?"shoot"
 ```
@@ -990,7 +1017,7 @@ t(0 4 8 8 16; 19 8 19)
 
 <hr>
 
-**🔵 6. Change the last number in p to 1000**
+**🔵 5.6 Change the last number in p to 1000**
 ```q
 p[5]: 1000
 ```
@@ -998,7 +1025,7 @@ p[5]: 1000
 
 <hr>
 
-**🔵 7. Find the 3 highest numbers in p**
+**🔵 5.7 Find the 3 highest numbers in p**
 ```q
 3#desc p
 ```
@@ -1007,7 +1034,7 @@ p[5]: 1000
 
 <hr>
 
-**🔵 8. Find values of p that are below the mean**
+**🔵 5.8 Find values of p that are below the mean**
 ```q
 p where p<avg p
 ```
