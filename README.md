@@ -18,6 +18,7 @@
 13. [Larger](#larger_intro)
 14. [Smaller](#smaller_intro)
 15. [Raze](#raze_intro)
+16. [+:](#pluscolon)
 
 ## 2. [Data Types & Casting & Enumeration](#casting_header)
 1. [Datatype Table](#datatype_table)
@@ -497,6 +498,22 @@ t2
 
 
 <hr>
+
+<a name="pluscolon"></a>
+### 🔵 1.16 +:
+
+```q
+x+:1
+/ is the same as
+x:x+1
+```
+
+```q
+x*:3
+/ is the same as
+x:x*3
+```
+
 
 <a name="casting_header"></a>
 ## 🔴 2. Data Types & Casting 
