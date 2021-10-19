@@ -772,7 +772,7 @@ t,:`u
 [Top](#top)
 
 <a name="simple_list"></a>
-### 🔵 Simple Lists
+### 🔵 4.1 Simple Lists
 ```q
 L1: 1 2 3 4
 L2: 1;2;3;4
@@ -788,7 +788,7 @@ L6: ("a";"b";"c")
 * L6 = list of chars
  
 <a name="mixed_list"></a>
-### 🔵 Mixed Lists
+### 🔵 4.2 Mixed Lists
 ```q
 L7: (1; `p; 200.)
 ```
@@ -796,37 +796,52 @@ L7: (1; `p; 200.)
 
 ```q
 type L7
-```
-0h 
+0h
+``` 
 * null because its a mixed list
 
 <a name="empty_list"></a>
-### 🔵 Empty Lists
+### 🔵 4.3 Empty Lists
 
 ```q
-L8: ()
-count L8
-```
+L: ()
+count L
 0
+```
 
 <a name="atom_list"></a>
-### 🔵 Single Item Lists
+### 🔵 4.4 Single Item Lists
 ```q
 L9: enlist `C
 ```
 * have to use enlist for single item lists
 
 <a name="join_lists"></a>
-### 🔵 Joining Lists
-a: 1 2 3
-b: 4 5 6
+### 🔵 4.5 Joining Lists
+
 ```q
-a,b
+atom to atom
+
+1,2
+1 2
 ```
+
+```q
+atom to list
+
+`a, `b`c`d
+`a`b`c`d
+```
+
+```q
+list to list
+
+1 2 3, 4 5 6
 1 2 3 4 5 6
+```
 
 <a name="retrieve_list"></a>
-### 🔵 Retrieving from Lists
+### 🔵 4.6 Retrieving from Lists
 L: 10 20 30
 
 ```q
@@ -842,7 +857,7 @@ L 1 2 3
 * notice you DONT use colons : when retrieving from lists
 
 <a name="update_list"></a>
-### 🔵 Update List Values
+### 🔵 4.7 Update List Values
 L: 10 20 30
 ```q
 L[0 1 2] : 40 50 60
@@ -851,7 +866,7 @@ L[0 1 2] : 40 50 60
 * notice you use colon : to update values
 
 <a name="nest_list"></a>
-### 🔵 Nested Lists
+### 🔵 4.8 Nested Lists
 ```q
 L: 10 20 30 40 50
 K: 0.1 0.2 0.3
@@ -878,7 +893,7 @@ NL [0][0]
 * retrieves list L (index location 0) and the first value from that list (index location 0)
 
 <a name="matrix_list"></a>
-### 🔵 Matrix
+### 🔵 4.9 Matrix
 
 m: (10 20 30; 40 50 60; 70 80 90)
 
