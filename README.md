@@ -40,6 +40,10 @@
 8. [Nested Lists](#nest_list)
 9. [Matrix](#matrix_list)
 10. [Sublist](#sublist_list)
+11. [Find Operator](#find_list)
+12. [Random Operator](#random_list)
+13. [Count Operator](#count_list)
+14. 
 
 ## 5. [Lists Problem Set](#list_problemset)
 
@@ -864,30 +868,36 @@ L[0 1 2] : 40 50 60
 
 <a name="nest_list"></a>
 ### 🔵 4.8 Nested Lists
+
+```q
+list: (1 2; 3 4; 5 6; 7 8)
+
+first each list
+1 3 5 7
+
+/ returns first element of each nested list
+```
+
 ```q
 L: 10 20 30 40 50
 K: 0.1 0.2 0.3
 NL: (L; K; `pp`qq`rr)
-```
-* NL is a list of 3 nested lists: L, K, and the syms
 
-10 20 30 40 50 \
-0.1 0.2 0.3 \
-`pp`qq`rr \
+/ NL is a list of 3 nested lists: L, K, and the syms
 
-```q
 NL [ 0 2]
-```
-10 20 30 40 50 \
-`pp`qq`rr \
-* So think of list NL as 3 separate lists. we retrieved index location 0 and 2, so returned the first and 3rd list
+10 20 30 40 50
+`pp`qq`rr
 
-```q
-(NL 0)0
+/ So think of list NL as 3 separate lists.
+/ Retrieve index location 0 and 2, so returned the first and 3rd list
+
 NL [0][0]
-```
 10
-* retrieves list L (index location 0) and the first value from that list (index location 0)
+
+/ retrieves index position 0 (first list = list L) 
+/ and the first value from that list (index location 0)
+```
 
 <a name="matrix_list"></a>
 ### 🔵 4.9 Matrix
@@ -921,27 +931,131 @@ m[ ; 1]
 ```q
 2 sublist 1 2 3 4 5
 1 2
+
 / takes first 2
 ```
 
 ```q
 -2 sublist 1 2 3 4 5
 4 5
+
 / takes last 2
 ```
 
 ```q
 10 sublist 1 2 3 4 5
 1 2 3 4 5
+
 / take only what's available
 ```
 
 ```q
 2 2 sublist 1 2 3 4 5
 3 4
+
 / from index position 2, take 2 items
 ```
 
+<a name="find_list"></a>
+### 🔵 4.11 Find in List
+
+```q
+1 2 3 4 5 ? 3
+2
+
+/ find position of 3
+```
+```q
+1 2 3 4 5 ? 7
+5
+
+/ not found, returns max index + 1
+```
+```q
+1 2 2 3 4 ? 2
+1
+
+/ only returns first occurence
+```
+
+<a name="random_list"></a>
+### 🔵 4.12 Random Operator in Lists
+
+```q
+5 ? 1 2 3 4 5
+1 3 2 2 4
+
+/ pick 5 random items from list
+```
+
+```q
+5 ? 10
+8 5 5 9 2
+
+/ pick 5 random items less than 10
+```
+```q
+-5 ? 10
+8 5 1 9 2
+
+/ pick 5 distinct random items less than 10
+```
+
+```q
+5 ? `2
+`ah `lj `ef `ie `jf
+
+/ pick 5 random syms with length 2
+```
+
+```q
+5 ? " "
+"lwhev"
+
+/ pick 5 random chars 
+```
+
+```q
+list: 1 2 3 4 5
+
+list ? 2
+1
+
+/ from list, find 2
+
+2 ? list
+3 4
+
+/ from list, return 2 random elements
+```
+
+<a name="count_list"></a>
+### 🔵 4.13 Count Operator in Lists
+
+```q
+count 1 2 3 4
+4
+
+/ counts number of elements in list
+```
+```q
+count enlist 1 2 3 4
+1
+
+/ counts the first dimension of the enlisted structure
+```
+```q
+count (1 2 3;4 5 6)
+2
+
+/ counts number of nested lists
+```
+```q
+count each (1 2 3; 4 5 6)
+3 3
+
+/ counts number of elements in each nested list
+```
 
 
 <hr>
