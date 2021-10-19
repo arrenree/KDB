@@ -1025,15 +1025,17 @@ raze string `a`b`c
 **🔵 5.1 What is the difference between 3 ? 10 and 3 ? 10 20 30**
 
 ```q
-3?10
+3 ? 10
+
+/ returns 3 random numbers from 0-10
 ```
-* returns 3 random numbers from 0-10
 
 ```q
-3? 10 20 30
-```
+3 ? 10 20 30
 10 10 30
-* returns 3 random numbers from the list
+
+/ returns 3 random numbers from the list
+```
 
 <hr>
 
@@ -1041,8 +1043,9 @@ raze string `a`b`c
 
 ```q
 GL: (`p; 1b; 100200j)
+
+/ general lists with different data types have to be contained within ( ) with ; separating each item
 ```
-* general lists with different data types have to be contained within ( ) with ; separating each item
 
 <hr>
 
@@ -1055,62 +1058,70 @@ m: (1 2 3; 10 20 30; 100 200 300)
 **Retrieve first 3 items from p**
 ```q
 3#p
-```
 100 200 300
+```
 
 <hr>
 
 **🔵 5.4 From t, retrieve the list "sold"**
+
 ```q
 t[0 8 6 14]
-```
 "sold"
-* you are retrieving characters from their index position
+
+/ you are retrieving characters from their index position
+```
 
 <hr>
 
 **🔵 5.5 Create the nested list ("shoot";"bob") by indexing into t**
+
 ```q
 t?"shoot"
-```
 0 4 8 8 16
+```
 
 ```q
 t? "bob"
-```
 19 8 19
+```
 ```q
 t(0 4 8 8 16; 19 8 19)
-```
 ("shoot";"bob")
 
-* you are finding the index locations of those chars from list t
-* then retrieving those index positions (letters) to spell out 
+/ you are finding the index locations of those chars from list t
+/ then retrieving those index positions (letters) to spell out 
+```
 
 <hr>
 
 **🔵 5.6 Change the last number in p to 1000**
+
 ```q
 p[5]: 1000
+
+/ upsert. find index location 5, replace value with 1000
 ```
-* upsert. find index location 5, replace value with 1000
 
 <hr>
 
 **🔵 5.7 Find the 3 highest numbers in p**
+
 ```q
 3#desc p
-```
 100 500 400
-* take 3 numbers from descending list p
+
+/ take 3 numbers from descending list p
+```
 
 <hr>
 
 **🔵 5.8 Find values of p that are below the mean**
+
 ```q
 p where p<avg p
-```
 100 200 300 400
+```
 
 <hr>
 
@@ -1120,46 +1131,53 @@ p where p<avg p
 
 <a name="add_list"></a>
 ### 🔵 6.1 Addition
+
 ```q
 10 + 10 20 30
-```
 20 30 40
+```
 
 ```q
 10 20 30 + 1 2 3 
-```
 11 22 33
+```
 
 ```q
 10 20 30 + 1 2
-```
 length
-* error because different list lengths
+
+/ error because different list lengths
+```
 
 <a name="compare_lists"></a>
 ### 🔵 6.2 Comparing Lists
+
 ```q
 1 2 3 = 1 2 3 
-```
 111b
-* comparing 2 lists will result in boolean answer (true true true)
+
+/ comparing 2 lists will result in boolean answer (true true true)
+```
 
 <a name="match_diff"></a>
 ### 🔵 6.3 Match and Equal Differences
+
 ```q
 Equals
 1 2 3 = 1 2 3 
 1b
+
+/ Equals is type tolerant. allows for some rounding. accomodates different data types
 ```
-* Equals is type tolerant. allows for some rounding. accomodates different data types
 
 ```q
 Match
 1 2 3 ~ 1.0 2.0 3.0
 0b
+
+/ Match will check value and data type. Requires EXACT match
+/ Single item return (false)
 ```
-* Match will check value and data type. Requires EXACT match
-* single item return (false)
 
 <a name="basic_operations"></a>
 ### 🔵 6.4 Basic Operations
@@ -1174,19 +1192,21 @@ avg l
 dev l
 sqrt l
 x xexp y
+
+/ med = median
+/ dev = standard deviation
+/ xexp = to the power of
 ```
-* med = median
-* dev = standard deviation
-* xexp = to the power of
 
 <a name="mod_operations"></a>
 ### 🔵 6.5 Division Remainders Mod
 
 ```q
 11 21 31 mod 2
-```
+
 1 1 1
-* modulus function returns remainder after dividing it
+/ modulus function returns remainder after dividing it
+```
 
 <a name="running_sums"></a>
 ### 🔵 6.6 Running Sums/Moving Windows
@@ -1194,60 +1214,66 @@ x xexp y
 sums l
 prds 1
 maxs l
+
+/ running sums, running products, running max
 ```
-running sums, running products, running max
 ```q
 3 msum 1
-```
-moving window sum of 3
 
+/ moving window sum of 3
+```
 ```q
 3 mmax l
+
+/ moving window max of 3
 ```
-moving window max of 3
 
 <a name="contain_ops"></a>
 ### 🔵 6.7 Contain
 
 ```q
 5 in 1 2 3 4
-```
 0000b
-* is x in y? no, so 0
+
+/ is x in y? no, so 0
+```
 
 <a name="except_ops"></a>
 ### 🔵 6.8 Except
 
 ```q
 1 2 3 4 except 3
-```
 1 2 4
-* return the list except 3
+
+/ return the list except 3
+```
 
 <a name="inter_ops"></a>
 ### 🔵 6.9 Inter
 
 ```q
 1 2 3 inter 2 3 4
-```
 2 3
-* inter returns values occuring in both lists
+
+/ inter returns values occuring in both lists
+```
 
 <a name="distinct_ops"></a>
 ### 🔵 6.10 Distinct
 
 ```q
 distinct `a`a`b`b`c`c
-```
 a b c
-* distinct only returns distinct values
+
+/ distinct only returns distinct values
+```
 
 <a name="reverse_ops"></a>
 ### 🔵 6.11 Reverse
 ```q
 reverse 1 2 3
-```
 3 2 1
+```
 
 <a name="uppercase_ops"></a>
 ### 🔵 6.12 Upper/Lowercase
@@ -1270,27 +1296,30 @@ adsf
 
 ```q
 "hello ryan where is ryan" ss "ryan"
-```
 6 20
-* ss = finds the index location
+
+/ ss = finds the index location
+```
 
 <hr>
 
 **🔵 7.2 replace "ryan" with "john"**
+
 ```q
 ssr["hello ryan where is ryan";"ryan";"john"]
-```
 hello johhn where is john
 
-* this is similar to excel search and replace function
+/ this is similar to excel search and replace function
+```
 
 <hr>
 
 **🔵 7.3 Find the number of days in 2004**
 ```
 2005.01.01-2004.01.01
-```
 366
+
+```
 
 <hr>
 
@@ -1300,46 +1329,47 @@ k: 7 17 200 300 400 1000
 
 ```q
 l inter k
-```
 7 17
+```
 
 <hr>
 
 **🔵 7.5 Find the sum of the first 5 numbers in l**
 ```q
 sum 5#l
-```
 64
+```
 
 <hr>
 
 **🔵 7.6 Find the result whhen you remove the last 2 items from k**
 ```q
 -2_k
-```
 7 17 200 300
+```
 
 <hr>
 
 **🔵 7.7 Return only numbers in l that are wholly divisible by 5**
 ```q
 l mod 5
-```
 2 0 3 0 4 2 0
+```
 
 ```q
 l where 0 = l mod 5
-```
 5 20 30
-* show list l where l divide by 5 = 0
+
+/ show list l where l divide by 5 = 0
+```
 
 <hr>
 
 **🔵 7.8 Subtract the average of list l from max value in list k**
 ```q
 max[k] - avg [l] 
-```
 984.14
+```
 
 <hr>
 
@@ -1347,21 +1377,25 @@ max[k] - avg [l]
 ```q
 p: 1000?100
 a: sqrt p
+
+/ a will contain both ints and floats
 ```
-* a will contain both ints and floats
 
 ```q
 a = `int$a
+
+/ cast a as an integer (whole number)
 ```
-* cast a as an integer (whole number)
 ```q
 p where a=`int$a
+
+/ return value in p where a = whole number
 ```
-* return value in p where a = whole number
 ```q
 count p where a=`int$a
+
+/ count the number of times p is a whole number
 ```
-count the number of times p is a whole number
 
 <hr>
 
