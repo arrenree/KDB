@@ -1753,16 +1753,28 @@ g 1 2 3
 
 ```q
 if [10>3; a:11; show a*10]
-```
 110
-* if the first condition is true, then execute the statements that follow
+/ since the first condition is true, execute statements that follow
+```
 
 ```q
 if[10>3; a:11; show a*10; show "hello"]
-```
 110
 "hello"
-* as long as the first condition is true, execute all following statements
+/ as long as the first condition is true, execute all following statements
+```
+
+```q
+if[10; show "true"]
+"true"
+/ since 10 is an int, and int will default to 1b (true)
+```
+
+```q
+if[count(); show "true"]
+/ nothing shows, since count empty list = 0, hence false
+```
+
 
 <a name="iftrue_else_state"></a>
 ### 🔵 10.7 If True/Else Statements
