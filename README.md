@@ -1011,15 +1011,18 @@ length
 <a name="match_diff"></a>
 ### 🔵 Match and Equal Differences
 ```q
+Equals
 1 2 3 = 1 2 3 
+1b
 ```
-* = is type tolerant. allows for some rounding. accomodates different data types
+* Equals is type tolerant. allows for some rounding. accomodates different data types
 
 ```q
+Match
 1 2 3 ~ 1.0 2.0 3.0
-```
 0b
-* match key ~ is EXACT match
+```
+* Match will check value and data type. Requires EXACT match
 * single item return (false)
 
 <a name="basic_operations"></a>
