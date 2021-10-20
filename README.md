@@ -1844,212 +1844,236 @@ peter|	56.1
 ## 🔴 10. Functions
 [Top](#top)
 
+Functions are encased in { }
+
+
 <a name="define_func"></a>
 ### 🔵 10.1 Defining & Calling Functions
-* functions are encased in { }
 ```q
 f: { [a] a * a}
-```
-```q
 f [3]
-```
-or
-```q
-f @ 3
-```
 9
-* [a] defines the argument
-* f[3] or f@3  calls the function with a=3
+
+/ [a] = defines the argument
+/ f[3] or f@3 calls the function with a=3
+```
 
 ```q
-add: { [a;b] a+ b}
-```
-```q
+add: { [a;b] a + b}
 add [3;5]
-```
 8
-* multi argument function
-* [a;b] = defines first, second argument
-* a+b = statement
+
+/ multi argument function
+/ [a;b] = defines first, second argument
+/ a+b = statement
+```
 
 <a name="anon_function"></a>
 ### 🔵 10.2 Anonymous Functions
 ```q
 {[a] a*a}6
-```
 36
-* you dont assign variable 
-* simply call the argument outside the function { } 
+
+/ you dont assign variable 
+/ simply call the argument outside the function { } 
+```
 
 <a name="implicit_argu"></a>
 ### 🔵 10.3 Implicit Argument
+
 ```q
 {x*x}5
-```
 25
-* omit [x], q implicitly understands x is an argument
+
+/ omit defining argument [x], q implicitly understands x is an argument
+```
 
 ```q
 {x+y+z}[1;2;3]
-```
 6
-* q has x, y, z as implicit arguments
+
+/ q has x, y, z as implicit arguments
+/ [1;2;3] you are calling x y z as arguments
+```
 
 ```q
 {x+z}[1;2]
+
+/ error because you can't skip the y. if only 2 implicit arguments, need to use x, y
 ```
-* error because you can't skip the y. if only 2 implicit arguments, need to use x, y
 
 <a name="local_global_variables"></a>
 ### 🔵 10.4 Local vs Global Variables
 ```q
 {a:1; b:2; a+b*x} [12]
-```
 25
-* = (12x2) + 1
-* a and b are locally defined variables within the function
-* will NOT work if you try to recall variable a or b outside the function
-* 12 = implicit argument x
+
+/ calling in x = 12 (implicit argument)
+/ 1 + 2 * 12 
+/ a and b are locally defined variables within the function
+/ will NOT work if you try to recall variable a or b outside the function
+```
 
 ```q
 d:10
 f:{d+x}
-f 1
-```
+f [1]
 11
-* assign global variable D to 10 (outside the function)
-* functions pulls in 10 (global variable) for d and 1 for x (implicit argument)
+
+/ assign global variable D to 10 (outside the function)
+/ f[1] calls in 1 for x (implicit argument)
+/ = 10 + 1 = 11
+```
 
 ```q
+d: 10
 g: {d:20; d+x}
-g 1
-```
+g [1]
 21
-* local variable d:20 takes priority over global variable of 10
+
+/ d:20 is a locally defined variable
+/ local takes priority over global variable of 10
+/ = 20 + 1 = 21
+```
 
 <a name="projected_func"></a>
 ### 🔵 10.5 Projected Functions
 ```q
 raise: {x xexp y}
 raise [10; 2 3 4]
-```
 100 1000 1000f
-* calls x = 10; y = 2 3 4
+
+/ calls x = 10 and y = 2 3 4
+```
 
 ```q
 g: raise [10; ]
 g 1 2 3
-```
 10 100 1000
-* creates a projection of the original raise function
+
+/ creates a projection of the original raise function
+```
 
 <a name="iftrue_state"></a>
-### 🔵 10.6 If True Statements
+### 🔵 10.6 If Statements
 
 ```q
 if [10>3; a:11; show a*10]
 110
-/ since the first condition is true, execute statements that follow
+
+/ since the first condition is true, execute all statements that follow
 ```
 
 ```q
 if[10>3; a:11; show a*10; show "hello"]
 110
 "hello"
+
 / as long as the first condition is true, execute all following statements
 ```
 
 ```q
 if[10; show "true"]
 "true"
+
 / since 10 is an int, and int will default to 1b (true)
 ```
 
 ```q
 if[count(); show "true"]
+
 / nothing shows, since count empty list = 0, hence false
 ```
 
-
 <a name="iftrue_else_state"></a>
-### 🔵 10.7 If True/Else Statements
+### 🔵 10.7 If/Else Statements
 
 ```q
 $[1b; show "true"; show "false"]
-```
 true
-* always starts with $[ ] 
-* if first condition true, then show second condition. else, show third condition
-* here the first condition is the false boolean
+
+/ always starts with $[ ] 
+/ if first condition true, then show second condition. else, show third condition
+/ here the first condition is the false boolean
+```
 
 ```q
 $[100>1; [show "message"; `a];`b]
-```
 "message"
 `a
-* since true, show everythign  in the [ ]
+
+/ since true, show everythign  in the [ ]
+```
 
 <a name="add_cond_branch"></a>
 ### 🔵 10.8 Adding Conditional Branch Pair
 
 ```q
 {$[x < 0; `negative; x=0; `zero; `positive]}0
-```
 `zero
-* using implicit argument x =0
-* 0 doesnt equal 0, so false. goes to 2nd condition, x=0
-* x = 0 this begins another conditional branch
-* since x-0 is true, returns first condition (zero)
+
+/ using implicit argument x =0
+/ 0 doesnt equal 0, so false. goes to 2nd condition, x=0
+/ x = 0 this begins another conditional branch
+/ since x-0 is true, returns first condition (zero)
+```
 
 ```q
 {$[x < 0; `negative; x=0; `zero; `positive]}2
-```
 `posititve
-* 2 = x and since 2 isnt less than 0, false. 
-* 2 does NOT equal x=0, so false again
-* skips first condition, returns second condition (positive)
+
+/ 2 = x and since 2 isnt less than 0, false. 
+/ 2 does NOT equal x=0, so false again
+/ skips first condition, returns second condition (positive)
+```
 
 <a name="do_loop"></a>
 ### 🔵 10.9 Do Loops
 ```q
 do[3;show "hi"]
+hi
+hi
+hi
+
+/ repeats loop x number of times
 ```
-hi
-hi
-hi
-* repeats loop x number of times
 
 ```q
 f:{avg x xexp 1000?2}
 \t do[1000;f]
-```
 0
-* time the loop 1000x on function f
+
+/ time the loop 1000x on function f
+```
 
 <a name="while_loop"></a>
 ### 🔵 10.10 While Loops
+
 * while will execute a statement x number of times until statement is no longer true
+
 ```q
 a:1
 while[a<3; show a; a:a+1]
-```
 1
 2
-* 1 is less than 3, so show 1
-* a becomes 1+1 =2
-* 2 less than 3, so show 2
-* a becomes 2+1=3
-* 3 not less than 3, so stop executing
+
+/ 1 is less than 3, so show 1
+/ a becomes 1+1 =2
+/ 2 less than 3, so show 2
+/ a becomes 2+1=3
+/ 3 not less than 3, so stop executing
+```
 
 ```q
 a:1
 b:2
 while[(a<10); a:a+1; b:b+1; show enlist b,a]
+
+/ a = 1; a becomes 1+1(2)
+/ b = 2; b becomes 2+1(3)
+/ show enlist shows b and a in a clean list
+/ stop running this loop when first condition becomes false
 ```
-* a = 1; a becomes 1+1(2)
-* b = 2; b becomes 2+1(3)
-* show enlist shows b and a in a clean list
-* stop running this loop when first condition becomes false
 
 key|value
 -|-
@@ -2102,7 +2126,7 @@ findprime 10
 ## 🔴 11. Functions Problem Set
 [Top](#top)
 
-**🔵 1. Create a function volc that accepts 2 arguments (r and h), that returns the volume of the given volc [2;3]** \
+**🔵 11.1 Create a function volc that accepts 2 arguments (r and h), that returns the volume of the given volc [2;3]** \
 vol of cone = 1/3 * pi * r^2 * h \
 pi = -4 * atan -1**
 
@@ -2118,7 +2142,7 @@ volc[2;3]
 
 <hr>
 
-**🔵 2. Write function sph that takes radius and returns the area and volume**\
+**🔵 11.2 Write function sph that takes radius and returns the area and volume**\
 v = 4/3 * pi * r^3 \
 a = 4 * pi * r^2
 
@@ -2141,7 +2165,7 @@ volume |	12.56
 
 <hr>
 
-**🔵 3. Create function setc that takes one argument and sets the global value c to that argument**
+**🔵 11.3 Create function setc that takes one argument and sets the global value c to that argument**
 ```q
 setc: {c::x}
 setc[10]
@@ -2160,7 +2184,7 @@ c
 
 <hr>
 
-**🔵 4. Given raise:{x xexp y}, create function that is projection of the raise. Ex, root[9] = 3**
+**🔵 11.4 Given raise:{x xexp y}, create function that is projection of the raise. Ex, root[9] = 3**
 ```q
 raise: {x xexp y}
 root: raise[ ; 0.5]
@@ -2173,7 +2197,7 @@ root[9]
 
 <hr>
 
-**🔵 5. Convert all entries of list L to a string**
+**🔵 11.5 Convert all entries of list L to a string**
 * list of long, sym, and boolean
 ```q
 l: (100;`price;1b)
@@ -2187,7 +2211,7 @@ string l
 
 <hr>
 
-**🔵 6. Given the string, find and replace "cow" with "kangaroo"**
+**🔵 11.6 Given the string, find and replace "cow" with "kangaroo"**
 
 ```q
 st: "the cow jumped over the moon"
@@ -2199,7 +2223,7 @@ ssr [st; "cow";"kangaroo"]
 
 <hr>
 
-**🔵 7. Create function sayHi that takes 2 arguments, first one name, second one age and behaves as follows:**
+**🔵 11.7 Create function sayHi that takes 2 arguments, first one name, second one age and behaves as follows:**
 
 sayHi("joe";90] \
 "hello 90 year old joe"
@@ -2217,7 +2241,7 @@ hello 90 year old joe
 
 <hr>
 
-**🔵 8. I have a box of 7 eggs, find the median and average weight**
+**🔵 11.8 I have a box of 7 eggs, find the median and average weight**
 
 eggs: 10 20 30 40 50 60 70
 
@@ -2232,7 +2256,7 @@ avg eggs
 
 <hr>
 
-**🔵 9. I sold 2 boxes of eggs. 1 box had 10 eggs and i sold it for 50 each. the other box had 20 eggs and sold it for 100 each. find the average price paid per egg**
+**🔵 11.9 I sold 2 boxes of eggs. 1 box had 10 eggs and i sold it for 50 each. the other box had 20 eggs and sold it for 100 each. find the average price paid per egg**
 
 ```q
 10 20 wavg 50 100
@@ -2242,7 +2266,7 @@ avg eggs
 
 <hr>
 
-**🔵 10. Generate list k of 10 random integers. Find the moving average with window size of 3**
+**🔵 11.10 Generate list k of 10 random integers. Find the moving average with window size of 3**
 ```
 k: 10?10
 mavg[3;k]
@@ -2266,7 +2290,7 @@ deltas k
 
 <hr>
 
-**🔵 11. Create function factw, using a loop to write a factorial function**
+**🔵 11.11 Create function factw, using a loop to write a factorial function**
 ```q
 factw:{r:i:1; while[i<=x; r*:i; i+:1];r}
 factw 3
@@ -2290,7 +2314,7 @@ i(4) <= x(3) FALSE, so returns r = 6
 
 <hr>
 
-**🔵 12. Re-create the factorial function as factp without using loops**
+**🔵 11.12 Re-create the factorial function as factp without using loops**
 ```q
 factp:{prd 1+til x}
 factp 3
@@ -2301,7 +2325,7 @@ factp 3
 
 <hr>
 
-**🔵 13. Demonstrate which calculation is faster, factorial using loops or via KDB**
+**🔵 11.13 Demonstrate which calculation is faster, factorial using loops or via KDB**
 ```q
 \ts do[1000;factw 12]
 ```
@@ -2316,7 +2340,7 @@ factp 3
 
 <hr>
 
-**🔵 14. Create function safefact that wraps factp with protected evaluation to return null On instead of error when calling on a negattive number**
+**🔵 11.14 Create function safefact that wraps factp with protected evaluation to return null On instead of error when calling on a negattive number**
 ```q
 safefact:{@[factp; x; 0N]}
 safefact -10
@@ -2326,7 +2350,7 @@ safefact -10
 
 <hr>
 
-**🔵 15. Write function isPalindrome that returns `yes if single argument is a palindrome list. Otherwise return `no**
+**🔵 11.15 Write function isPalindrome that returns `yes if single argument is a palindrome list. Otherwise return `no**
 ```q
 isPalindrome:{$[x~reverse x;`yes;`no]}
 isPalindrome 1 2 2 1
@@ -2339,7 +2363,7 @@ yes
 
 <hr>
 
-**🔵 16. Find the sum of all multiples of 3 or 5 below 1000**
+**🔵 11.16 Find the sum of all multiples of 3 or 5 below 1000**
 ```q
 sum where {(0 =x mod 3) or (0 = x mod 5)}[til 1000]
 ```
