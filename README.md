@@ -2354,8 +2354,12 @@ til 1000 = implicit variable (runs through 0...999)
 ## 🔴 12. Tables
 [Top](#top)
 
+* A table is a flipped dictionary.
+* Vectors of data are organized by columns. 
+* Tables are encased by parathesis ( ) and contain brackets [ ] which assigns the key.
+
 <a name="dict_to_table"></a>
-### 🔵 Flipping Dictionary to Table
+### 🔵 12.1 Flipping Dictionary to Table
 
 ```q
 d: `company`employees`! (`ford`bmw; 300 100)
@@ -2365,50 +2369,52 @@ key|Value
 company	|`ford`bmw
 employees|	300 100
 
-* dictionary d
-
 ```q
 flip d
+
+/ when you flip a dictionary, you get a table
 ```
 company | employees
 -|-
 ford |	300
 bmw	| 100
 
-* when you flip a dictionary, you get a table
-
 <a name="simple_table"></a>
-### 🔵 Simple Table
+### 🔵 12.2 Simple Table
 
 ```q
 ( [] company: `ford`bmw; employees: 300 100)
+
+/ have to define a table within parathesis ( )
+/ tables must have [] which are for key columns
+/ semi colon ; separates next column
 ```
 company | employees
 -|-
 ford |	300
 bmw	| 100
 
-* have to define a table within parathesis ( )
-* tables must have [] which are for key columns
-* semi colon ; separates next column
-
 <a name="single_row_table"></a>
-### 🔵 Single Row Table
+### 🔵 12.3 Single Row Table
 
 ```q
 ( [] company: enlist `ford; employees: enlist 300)
+
+/ have to use enlist for atoms and single row tables
 ```
 company | employees
 -|-
 ford |	300
 
-* have to use enlist for atoms and single row tables
-
 <a name="mixed_table"></a>
-### 🔵 Mixed Table
+### 🔵 12.3 Mixed Table
 
 ```q
 ( [] syms:`a`b`c; floats: 1.1 2.2 3.3; strings: ("bob"; "jim"; "john"))
+
+/ syms have to start with backtick
+/ strings have to enclose within (" ")
+
 ```
 syms|floats|strings
 -|-|-
@@ -2416,42 +2422,39 @@ a|	1.1 |	bob
 b|	2.2	|jim
 c|	3.3	|john
 
-* syms have to have backtick+sym
-* strings have to enclose within (" ")
 
 <a name="meta_datatypes_table"></a>
-### 🔵 Meta / Data Type Table
+### 🔵 12.4 Meta / Data Type Table
 
-* meta returns a table where each row is a column
+Meta returns a table where each row is a column
 
 ```q
 ( [] company:(); employees:() )
 meta t
+
+/ create empty table with no types
+/ c = column names
+/ t = datatype (s = symbol, j = long)
+/ f = foreign key
+/ a = attributes
 ```
 c|t|f|a
 -|-|-|-
 company|	|	|
 employees|	|	|
 
-* create empty table with no types
-* t = type (s = symbol, j = long)
-* f = foreign key
-* a = attributes
-
 ```q
 ( [] company: `symbol$(); employees: `int$())
+
+/ changed company type to s (symbol) and employees to i (integer)
 ```
 c|t|f|a
 -|-|-|-
 company|	s	|	|
 employees|	j	|	|
 
-* changed type to s symbol and i integer
-
 <a name="countrowsimple_table"></a>
-### 🔵 Count Row Table
-
-Given:
+### 🔵 12.5 Count Row Table
 
 company | employees
 -|-
@@ -2460,23 +2463,25 @@ bmw	| 100
 
 ```q
 count t
-```
 2
 
-* returns number of rows in table
+/ counts number of rows in table
+```
 
 ```q
 cols t
-```
 `company`employee
 
-* returns symbol list of columns
+/ returns list of all columns
+```
 
 <a name="rename_column_table"></a>
-### 🔵 Rename Column Table xcol
+### 🔵 12.6 Rename Column Table xcol
 
 ```q
 `a`b xcol t
+
+/ renamed first 2 columns from company/employee to a/b
 ```
 
 a | b
@@ -2485,38 +2490,36 @@ ford |	300
 bmw	| 100
 
 <a name="add_column_table"></a>
-### 🔵 Add Column Table
+### 🔵 12.7 Add Column
 
 ```q
 select company, employees, newval: 101 from t
+
+/ select will retrieve columns as values
+/ if you select a column that doesnt exist, it will add it (newval)
 ```
 company | employees | newval
 -|-|-
 ford |	300 | 101
 bmw	| 100 | 101
 
-* select will retrieve columns as values
-* if you select a column that doesnt exist, it will add it (newval)
-
 <a name="sort_column_table"></a>
-### 🔵 Sort Column Table (xasc)
+### 🔵 12.8 Sort Column Table (xasc)
 
 ```q
 `employees xasc t
+
+/ will sort ascending by employees
 ```
 company | employees | newval
 -|-|-
 bmw	| 100 | 101
 ford |	300 | 101
 
-* will sort ascending by employees
-
 <a name="union_table"></a>
-### 🔵 Union Table
+### 🔵 12.9 Union Table
 
-Given
-
-table t
+Table t
 
 company | employees
 -|-
@@ -2524,7 +2527,7 @@ ferrari| 100
 ford |	100 
 rover| 100
 
-table t
+Table u
 
 company | employees
 -|-
@@ -2534,6 +2537,10 @@ ford| 5
 
 ```q
 t union u
+
+/ returns values that are same (ferrari 100). does NOT dupe same values.
+/ any values that do NOT equal, adds as new row
+
 ```
 company | employees
 -|-
@@ -2543,37 +2550,36 @@ rover| 100
 bmw |	5 
 ford| 5
 
-* returns values that are same (ferrari 100). does not dupe same values.
-* any values that do NOT equal, adds as new row
-
 <a name="except_table"></a>
-### 🔵 Except Table
+### 🔵 12.10 Except Table
 
 ```q
 t except u
+
+/ from table t, check table u for any key + value matches, and remove
+/ ferrari 100 appears in both tables, hence removed
+/ then returns remaining rows in table t
+/ in table u, bmw + ford aren't matches, so ignored
 ```
 company | employees
 -|-
 ford| 100
 rover | 100 
 
-* checks for any matches, and removes them (ferrari 100)
-* returns remaining rows in table t
-
 <a name="inter_table"></a>
-### 🔵 Inter Table
+### 🔵 12.11 Inter Table
 
 ```q
 t inter u
+
+/ only returns rows from both table t and u that match
 ```
 company | employees
 -|-
 ferrari| 100
 
-* only returns rows that match
-
 <a name="distinct_table"></a>
-### 🔵 Distinct Table
+### 🔵 12.12 Distinct Table
 
 ```q
 ([] a: 1 1 2; b: 1 1 3)
@@ -2586,18 +2592,19 @@ a|b
 
 ```q
 distinct ([] a: 1 1 2; b: 1 1 3)
+
+/ will return distinct values per row
 ```
 a|b
 -|-
 1|	1
 2	|3
 
-* will return distinct values per row
 
 <a name="retrieve_table"></a>
-### 🔵 Retrieve From Table
+### 🔵 12.13 Retrieve From Table
 
-Given
+Table t:
 
 company | employees
 -|-
@@ -2609,6 +2616,8 @@ ford| 5
 
 ```q
 select from t
+
+/ retrieves all columns from table t
 ```
 company | employees
 -|-
@@ -2618,10 +2627,10 @@ rover| 100
 bmw |	5 
 ford| 5
 
-* retrieves all columns from table t
-
 ```q
 select company from t
+
+/ only retrieves the company column
 ```
 
 company | 
@@ -2632,27 +2641,27 @@ rover|
 bmw |	 
 ford| 
 
-* only retrieves the company column
-
 ```q
 select from t where company = `ford
+
+/ retrieves rows where company = ford 
 ```
 
 company | employees
 -|-
 ford | 100 
 
-* retrieves rows that meet the specific where requirement (ford)
-
 ```q
 t [`employees]
+
+/ retrieves column= employee as a row
 ```
 100 100 100 5 5 
 
-* retrieves column= employee as a row
-
 ```q
 t [`employees] - : 100
+
+/ -100 from every value in column employee
 ```
 company | employees
 -|-
@@ -2661,27 +2670,24 @@ ford | 0
 rover| 0
 bmw |	-105 
 ford| -105
-
-* you can manipulate all the values in a column (employees)
 
 ```q
 t [ 0 1]
+or
+2#t
+
+/ returns first 2 rows
 ```
 company | employees
 -|-
 ferrari| 0
 ford | 0 
 
-* returns first 2 rows
-
-alternatively
-
-```q
-2#t
-```
 
 ```q
 -3#t
+
+/ returns last 3 rows
 ```
 
 company | employees
@@ -2690,10 +2696,10 @@ rover| 0
 bmw |	-105 
 ford| -105
 
-* returns last 3 rows 
-
 ```q
 2 ? t
+
+/ randomly selects 2 rows from table
 ```
 
 company | employees
@@ -2701,10 +2707,8 @@ company | employees
 rover| 0
 ford| -105
 
-* randomly select 2 from table
-
 <a name="insert_table"></a>
-### 🔵 Insert Table
+### 🔵 12.14 Insert Table
 
 ```q
 t: ( [] company: (); employees: () )
