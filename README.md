@@ -18,6 +18,7 @@
 13. [Larger](#larger_intro)
 14. [Smaller](#smaller_intro)
 15. [+:](#pluscolon)
+16. [Multi-line Comment](#multilinecomment)
 
 ## 2. [Data Types & Casting & Enumeration](#casting_header)
 1. [Datatype Table](#datatype_table)
@@ -443,6 +444,18 @@ x*:3
 / is the same as
 x:x*3
 ```
+
+<a name="multilinecomment"></a>
+### 🔵 1.17 Multi-line Comment
+
+```q
+/
+to write a multi line comment
+start with "/"
+end with "\"
+\
+```
+
 
 <a name="casting_header"></a>
 ## 🔴 2. Data Types & Casting 
