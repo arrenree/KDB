@@ -3102,11 +3102,14 @@ MS|	Fin|	100
 [Top](#top)
 
 <a name="single_keyed_table"></a>
-### 🔵 Single Keyed Table
+### 🔵 14.1 Single Keyed Table
 
 ```q
 ( [id: `a`b`c`e] name:`jane`jim`kim`john; employer:`citi`citi`ms`ts; age: 11 22 33 44)
+
+/ the [ ] square bracket holds the key columns
 ```
+
 id|name|employer|age
 -|-|-|-
 `a`|	jane|	citi|	11
@@ -3114,13 +3117,13 @@ id|name|employer|age
 `c`|	kim|	ms|	13
 `e`|	john|	ts|	15
 
-* the [ ] square bracket holds the key columns
-
 <a name="multi_keyed_table"></a>
-### 🔵 Multi Keyed Table
+### 🔵 14.2 Multi Keyed Table
 
 ```q
 kt: ( [id:`a`b`c`d; name:`jane`jim`kim`john] employer:`citi`citi`ms`ts; age: 11 22 33 44)
+
+/ columns id and name are both keyed columns
 ```
 
 id|name|employer|age
@@ -3131,10 +3134,14 @@ id|name|employer|age
 `e`|	`john`|	ts|	15
 
 <a name="retrieving_keysvalues"></a>
-### 🔵 Retrieving Keys/Values
+### 🔵 14.3 Retrieving Keys/Values
+
 ```q
 key kt
+
+/ retrieves key columns
 ```
+
 id|name
 -|-
 a	|jane
@@ -3142,11 +3149,10 @@ b	|jim
 c	|kim
 d	|john
 
-*retrieves key columns
-
 ```q
 value kt
 ```
+
 employer|age
 -|-
 citi|	11
@@ -3155,7 +3161,7 @@ ms|	33
 ts|	44
 
 <a name="changing_keys"></a>
-### 🔵 Changing Keys
+### 🔵 14.4 Changing Keys
 
 Table kt
 
@@ -3166,11 +3172,15 @@ id|name|employer|age
 `c`|	kim|	ms|	13
 `e`|	john|	ts|	15
 
-* id column is keyed
+/ only id column is keyed for now
 
 ```q
 `id`name xkey `kt
+
+/ changed key columns to both id and name
+/ use backtick kt to change underlying table
 ```
+
 id|name|employer|age
 -|-|-|-
 `a`|	`jane`|	citi|	11
@@ -3178,14 +3188,13 @@ id|name|employer|age
 `c`|	`kim`|	ms|	13
 `e`|	`john`|	ts|	15
 
-* changed key columns to both id and name
-* use backtick kt to change underlying table
-
 <a name="adding_keys"></a>
-### 🔵 Adding Keys
+### 🔵 14.5 Adding Keys
 
 ```q
 1!kt
+
+/ adds first column as a key
 ```
 id|name|employer|age
 -|-|-|-
@@ -3195,15 +3204,14 @@ id|name|employer|age
 `e`|	john|	ts|	15
 
 <a name="removing_keys"></a>
-### 🔵 Removing Keys
+### 🔵 14.6 Removing Keys
 
 ```q
 () xkey `kt
-```
 or
-```q
 0!kt
 ```
+
 id|name|employer|age
 -|-|-|-
 a|	jane|	citi|	11
@@ -3212,7 +3220,7 @@ c|	kim|	ms|	13
 e|	john|	ts|	15
 
 <a name="upsert_keys"></a>
-### 🔵 Upserting Keys
+### 🔵 14.7 Upserting Keys
 
 Given
 ```q
@@ -3225,7 +3233,13 @@ id|name|employer|age
 
 ```q
 upsert[`kt;nd]
+
+/ if key exists and matches, updates value
+/ if new key, adds new row
+/ since key e already exists, overrides values for name, employer, age
+/ must make sure underlying keyed columns match, otherwise error. (1 keyed col vs 2 keyed col)
 ```
+
 id|name|employer|age
 -|-|-|-
 `a`|	jane|	citi|	11
@@ -3234,14 +3248,13 @@ id|name|employer|age
 `e`|	dan|	walmart|	200
 `f`|	kate|	walmart|	200
 
-* if key exists and matches, updates value
-* if new key, adds new row
-* since key e already exists, overrides values for name, employer, age
-* must make sure underlying keyed columns match, otherwise error. (1 keyed col vs 2 keyed col)
-
 ```q
 upsert [`kt; ( [id:`f`g] name:`ron`allen)]
+
+/ f was updated to ron, and since no employer or age info, pulled from existing kt table (kate's old row)
+/ g is new key, so adds new row. since no info, returns null
 ```
+
 id|name|employer|age
 -|-|-|-
 `a`|	jane|	citi|	11
@@ -3251,11 +3264,8 @@ id|name|employer|age
 `f`|	ron|	walmart|	200
 `g`|	allen|	|	
 
-* f was updated to ron, and since no employer or age info, pulled from existing kt table (kate's old row)
-* g is new key, so adds new row. since no info, returns null
-
 <a name="upsert_multi_rowkeys"></a>
-### 🔵 Upserting Multi Rows/Keys
+### 🔵 14.8 Upserting Multi Rows/Keys
 
 Given:
 ```q
@@ -3269,7 +3279,11 @@ employer|loc|size|area
 
 ```q
 upsert [et; ([employer:`kx`ms; loc:`NY`SG] size: 9 10)]
+
+/ updated kx, NY to 9 (overrides prev value)
+/ since there was no ms, SG, adds new row 
 ```
+
 employer|loc|size|area
 -|-|-|-
 `kx`|	`NY`|	9|	1
@@ -3277,11 +3291,8 @@ employer|loc|size|area
 `ms`|	`HK`|	30|	3
 `ms`|	`SG`|	10|	
 
-* updated kx, NY to 9 (overrides prev value)
-* since there was no ms, SG, adds new row 
-
 <a name="retrieve_value_keys"></a>
-### 🔵 Retrieving Values from Keyed Table
+### 🔵 14.9 Retrieving Values from Keyed Table
 
 Given:
 
@@ -3351,7 +3362,7 @@ size|area
 ## 🔴 15. Keyed Tables Problem Set
 [Top](#top)
 
-**🔵 1. Create the following keyed table**
+**🔵 15.1 Create the following keyed table**
 
 table p
 
@@ -3372,7 +3383,7 @@ p: ( [book:`A`B`B`C; ticker:`MS`AAPL`MS`C] size:100 200 300 400)
 
 <hr>
 
-**🔵 2. Retrieve entries where book is B, using select**
+**🔵 15.2 Retrieve entries where book is B, using select**
 ```q
 select from p where book=`B
 ```
@@ -3383,7 +3394,7 @@ book | ticker|size
 
 <hr>
 
-**🔵 3. Retrieve entries where book is C and ticker is c, using take**
+**🔵 15.3 Retrieve entries where book is C and ticker is c, using take**
 ```q
 ( [book:enlist`C; ticker:enlist`C]) # p
 ```
@@ -3394,7 +3405,7 @@ book | ticker|size
 * underlying table p has 2 keyed columns (book and ticker)
 * you cannot retrieve 2 keyed columns if underlying table only has 1 key column
 
-**🔵 4. Upsert the following values**
+**🔵 15.4 Upsert the following values**
 
 table p
 
@@ -3424,7 +3435,7 @@ upsert [p; ([book:`C`D; ticker:`C`MS]size:400 500)]
 [Top](#top)
 
 <a name="set_attribute_creation"></a>
-### 🔵 Setting Attributes During Creation
+### 🔵 16.1 Setting Attributes During Creation
 ```q
 l:`s# 1 2 3 4 5 
 ```
@@ -3440,7 +3451,7 @@ attr l
 * 's means sorted attribute applied
 
 <a name="apply_attribute_data"></a>
-### 🔵 Applying Attribute to Existing Data
+### 🔵 16.2 Applying Attribute to Existing Data
 ```q
 k: 1 2 3 4 5
 ```
@@ -3495,7 +3506,7 @@ val	|j|
 * under attributes for column time, s sorted has been applied
 
 <a name="clear_attribute"></a>
-### 🔵 Clear Attributes
+### 🔵 16.3 Clear Attributes
 ```q
 @ [`.;`k;`#]
 ```
@@ -3532,7 +3543,7 @@ k: til 1000000
 * applying sort applies a binary search. start in the middle, (ex 5), less than that, so checks mid (ex 3), more, so 4
 
 <a name="sort_attribute"></a>
-### 🔵 Sorted Attribute
+### 🔵 16.4 Sorted Attribute
 * sorted attribute applied to list or column to specify data is sorted in ascending order
 * the underlying list must already be in ascending order, otherwise error
 * `s# attribute only maintained during append that maintain the sort requirement, otherwise lost
@@ -3577,7 +3588,7 @@ attr list
 s-fail
 
 <a name="unique_attribute"></a>
-### 🔵 Unique Attribute
+### 🔵 16.5 Unique Attribute
 * unique attribute applied to a list where all values must be unique (no same values)
 
 ```q
@@ -3608,7 +3619,7 @@ attr lu
 * loses unique attribute since 4 already exists
 
 <a name="group_attribute"></a>
-### 🔵 Grouped Attribute
+### 🔵 16.6 Grouped Attribute
 * groups same identifiers together for faster searches
 
 ```q
@@ -3640,7 +3651,7 @@ key|value
 * stores lookup table from values to indices where they occur
 
 <a name="parted_attribute"></a>
-### 🔵 Parted Attribute
+### 🔵 16.7 Parted Attribute
 * parted attribute marks a list of having same value occuring in sequential block
 * enables faster searches
 
@@ -3676,7 +3687,7 @@ attr lp
 * Foreign keys restrict the values that are allowed in a column
 
 <a name="single_fkey"></a>
-### 🔵 Single Foreign Keys
+### 🔵 17.1 Single Foreign Keys
 
 Given:
 
@@ -3717,7 +3728,7 @@ update `company$employer from `employee
 * the values in column employee must exist in domain company table
 
 <a name="check_fkey"></a>
-### 🔵 Checking Foreign Keys
+### 🔵 17.2 Checking Foreign Keys
 
 ```q
 meta employee
@@ -3740,7 +3751,7 @@ key|value
 employer|company
 
 <a name="upsert_fkey"></a>
-### 🔵 Upserting with Foreign Keys
+### 🔵 17.3 Upserting with Foreign Keys
 ```q
 upsert[employee; ( [] name:`james`claire; employer:`RBS`RBS)]
 ```
@@ -3781,7 +3792,7 @@ claire | RBS
 * now you can append james and claire
 
 <a name="retrieve_fkey"></a>
-### 🔵 Retrieving Columns via fkey
+### 🔵 17.4 Retrieving Columns via fkey
 company table
 
 sym | advice | level
@@ -3817,7 +3828,7 @@ arthur|	KX|	BUY|	10
 greg|	MS|	SELL|	90
 
 <a name="multi_fkey"></a>
-### 🔵 Multiple Foreign Keys
+### 🔵 17.5 Multiple Foreign Keys
 ```q
 office: ([sym:`TS`KX`C; loc:`LDN`NY`LDN] employees:10+3?1000)
 ```
@@ -3893,7 +3904,7 @@ arthur|	KX|	NY	|1|	KX|	NY
 ## 🔴 18. Foreign Key Problem Set
 [Top](#top)
 
-**🔵 1. Given the following table**
+**🔵 18.1. Given the following table**
 
 book table
 
@@ -3913,7 +3924,7 @@ date|time|sym|price|size|cond|bookId
 2021.01.01|09:00|UPS|34|100| A| lefhe
 2021.01.01|09:00|A|56|100| C| bfjnf
 
-**🔵 1. Insert a foreign key column into the trade table called owner, linking trade and book table, using bookID**
+**🔵 18.1. Insert a foreign key column into the trade table called owner, linking trade and book table, using bookID**
 ```q
 update owner: `book$bookId from `trade
 ```
@@ -3933,7 +3944,7 @@ c | t|f|a
 -|-|-|-
 owner | | book|
 
-**🔵 2. Join the book table onto the trade table and add the name of person who did trade**
+**🔵 18.2 Join the book table onto the trade table and add the name of person who did trade**
 ```q
 update owner.name from trade
 ```
@@ -3950,16 +3961,16 @@ date|time|sym|price|size|cond|bookId | owner|name
 <hr>
 
 <a name="qsql_header"></a>
-## 🔴   19. qSQL
+## 🔴 19. qSQL
 [Top](#top)
 
 **4 Types of Queries**
 
 ```q
-select:
+select
 select a by b from t where c
 
-update:
+update
 select a by b from t where c
 
 exec
@@ -3975,42 +3986,22 @@ delete a by b from t where c
 
 ### 🔸 Select Template
 * the result of a select statement is a table
-* each phrase (a, b, c) is a comma separated value
-* order of evaluation is left to right
-* the sub phrases (comma separated values) in a phrase are evaluated from right to left individually
-* where is a conditional clause for the records
 
-### Multiple where subphrases
+### Example Where subphrases
 ```q
 select from trade where size>300, price>100
-```
-```q
 select from trade where sym in `AAPL`GOOG
-```
-```q
 select from trade where price within (200:300)
-```
-```q
 select from trade where (price>100) and size>300
-```
-```q
 select from trade where (price>100) or size> 300
-```
-```q
 select i, sym, price from trade where i>5
-```
-```q
 select price, i by sym from trade
 ```
 
 ### Analytics on Grouped Data
 ```q
 select max price by sym from trade
-```
-```q
 select price by sym from trade
-```
-```q
 ungroup select price by sym from trade
 ```
 
@@ -4100,45 +4091,44 @@ update price:avg price by sym from trade where sym in `AAPL`GOOG
 ```
 updates the price to average price, grouped by sym 
 
-
-
 <a name="select_template"></a>
 ### 🔵 19.1) Select Template
 
 ```q
 select a by b from t where c
+
+/ result of a select is a table
 ```
-* result of a select is a table
-* each phrase (a, b, c) is a comma separated value
-* order of evaluation is left to right
-* the sub phrases (comma separated) are evaluated right to left
 
 ```q
 select from trade
+
+/ this will select the whole table
 ```
-* this will select the whole table
 
 ```q
 select sym, price from trade
+
+/ this will select the sym and price columns only
 ```
-* this will select the sym and price columns only
 
 <a name="selectadd_template"></a>
 ### 🔵 19.2) Adding a new column using select
 
 ```q
 select sym, price, size, total:price*size from trade
+
+/ if you select a column name that doesnt exist, it will append it
+/ in this case, total will be returned
 ```
-* if you select a column name that doesnt exist, it will append it
-* in this case, total will be returned
 
 <a name="qsqlvirtuali_template"></a>
 ### 🔵 19.3) Virtual Column i
 
-* q provides a virtual column i which represents the offset of each record
-
 ```q
 select i, sym, price from trade
+
+/ q provides a virtual column i which represents the offset of each record
 ```
 
 x | sym | price   
@@ -4157,18 +4147,21 @@ x | sym | price
 
 ```q
 select [4] from trade
+
+/ selects the first 4 records
 ```
-* selects the first 4 records
 
 ```q
 select [-3] from trade
+
+/ selects the last 3 records
 ```
-* selects the last 3 records
 
 ```q
 select [1 4] from trade
+
+/ skips 0, returns 1, 2, 3, 4
 ```
-* skips 0, returns 1, 2, 3, 4
 
 <a name="select_from_where"></a>
 ### 🔵 19.5) Select from where
