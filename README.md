@@ -107,6 +107,7 @@
 13. [Distinct Table](#distinct_table)
 14. [Retrieve From Table](#retrieve_table)
 15. [Insert Table](#insert_table)
+16. [Operations on Tables](#operations_table)
 
 ## 13. [Tables Problem Set](#tables_problem_set)
 
@@ -2765,13 +2766,52 @@ alternatively:
 ```q
 t:t,x
 ```
+
+<a name="operations_table"></a>
+### 🔵 12.15 Operations on Tables
+
+With KEYED tables, you can use arithmetic between tables
+
+```q
+t1: ([sym: `a`b`c] num: 1 2 3)
+t2: ([sym: `a`b`c] num: 1 1 1)
+t1+t2
+
+/ both tables have to be keyed
+/ column names have to match
+```
+
+sym | num
+-|-
+a | 2
+b | 3
+c | 4
+
+
+```q
+/ if UNKEYED, can only do math on tables with numeric fields
+
+t1: ([] sym: 1 2 3; num: 1 2 3)
+t2: ([] sym: 1 1 1; num: 1 1 1)
+t1+t2
+
+/ will find the column names that match, and add values together
+/ column names that dont match will be union joined as a new column
+```
+
+sym | num
+-|-
+2 | 2
+3 | 3
+4 | 4
+
 <hr>
 
 <a name="tables_problem_set"></a>
 # 🔴 13. Tables Problem Set
 [Top](#top)
 
-**🔵 1. Given:**
+**🔵 Given:**
 
 ```q
 stock: ( [] sym: `MS`C`AAPL; sector:`Financial`Financial`Tech; employees: 100 100 100)
@@ -2782,7 +2822,7 @@ MS	|Financial|	100
 C	|Financial	|100
 AAPL|	Tech	|100
 
-**🔵 1. Extract the employees numbers (without the header)**
+**🔵 13.1 Extract the employees numbers (without the header)**
 
 ```q
 stock [ ; `employees]
@@ -2803,7 +2843,7 @@ stock`employees
 
 <hr>
 
-**🔵 2. Key the first column in stock table (above)**
+**🔵 13.2 Key the first column in stock table (above)**
 
 ```q
 1!stock
@@ -2819,7 +2859,7 @@ AAPL|	Tech	|100
 
 <hr>
 
-**🔵 3. Display only the first and second rows of the stock table**
+**🔵 13.3 Display only the first and second rows of the stock table**
 
 ```q
 2#stock
@@ -2836,7 +2876,7 @@ C	|Financial	|100
 
 <hr>
 
-**🔵 4. Select the last row of stock table as a dictionary**
+**🔵 13.4 Select the last row of stock table as a dictionary**
 
 ```q
 last stock
@@ -2849,7 +2889,7 @@ employees | 100
 
 <hr>
 
-**🔵 5. Insert GOOG in the tech sector with 100 employees**
+**🔵 13.5 Insert GOOG in the tech sector with 100 employees**
 
 ```q
 insert [`stock; ([] sym: enlist `GOOG; sector: enlist `tech; employees: enlist 100)]
@@ -2866,7 +2906,7 @@ GOOG | Tech | 100
 
 <hr>
 
-**🔵 6. Given:**
+**🔵 13.6 Given:**
 
 ```q
 boss: ( [] name:`bob`bill`belinda; height: 188 186 174)
@@ -2887,7 +2927,7 @@ jim|	180
 jane|	160
 john|	170
 
-**🔵 6. Find the average height of the bosses, the employees, and both the bosses and employees**
+**🔵 13.6 Find the average height of the bosses, the employees, and both the bosses and employees**
 
 ```q
 avg boss `height
@@ -2909,7 +2949,7 @@ avg (employees, boss) `height
 
 <hr>
 
-**🔵 7. Find the 2 tallest employees**
+**🔵 13.7 Find the 2 tallest employees**
 ```q
 2#`height xdesc employees
 ```
@@ -2922,7 +2962,7 @@ john|	170
 
 <hr>
 
-**🔵 8. Given the 2 tables:**
+**🔵 13.8 Given the 2 tables:**
 
 ```q
 stock: ( [sym:`MS`C`AAPL] sector:`Fin`Fin`Tech; employees: 100 100 100)
@@ -2971,7 +3011,7 @@ dt|sym|price|size
 
 <hr>
 
-**🔵 9. Insert the following record into stock**
+**🔵 13.9 Insert the following record into stock**
 sym|sector|employees
 -|-|-
 FB|	Tech|	100
@@ -2990,7 +3030,7 @@ FB | Tech | 100
 
 <hr>
 
-**🔵 10. In the stock table, change the number of employees for C to 300**
+**🔵 13.10 In the stock table, change the number of employees for C to 300**
 
 ```q
 stock upsert (`C;`Fin;300)
