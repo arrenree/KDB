@@ -19,6 +19,7 @@
 14. [Smaller](#smaller_intro)
 15. [+:](#pluscolon)
 16. [Multi-line Comment](#multilinecomment)
+17. [Signum](#signum)
 
 ## 2. [Data Types & Casting & Enumeration](#casting_header)
 1. [Datatype Table](#datatype_table)
@@ -431,7 +432,7 @@ k: 1 2 3 4
 <hr>
 
 <a name="pluscolon"></a>
-### 🔵 1.16 +:
+### 🔵 1.15 +:
 
 ```q
 x+:1
@@ -446,7 +447,7 @@ x:x*3
 ```
 
 <a name="multilinecomment"></a>
-### 🔵 1.17 Multi-line Comment
+### 🔵 1.16 Multi-line Comment
 
 ```q
 /
@@ -456,6 +457,29 @@ end with "\"
 \
 ```
 
+<a name="signum"></a>
+### 🔵 1.17 Signum
+
+```q
+/ Signum conveys whether a value is positive, negative, or 0
+
+prices: 3 2 2 1 5
+deltas prices
+3 -1 0 -1 4
+
+/ deltas = difference between each element
+
+signum deltas prices
+1 -1 0 -1 1
+
+/ signum shows if element is positive, negative or 0
+
+tickdirection: {signum deltas[first x;x]}
+tickdirection prices
+
+```
+
+<hr>
 
 <a name="casting_header"></a>
 ## 🔴 2. Data Types & Casting 
@@ -2750,33 +2774,33 @@ ford| -105
 
 ```q
 t: ( [] company: (); employees: () )
+
+/ create empty table
 ```
 company|employees
 -|-
 
-* empty table
-
 ```q
 insert [`t; (`Ferrari; 8)]
+
+/ backtick t to update underlying table
+/ first argument is table name(t), second argument are the values to be inserted
+/ semi colon separate columns for the values
 ```
 company|employees
 -|-
 Ferrari | 8
 
-* backtick t to update underlying table
-* first argument is table name, second argument are the values to be inserted
-* semi colon separate columns for the values
-
 ```q
 insert [`t; (Ferrari`bmw; 9 7)]
+
+/ insert will append to the table each time (ferrari repeated)
 ```
 company|employees
 -|-
 Ferrari | 8
 Ferrari | 9
 bmw | 7
-
-* insert will append to the table each time (ferrari repeated)
 
 ```q
 x: ( [] company: `Subaru`Hyundai; employees: 55 56)
@@ -3979,117 +4003,13 @@ exec a by b from t where c
 delete
 delete a by b from t where c
 ```
-* select/update/exec/delete - the columns(original or modified by functions) returned
-* from t - from table you want to run the query on
-* where c - apply filtering conditions
-* by b - group by columns b
-
-### 🔸 Select Template
-* the result of a select statement is a table
-
-### Example Where subphrases
 ```q
-select from trade where size>300, price>100
-select from trade where sym in `AAPL`GOOG
-select from trade where price within (200:300)
-select from trade where (price>100) and size>300
-select from trade where (price>100) or size> 300
-select i, sym, price from trade where i>5
-select price, i by sym from trade
+Evaluated in the following order:
+1. from
+2. where
+3. by
+4. select
 ```
-
-### Analytics on Grouped Data
-```q
-select max price by sym from trade
-select price by sym from trade
-ungroup select price by sym from trade
-```
-
-### xbar
-rounds right argument down to nearest multiple of left argument
-```q
-7 xbar 10 20 30 40 50
-7 14 28 35 39
-```
-```q
-5 xbar 11:00 + 0 3 5 11
-11:00 11:00 11:05 11:10
-```
-remember, it evaluates right to left (so 11+0 3 5 11), then does 5 xbar
-```q
-select price by sym, 240 xbar time.minute from trade
-```
-```q
-select avg price by sym, 240 xbar time.minute from trade
-```
-
-### 🔸 Exec Template
-* exec from one column returns a list
-* exec from more than one column returns a dictionary
-* one diff between select and exec is the column lists do not have to be rectangular to return a result
-
-```q
-exec sym from trade
-`GOOG`GOOG`MSFT
-```
-```q
-exec sym, price, size from trade
-```
-* exec from multiple columns returns a dictionary
-```q
-exec price by sym from trade
-```
-exec with single column with by clause returns a dictionary
-
-
-### Select vs Exec
-```q
-cnc: ([] city:`toronto`london`ny`vancouver; country:`canada`england`usa`canada)
-```
-city | country
--|-
-toronto|	canada
-london	|england
-ny|	usa
-vancouver|	canada
-
-```q
-exec city, distinct country from cnc
-```
-key|value
--|-
-city|	toronto london ny vancouver
-country|	canada england usa
-
-```q
-select city, distinct country from cnc
-```
-error because select expects the columns to have the same length
-
-### 🔸 Update Template
-* update phrase updates a pre-existing column in t with value evaluated with an assignemtn
-* if column doesnt exist, gets joined to the result at the end of column list
-* original table unaffected unless the data is persisted by using backtick
-
-```q
-update price: 10.0 from trade
-```
-this will update all prices to 10
-```q
-update price:10.0 from trade where sym in `AAPL`GOOG
-```
-this will update prices to 10 for AAPL and GOOG 
-uses where clause - updates only the filtered records
-
-```q
-update vol:price*size from trade where sym in `AAPL`GOOG
-```
-new column vol is added 
-
-```q
-update price:avg price by sym from trade where sym in `AAPL`GOOG
-```
-updates the price to average price, grouped by sym 
 
 <a name="select_template"></a>
 ### 🔵 19.1) Select Template
@@ -4110,6 +4030,26 @@ select from trade
 select sym, price from trade
 
 / this will select the sym and price columns only
+```
+
+```q
+t:([] sym:`a`b`c`d; price: 1 2 3 4)
+2 sublist t
+
+/ returns the first 2 rows of t
+```
+```q
+/ Given a table, select the high, low, open, and close price by sym
+
+select high: max price, low: min price, open: first price, close: last price by sym from trade
+```
+
+
+### Analytics on Grouped Data
+```q
+select max price by sym from trade
+select price by sym from trade
+ungroup select price by sym from trade
 ```
 
 <a name="selectadd_template"></a>
@@ -4164,25 +4104,23 @@ select [1 4] from trade
 ```
 
 <a name="select_from_where"></a>
-### 🔵 19.5) Select from where
+### 🔵 19.5) Where Clause
 
-General Rules
-* column =
-* sym=`A 
-* cond="A"
-* .z.d means today
-* use comma , for multiple expressions
-* put most restrictive clause first, starting from left (saves time)
+Where clause operates left to right, so put most restrictive clause first
 
 ```q
 select from trade where date=20121.05.29, sym=`A
+
+/ where colname = xxx
+/ use commas for multiple where expressions
+/ put most restrictive clause first, starting from left (saves time)
 ```
 
 date | time | sym |price | size | cond
 -|-|-|-|-|-
-2021-05-29|	09:30:02.758|	A|	100.35004081670195 |	50300|	B
-2021-05-29|	09:30:17.997|	A |	57.81544134486467 |	65600	|C
-2021-05-29|	09:30:21.507|	A	|97.85912833176553 |	51800|	B
+2021-05-29|	09:30:02.758|	A|	100.35 |	50300|	B
+2021-05-29|	09:30:17.997|	A |	57.81 |	65600	|C
+2021-05-29|	09:30:21.507|	A	|97.85 |	51800|	B
 
 ```q
 select price from trade where date=2021.05.29, sym=`A
@@ -4204,14 +4142,15 @@ price |
 
 ```q
 count select from trade where cond="A"
-```
 211597
+```
 
 ```q
 select by sym from trade where date=.z.d
+
+/ by sym = will set sym as the key and agg all dates with the same sym
+/ since select + blank , KDB will auto select last entry in column
 ```
-* by sym = will set sym as the key and agg all dates with the same sym
-* since select + blank , KDB will auto select last entry in column
 
 sym|date|time|price|size|cond
 -|-|-|-|-|-|
@@ -4219,15 +4158,40 @@ sym|date|time|price|size|cond
 `AA`|	2021-06-02|	17:29:58.789 |	68.09 |	88100	|A
 `AAPL`|	2021-06-02|	17:29:58.262 |	76.18	|22500	|A
 
+### Where clause from 2 different Tables
+
+```q
+t1: ([] date: 2021.10.21 2021.10.21 2021.10.21 2021.10.21; sym: `GOOG`MSFT`FB`AMZN; exch: `nyse`nyse`nasdaq`nasdaq)
+t2: ([] sym: `GOOG`FB; exch: `nyse`nasdaq)
+
+select from t1 where date=2021.10.21,([]sym;exch) in t2
+
+/ this will filter date = 2021.10.21
+/ and where the sym + exch columns appear in t2
+```
+
+
+### Sample Where Clauses
+
+```q
+select from trade where size>300, price>100
+select from trade where sym in `AAPL`GOOG
+select from trade where price within (200:300)
+select from trade where (price>100) and size>300
+select from trade where (price>100) or size> 300
+select i, sym, price from trade where i>5
+select price, i by sym from trade
+```
+
 <a name="select_by"></a>
-### 🔵 19.6) Select By
+### 🔵 19.6) By
 
 ```q
 select first price, first time by date from trade where sym=`AAPL
-```
-* select = return column of values
-* by date = sets date as the key column
 
+/ select = return column of values
+/ by date = sets date as the key column
+```
 
 date|price|time
 -|-|-
@@ -4237,34 +4201,89 @@ date|price|time
 
 ```q
 select open:first price, high:max price, low:min price, close:last price by date from trade where sym=`AAPL
+
+/ open: renames the column
 ```
-* open: renames the column
 
 date|open|high|low|close
 -|-|-|-|-
 `2021-05-29`|	78.66|	109.91 |	50.5 |	68.01
 `2021-05-30`|	60.88	|109.98	| 50.0	| 90.49
 
+```q
+/ lets say you want to check if the latest value was an uptick, downtick, or unch
+/ can make use of the signum function
+
+select from trade / shows all columns
+update dir: signum deltas price from trade
+
+/ this will add a new column, dir, which will be +1, 0, or -1
+/ deltas will calculate the difference between subsequence elements
+/ signum will tell you if the element is positive, negative, or 0
+```
+
+sym |  price|    size|  cond |dir
+-|-|-|-|-
+C|    59| 18400| C|    1  
+F|    104| 62600|   |   1  
+IBM|  73| 77500| B  |  -1 
+A|   63| 73000| B   | -1 
+
+```q
+/ now lets say you want to group it by sym and see total size traded by direction (uptick, downtick, etc)
+
+tickdir:{0i,1 _signum deltas x}
+
+/ create function tickdir which will start the dir at 0
+
+select sum size by sym, dir from update dir:tickdir price by sym from trades
+
+/ this syntax is a bit funny, since you have 2 froms 
+/ you would THINK you could do this:
+
+select sum size by sym, dir:signum deltas price by sym from trades
+
+/ but you CAN'T, as tickdir is calculated on the price column as a whole
+/ instead of splititng on sym first
+/ so you have to use an fby instead
+
+select sum size by sym, dir:(tickdir; price) fby sym from trades
+
+/ this will now work and returns same table as above
+/ the fby aggregates the tickdir from price column by sym
+```
+
+sym| dir| size
+-|-|-
+AAPL|0 |311
+CSCO |0 |2191
+GOOG |-1 | 394
+
+
+
+
+
 <a name="select_count"></a>
 ### 🔵 19.7) Select Count 
 
 ```q
 select count i, max prirce by date, time.hh from trade where sym=`RBS
+
+/ i is a virtual column that returns the number of rows (as column x)
 ```
 date|hh|x|prrice
 -|-|-|-
 `2021-05-29`|	`9`|	645 |	50.5 
 `2021-05-30`|	`10`	|154	| 50.0
 
-* i is a virtual column that returns the number of rows (as column x)
-
 <a name="using_ops_functions"></a>
 ### 🔵 19.8) Using Operations and Functions 
 
 ```q
 select price by date from trade where sym=`AAPL, price < avg price
+
+/ finds all AAPL prices that are less than the avg price grouped by date
 ```
-* finds all AAPL prices that are less than the avg price grouped by date
 
 date|price
 -|-
@@ -4273,9 +4292,10 @@ date|price
 
 ```q
 select price by date=.z.d from trade where sym=`AAPL, price < avg price
+
+/ retrieve prices, keyed by TODAY, where AAPL's price is less than the avg price
+/ grouped by today; 0 = false, 1 = true
 ```
-* retrieve prices, keyed by TODAY, where AAPL's price is less than the avg price
-* grouped by today; 0 = false, 1 = true
 
 d | price
 -|-
@@ -4284,8 +4304,9 @@ d | price
 
 ```q
 select {x % max x} price by date = .z.d from trade where sym=`AApl, price < avg price
+
+/ retrieve price / max price, keyed by today, where the price is less than the avg price
 ```
-* retrieve price / max price, keyed by today, where the price is less than the avg price
 
 d | price
 -|-
@@ -4297,23 +4318,26 @@ d | price
 
 ```q
 select from trade where sym in `AAPL`RBS
+
+/ in function checks if every LHS argument occurs anywhere in RHS argument (AAPL or RBS)
+/ a faster way of checking "or" arguments
 ```
-* in function checks if every LHS argument occurs anywhere in RHS argument (AAPL or RBS)
-* a faster way of checking "or" arguments
 
 date|time|sym|price|size|cond
 -|-|-|-|-|-
 2021-05-30|	09:30:02.743 |	RBS |	97.113	| 80700 |	C
 2021-05-30|	09:30:03.025 |	AAPL |	78.66 |	19000	| A
 
+
 <a name="within_function"></a>
 ### 🔵 19.10) Within Function
 
 ```q
 select from trade where sym=`RBS, price within 95 100
+
+/ checks if LHS argument is within the range on RHS argument
+/ has to have lower + upper bind
 ```
-* checks if LHS argument is within the range on RHS argument
-* has to have lower + upper bind
 
 date|time|sym|price|size|cond
 -|-|-|-|-|-
@@ -4322,8 +4346,9 @@ date|time|sym|price|size|cond
 
 ```q
 select from trade where sym=`RBS, price within 95 100, time within 11:30 12:00
+
+/ 2 within filters, price and time
 ```
-* 2 within filters, price and time
 
 date|time|sym|price|size|cond
 -|-|-|-|-|-
@@ -4332,32 +4357,139 @@ date|time|sym|price|size|cond
 
 <a name="xbar_function"></a>
 ### 🔵 19.11) Xbar Function
-* xbar allows for custom sized boundaries
+
+```q
+select max price, sum size by sym, 5 xbar time.minute from trades
+
+/ set xbar as 5 minute time buckets
+/ select max price during 5 mins, total size during 5 mins
+```
+sym|minute|price|size
+-|-|-|-
+AAPL | 08:00 | 27.4 | 100
+AAPL | 08:05 | 27.9 | 200
+AAPL | 08:10 | 28.2 | 300
+
+```q
+select sum size, num: count i by sym, 1 xbar price from trades
+
+/ keyed by sym, price (xbar to 1)
+/ num = how many trades were executed by sym for that price bucket
+```
+```q
+select max price by sym, 45 xbar time.minute from trade
+
+/ group by sym, set xbar as 45 minute time buckets
+```
+sym | minute | price
+-|-|-
+A|	09:00|	109.94
+A|	09:45|	109.99
+A|	10:30|	109.96
+
+```q
+/ notice how in the above example, the time bucket starts at 9:00
+/ what if we wanted the 15 min bucket to include 9:30 instead?
+
+select max price by sym, 09:30 + 45 xbar time.minute - 09:30 from trade
+
+/ by adding 9:30 and subtracting 9:30 from xbar, you can set the time bucket
+```
+
+sym | minute | price
+-|-|-
+A|	09:30|	109.94
+A|	10:15|	109.99
+A|	10:45|	109.96
+
+```q
+/ to clean this up, you can even write the xbar shift as a function
+
+timeshift:{[start;minbar;time] start+xbar (`minute$times)-start}
+select max price by sym, time: timeshift[09:30;45;time] from trade
+
+/ and this will give you the same exact result
+/ 9:30 = time you want to start
+/ 45 = time bucket
+/ time = column to bucket by
+```
 
 ```q
 select count i, max price by date, xbar [15*60*1000;time] from trade where sym=`RBS
+
+/ retrieve number of trades (count) and max price, keyed by date and time 
+/ 15 mins x 60 sec x 1000 ms to get to milliseconds
+/ xbar rounds its 2nd argument to nearest multiple of first argument (so rounds time to 15 mins)
 ```
-* retrieve number of trades (count) and max price, keyed by date and time 
-* 15 mins x 60 sec x 1000 ms to get to milliseconds
-* xbar rounds its 2nd argument to nearest multiple of first argument (so rounds time to 15 mins)
 
 date|time|x|price
 -|-|-|-
 `2021-05-30`|	`11:40:02.743` |	100 |	97.113
 `2021-05-30`|	`11:44:03.025` |	123 |	98.66 
 
+```q
+7 xbar 10 20 30 40 50
+7 14 28 35 39
+
+/ rounds right argument down to nearest multiple of left argument
+```
+```q
+5 xbar 11:00 + 0 3 5 11
+11:00 11:00 11:05 11:10
+
+/ evaluates right to left (11:00 + 0 3 5 11), then 5 xbar
+/ rounds down time to nearest 5 min intervals
+```
+```q
+select price by sym, 240 xbar time.minute from trade
+select avg price by sym, 240 xbar time.minute from trade
+```
+
 <a name="exec"></a>
-### 🔵 19.12) Exec Query
+### 🔵 19.12) Exec
+
+* Exec is a more general form of select
+* Exec doesn't return a table
+* Exec from one column returns a LIST
+* Exec from more than one column returns a DICTIONARY
+* One diff between select and exec is the column lists do not have to be rectangular to return a result
+
+```q
+a: ([] c1: 1 2 3; c2: `a`b`c)
+
+exec c1 from a
+1 2 3
+
+/ exec single column returns a list
+
+exec c1, c2 from a
+c1 | 1 2 3
+c2 | `a`b`c
+
+/ exec multi columns returns a dictionary
+
+1#exec from a
+c1 | 3
+
+/ take the first row from a
+
+1#exec c2 from a
+`a
+
+/ take the first row and return the value in c2
+```
 
 ```q
 exec price from trade where date=.z.d, sym=`AAPL
-```
 62 59 13
 
-* exec = single list returned
+/ exec single column = single list returned
+```
 
 ```q
 select price from trade where date=.z.d, sym=`AAPL
+
+/ select = single column returned
 ```
 price|
 -|
@@ -4365,20 +4497,15 @@ price|
 59|
 13|
 
-* select = single column returned
-
 ```q
 exec first price from trade where date=.z.d, sym=`AAPL
-```
 62
+```
 
 ```q
 exec price by sym from trade where date=.z.d, sym=`AAPL
-```
 AAPL | 62 59 13
-
-* retrieve price as values and specify the where expressions (date and sym)
-* sets sym as keys
+```
 
 ```q
 exec price by sym from trade where date=.z.d
@@ -4399,21 +4526,89 @@ sym | cond | price
 `AAPL` | `A` | 43
 `KX` | `C` | 32
 
+```q
+a: ([] c1: 1 2 3 1 2; c2: `a`b`c`a`b)
+exec distinct c1 from a
+1 2 3
+
+/ returns only distinct values in col c1
+
+exec distinct c1, distinct c2 from a
+c1 | 1 2 3
+c2 | `a`b`c
+
+/ exec allows distinct on multiple columns
+```
+
+### Select vs Exec
+```q
+cnc: ([] city:`toronto`london`ny`vancouver; country:`canada`england`usa`canada)
+```
+
+city | country
+-|-
+toronto|	canada
+london	|england
+ny|	usa
+vancouver|	canada
+
+```q
+exec city, distinct country from cnc
+```
+
+key|value
+-|-
+city|	toronto london ny vancouver
+country|	canada england usa
+
+```q
+select city, distinct country from cnc
+
+/ error because select expects the columns to have the same length
+```
+
 <a name="update_statement"></a>
 ### 🔵 19.13) Update
 
+* updates a pre-existing column
+* if column doesnt exist, gets added to end of column list
+* original table unaffected unless the data is persisted by using backtick
+
+```q
+update price: 10.0 from trade
+
+/ this will update all prices to 10
+```
+```q
+update price:10.0 from trade where sym in `AAPL`GOOG
+
+/ this will update prices to 10 for AAPL and GOOG 
+/ the where clause updates only the filtered records
+```
+```q
+update vol:price*size from trade where sym in `AAPL`GOOG
+
+/ new column vol is added
+```
+```q
+update price:avg price by sym from trade where sym in `AAPL`GOOG
+
+/ updates the price to average price, grouped by sym 
+```
 ```q
 tt:100?trade
+
+/ randomly selects 100 rows
 ```
 date|time|sym|price|size | cond
 -|-|-|-|-|-
 2021.01.01 | 15:10:01| BAC | 70| 422| B
 2021.03.01 | 15:09:01| JPM | 74| 412| C
 
-* randomly select 100 rows
-
 ```q
 update cond: "D" from tt
+
+/ updates cond to "D"
 ```
 date|time|sym|price|size | cond
 -|-|-|-|-|-
@@ -4421,10 +4616,10 @@ date|time|sym|price|size | cond
 2021.03.01 | 15:09:01| JPM | 74| 412| D
 2021.03.01 | 15:09:01| UBS | 41| 312| D
 
-* updates cond to "D"
-
 ```q
 update size%100 from tt
+
+/ can perform function on entire column. size divided by 100
 ```
 date|time|sym|price|size | cond
 -|-|-|-|-|-
@@ -4432,23 +4627,25 @@ date|time|sym|price|size | cond
 2021.03.01 | 15:09:01| JPM | 74| 41.2| D
 2021.03.01 | 15:09:01| UBS | 41| 31.2| D
 
-* can perform function on entire column. size divided by 100
-
 ```q
 update advice:`sell from tt
+
+/ if you update a column that doesnt exist, it will add the column
+/ new column added called advice and populates with sell
+/ notice it has to be backtick sell
 ```
+
 date|time|sym|price|size | cond| advice
 -|-|-|-|-|-|-
 2021.01.01 | 15:10:01| BAC | 70| 42.2| D | sell
 2021.03.01 | 15:09:01| JPM | 74| 41.2| D | sell
 2021.03.01 | 15:09:01| UBS | 41| 31.2| D | sell
 
-* if you update a column that doesnt exist, it will add the column
-* new column added called advice and populates with sell
-* notice it has to be backtick sell
-
 ```q
 update advice: `buy from tt where price < 70
+
+/ if price less than 70, advice becomes buy
+/ if not, then null value returned
 ```
 date|time|sym|price|size | cond| advice
 -|-|-|-|-|-|-
@@ -4456,23 +4653,22 @@ date|time|sym|price|size | cond| advice
 2021.03.01 | 15:09:01| JPM | 74| 41.2| D | 
 2021.03.01 | 15:09:01| UBS | 41| 31.2| D | buy
 
-* if price less than 70, advice becomes buy
-* if not, then null value returned
-
 ```q
 update maxprice: max price by sym from tt
+
+/ since maxprice doesnt exist, adds new column to end
 ```
+
 date|time|sym|price|size | cond| maxprice
 -|-|-|-|-|-|-
 2021.01.01 | 15:10:01| BAC | 70| 42.2| D | 104
 2021.03.01 | 15:09:01| JPM | 74| 41.2| D | 102
 2021.03.01 | 15:09:01| UBS | 41| 31.2| D | 91
 
-* adds new column max price
-
 <a name="delete_columns"></a>
 ### 🔵 19.14) Delete Columns
-* cannot have by or where clause
+
+Cannot have by or where clause
 
 Given table tt
 
@@ -4484,6 +4680,8 @@ date|time|sym|price|size | cond| maxprice
 
 ```q
 delete maxprice from tt
+
+/ removes maxprice column
 ```
 date|time|sym|price|size | cond
 -|-|-|-|-|-
@@ -4491,18 +4689,16 @@ date|time|sym|price|size | cond
 2021.03.01 | 15:09:01| JPM | 74| 41.2| D
 2021.03.01 | 15:09:01| UBS | 41| 31.2| D
 
-* removes maxprice column
-
 ```q
 delete date, time from tt
+
+/ deletes multiple columns from the table
 ```
 sym|price|size | cond
 -|-|-|-
 BAC | 70| 42.2| D
 JPM | 74| 41.2| D
 UBS | 41| 31.2| D
-
-* deletes multiple columns from the table
 
 <a name="delete_rows"></a>
 ### 🔵 19.15) Delete Rows
@@ -4516,21 +4712,22 @@ date|time|sym|price|size | cond| maxprice
 
 ```q
 delete from tt where cond="A"
+
+/ since you are adding a WHERE clause, delete will remove the entire row 
+/ WHERE cond = A
 ```
 date|time|sym|price|size | cond| maxprice
 -|-|-|-|-|-|-
 2021.03.01 | 15:09:01| JPM | 74| 41.2| B | 102
 2021.03.01 | 15:09:01| UBS | 41| 31.2| C | 91
 
-* deletes row where cond=A
-
 ```q
 delete from tt
+
+/ deletes all rows
 ```
 date|time|sym|price|size | cond| maxprice
 -|-|-|-|-|-|-
-
-* deletes all rows
 
 <a name="sort_asc_desc"></a>
 ### 🔵 19.16) Sort Ascending / Descending 
