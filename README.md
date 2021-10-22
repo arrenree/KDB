@@ -4012,7 +4012,7 @@ Evaluated in the following order:
 ```
 
 <a name="select_template"></a>
-### 🔵 19.1) Select Template
+### 🔵 19.1) Select
 
 ```q
 select a by b from t where c
@@ -4051,6 +4051,51 @@ select max price by sym from trade
 select price by sym from trade
 ungroup select price by sym from trade
 ```
+
+<a name="multipleselect_template"></a>
+### 🔵 19.1A) Multiple Select
+
+```q
+/ let's say you want to bucket trade sizes based on sym into small, med, big
+/ you could do this:
+
+(select count i by sym, sizegroup:`small from trade where size within 0 999),
+(select count i by sym, sizegroup:`medium from trade where size within 1000 8999),
+(select count i by sym, sizegroup:`big from trade where size > 8999)
+
+/ can use multiple select queries, but this is inefficient
+/ instead, you can write a function using BIN to help classify your buckets
+
+sizes: 2000 100 6000 11000
+0 1000 9000 bin sizes
+1 0 1 2
+
+/ bin takes its LEFT hand buckets, and sorts index position of RIGHT argument
+/ so sizes = 4 elements, will return index position of bin
+/ 2000 = index position 1 bin
+/ 100 = index position 0 bin
+/ 6000 = index position 1 bin
+/ 11000 = index position 2 bin
+
+`small`med`big 0 1000 9000 bin sizes
+`med`small`med`big
+
+/ so you can name your bins using syms as small med big
+/ this will bin your size list into the sym named buckets
+
+tradesize:{`small`med`big 0 1000 9000 bin x}
+tradesize sizes
+`med`small`med`big
+
+/ create function tradesize will has the small med big buckets + bin x variable
+/ testing out the function with sizes, returns same as above
+
+select count i by sym, sizebucket:(tradesize;size) fby sym from trade
+
+/ bring it back to the original query, can use tradesize function as an aggregator for fby
+/ and returns the number of trades (count i), sorted by sym and its size bucket
+```
+
 
 <a name="selectadd_template"></a>
 ### 🔵 19.2) Adding a new column using select
@@ -4104,7 +4149,7 @@ select [1 4] from trade
 ```
 
 <a name="select_from_where"></a>
-### 🔵 19.5) Where Clause
+### 🔵 19.5) Where
 
 Where clause operates left to right, so put most restrictive clause first
 
