@@ -207,6 +207,8 @@
 
 ## 29. [Random Questions](#random_questions)
 
+## 30. [Functional Form](#functional_form)
+
 
 
 <hr>
@@ -7036,7 +7038,75 @@ t:t,([] company:`bmw`skoda; employees:200 300)
 
 <hr> 
 
+<a name="functional_form"></a>
+## 30. 🔴 Functional Form
+[Top](#top)
 
+```q
+/ Functional Form Select Query Template
+
+?[table name;where;grouping;aggregation]
+
+/ where = given as a list
+/ groupings = given as dictionary
+/ aggregation = dictionary
+```
+
+```q
+/ convert a query to its parse tree using PARSE
+
+parse "select from trade"
+?
+`trades
+()
+0b
+()
+
+/ this is equilvalent to:
+
+?[`trade;();0b;()]
+
+/ ?[table name;where;grouping;aggregation]
+/ table name, 
+/ no where clause, use empty list ()
+/ no grouping, use 0b
+/ no aggregations, use empty list ()
+```
+```q
+/ functional form gives no performance advantages
+/ difficult to read/write
+/ only use is for DYNAMIC QUERIES
+```
+```q
+/ Let's say you want to select total size by sym, by cond, or by both
+/ col name will be parameter in this query 
+
+select total:sum size by sym from trade
+select total:sum size by x from trade / wont work!
+f:{select sum price by x from trade} / wont work!
+f[`sym]
+
+/ cannot substitute x for col name
+/ column names cannot dynamically passed in queries in this way
+/ have to use functional select instead
+
+parse"select total:sum price by x from trade"
+("?";`trade;;,`x!,`x;,`total!,("sum";`price))
+
+/ parse the query to see its parse tree
+/ then convert into functional form syntax
+
+f:{?[trade;(); g!g:(),x; (enlist `total)! enlist(sum;`size)]}
+f[`sym] / now this works
+f[`sym`cond] / this also works
+
+/ commas = atom so need enlist
+/ trade = table name
+/ no where = ()
+/ grouping = is where we want to put x
+/ use notation empty list join x as this allows x to be a single column name
+/ or a list of col names
+```
 
 
 [Top](#top)
