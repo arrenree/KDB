@@ -7042,6 +7042,8 @@ t:t,([] company:`bmw`skoda; employees:200 300)
 ## 30. 🔴 Functional Form
 [Top](#top)
 
+### Functional Select
+
 ```q
 / Functional Form Select Query Template
 
@@ -7107,6 +7109,37 @@ f[`sym`cond] / this also works
 / use notation empty list join x as this allows x to be a single column name
 / or a list of col names
 ```
+### Functional Exec
+
+```q
+/ is like functional select, but if there is no by clause we use an empty list instead of a 0b
+parse "exec sym from trade"
+?
+`trades
+()
+()
+,`sym
+
+?[`trades;();();`sym]
+```
+
+### Functional Update
+
+```
+/ uses an exclamation mark
+parse "update mid:(bid+ask)%2 from quotes"
+!
+`quotes
+()
+0b
+(,`mid)!,(%;(+;`bid;`ask);2)
+
+![quotes;();0b;(enlist `mid!enlist(%;(+;`bid;`ask);2)]
+```
+
+
+
+
 
 
 [Top](#top)
