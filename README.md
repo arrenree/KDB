@@ -5837,11 +5837,18 @@ ndate|ticker|title|price
 ### 🔵 23.1 Asof Time Join
 
 ```q
+/ used to find last value from one table, that matches the source table (prevailing quote)
+/ for example, from a table of trades, you want to look up the most recent price or bid size
+/ joins the closest matches from one table to another
+
 aj [`col_1`col_2; soure_table; lookup_table]
 
-/ joins the closest matches from one table to another
 / syntax = aj [column; source table; lookup table]
 / last item of columns will be less than or equal join
+```
+```q
+/ Asof Time Join Case Study
+/ Find the latest bid for list of syms in table t
 
 t: ( [] time: 07:00 08:30 09:59t; sym:`a`a`b; price: 0.9 1.5 1.9; size:100 200 300)
 q: ( [] time: 08:00 09:00 10:00t; sym:`a`b`a; bid: 1 9 4)
@@ -5874,7 +5881,7 @@ time     sym price size  bid
 08:30:00| a |	1.5 |	200	|1
 09:59:00| b |	1.9 |	300	|9
 
-/ from trade table, look through each sym, then time (less than or equal to)
+/ from t, look through each sym, then time (less than or equal to)
 / from t, first row = a. lookup a in q, but no time less than or equal to 7:00am. so bid = null
 / from t, 2nd row = a. lookup a in q, found 8:00am <= 8:30, so pull in bid = 1
 / from t, 3rd row = b. lookup bi n q, found 9:00am <=9:59, so bid = 9
@@ -5948,81 +5955,80 @@ time|sym|bid|price|size
 <a name="windowtime_join"></a>
 ### 🔵 23.3 Window Time Join
 
-* wj pulls in values from that time window
-
-Given:
+```q
+/ wj allows you to specify the window + aggregation function used to join
+/ wj aggregate values within an interval - whereas AJ would join most recent value,
+/ a wj would join an aggregation of the available quotes in a given time interval
+/ for example, 15 mins before trade occurred.
 
 table t:
-
-time | sym | price
--|-|-
-09:00:00.000 |	a|	10.0
-09:04:00.000|	a	|11.0
-09:12:00.000|	a	|12.0
-09:13:00.000|	a	|13.0
+time         sym price
+----------------------
+09:00:00.000|	a |	10.0
+09:04:00.000|	a	| 11.0
+09:12:00.000|	a	| 12.0
+09:13:00.000|	a	| 13.0
 
 table q:
+time         sym  bid
+----------------------
+09:00:00.000|	a |	10.0
+09:01:00.000|	a	| 10.0
+09:02:00.000|	a |	11.0
+09:03:00.000|	a |	13.0
+09:04:00.000|	a |	13.0
+09:05:00.000|	b |	14.0
+09:06:00.000|	b |	14.0
+09:07:00.000|	b |	15.0
+09:08:00.000|	a |	15.0
+09:09:00.000|	a |	17.0
+09:10:00.000|	a |	17.0
+09:11:00.000|	a |	18.0
+09:12:00.000|	a |	18.0
 
-time|sym|bid
--|-|-
-09:00:00.000|	a|	10.0
-09:01:00.000|	a	|10.0
-09:02:00.000|	a|	11.0
-09:03:00.000|	a|	13.0
-09:04:00.000|	a|	13.0
-09:05:00.000|	b|	14.0
-09:06:00.000|	b|	14.0
-09:07:00.000|	b|	15.0
-09:08:00.000|	a|	15.0
-09:09:00.000|	a|	17.0
-09:10:00.000|	a|	17.0
-09:11:00.000|	a|	18.0
-09:12:00.000|	a|	18.0
+/ from table t, produce a time interval 2 mins +\- for each row of time
 
-```q
 windows:flip t.time +\: -00:02 00:02t
-```
-08:58:00.000t;09:02:00.000t;09:10:00.000t;09:11:00.000t);(09:02:00.000t;09:06:00.000t;09:14:00.000t;09:15:00.000t
+08:58:00.000 09:02:00.000 09:10:00.000 09:11:00.000
+09:02:00.000 09:06:00.000 09:14:00.000 09:15:00.000
 
-* from table t, produce a time interval 2 mins +\- for each row of time
-* pairs of time values to specify the interval time values
-
-
-```q
 wj[windows;`sym`time;t;(q;(::;`bid))]
-```
 
-time|sym|price|bid
--|-|-|-
-09:00:00.000|	a|	10.0|	10 10 11f
-09:04:00.000|	a|	11.0|	11 13 13f
-09:12:00.000|	a|	12.0|	17 18 18f
-09:13:00.000|	a|	13.0|	18 18f
+time         sym price  bid
+---------------------------------
+09:00:00.000|	a |	10.0|	10 10 11f
+09:04:00.000|	a |	11.0|	11 13 13f
+09:12:00.000|	a |	12.0|	17 18 18f
+09:13:00.000|	a |	13.0|	18 18f
 
-* wj will output same number of rows as original table t
-* windows - interval pairs you created
-* columns you want to match on (sym, time) within source table t
-* start new list, look up values from table q (lookup table)
-* :: = return all values from the bid column
-* 1st row, looks up in table q, any syms (a) from 8:58 to 9:02, and returns the bid
-* 2nd row, looks up in table q any syms (a) from 9:02 to 9:06, and returns the bid 
+/ wj will output same number of rows as original table t
+/ windows - time interval pairs you created
+/ columns you want to match on (sym, time) within source table t
+/ start new list, look up values from table q (lookup table)
+/ :: = return all values from the bid column
+/ 1st row, looks up in table q, any syms (a) from 8:58 to 9:02, and returns the bid
+/ 2nd row, looks up in table q any syms (a) from 9:02 to 9:06, and returns the bid 
 
-```q
 wj[windows;`sym`time;t;(q;(::;`bid); (avg;`bid); (count;`bid))]
-```
-* can perform functions! 
 
-time | sym | bid | bid
--|-|-|-
-09:00:00.000|	a|	10.0|	10 10 11f	3
-09:04:00.000|	a|	11.0|	11 11 13f	3
-09:12:00.000|	a|	12.0|	17 17 17f	3
-09:13:00.000|	a|	13.0|	17 17f	2
+/ can perform functions! 
 
+time        sym   bid   bid
+----------------------------------
+09:00:00.000|	a |	10.0|	10 10 11f	3
+09:04:00.000|	a |	11.0|	11 11 13f	3
+09:12:00.000|	a |	12.0|	17 17 17f	3
+09:13:00.000|	a |	13.0|	17 17f	2
 
 wj vs wj1
-* wj pulls in prevailing values not within time window
-* wj1 strictly excludes values outside the interval (for ex, if time interval was 10:00 - 10:15)
+/ wj pulls in prevailing values not within time window
+/ wj1 strictly excludes values outside the interval (for ex, if time interval was 10:00 - 10:15)
+```
+```q
+/ window join case study 2
+
+
+
 
 
 <a name="adverbs_header"></a>
