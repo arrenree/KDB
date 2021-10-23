@@ -110,6 +110,7 @@
 14. [Retrieve From Table](#retrieve_table)
 15. [Insert Table](#insert_table)
 16. [Operations on Tables](#operations_table)
+17. [Joins](#joins_table)
 
 ## 13. [Tables Problem Set](#tables_problem_set)
 
@@ -2478,7 +2479,7 @@ company | employees
 ford |	300
 
 <a name="mixed_table"></a>
-### 🔵 12.3 Mixed Table
+### 🔵 12.4 Mixed Table
 
 ```q
 ( [] syms:`a`b`c; floats: 1.1 2.2 3.3; strings: ("bob"; "jim"; "john"))
@@ -2495,7 +2496,7 @@ c|	3.3	|john
 
 
 <a name="meta_datatypes_table"></a>
-### 🔵 12.4 Meta / Data Type Table
+### 🔵 12.5 Meta / Data Type Table
 
 Meta returns a table where each row is a column
 
@@ -2525,7 +2526,7 @@ company|	s	|	|
 employees|	j	|	|
 
 <a name="countrowsimple_table"></a>
-### 🔵 12.5 Count Row Table
+### 🔵 12.6 Count Row Table
 
 company | employees
 -|-
@@ -2547,7 +2548,7 @@ cols t
 ```
 
 <a name="rename_column_table"></a>
-### 🔵 12.6 Rename Column Table xcol
+### 🔵 12.7 Rename Column Table xcol
 
 ```q
 `a`b xcol t
@@ -2561,7 +2562,7 @@ ford |	300
 bmw	| 100
 
 <a name="add_column_table"></a>
-### 🔵 12.7 Add Column
+### 🔵 12.8 Add Column
 
 ```q
 select company, employees, newval: 101 from t
@@ -2575,7 +2576,7 @@ ford |	300 | 101
 bmw	| 100 | 101
 
 <a name="sort_column_table"></a>
-### 🔵 12.8 Sort Column Table (xasc)
+### 🔵 12.9 Sort Column Table (xasc)
 
 ```q
 `employees xasc t
@@ -2588,7 +2589,7 @@ bmw	| 100 | 101
 ford |	300 | 101
 
 <a name="union_table"></a>
-### 🔵 12.9 Union Table
+### 🔵 12.10 Union Table
 
 Table t
 
@@ -2622,7 +2623,7 @@ bmw |	5
 ford| 5
 
 <a name="except_table"></a>
-### 🔵 12.10 Except Table
+### 🔵 12.11 Except Table
 
 ```q
 t except u
@@ -2638,7 +2639,7 @@ ford| 100
 rover | 100 
 
 <a name="inter_table"></a>
-### 🔵 12.11 Inter Table
+### 🔵 12.12 Inter Table
 
 ```q
 t inter u
@@ -2650,7 +2651,7 @@ company | employees
 ferrari| 100
 
 <a name="distinct_table"></a>
-### 🔵 12.12 Distinct Table
+### 🔵 12.13 Distinct Table
 
 ```q
 ([] a: 1 1 2; b: 1 1 3)
@@ -2673,7 +2674,7 @@ a|b
 
 
 <a name="retrieve_table"></a>
-### 🔵 12.13 Retrieve From Table
+### 🔵 12.14 Retrieve From Table
 
 Table t:
 
@@ -2779,7 +2780,7 @@ rover| 0
 ford| -105
 
 <a name="insert_table"></a>
-### 🔵 12.14 Insert Table
+### 🔵 12.15 Insert Table
 
 ```q
 t: ( [] company: (); employees: () )
@@ -2838,7 +2839,7 @@ t:t,x
 ```
 
 <a name="operations_table"></a>
-### 🔵 12.15 Operations on Tables
+### 🔵 12.16 Operations on Tables
 
 With KEYED tables, you can use arithmetic between tables
 
@@ -2874,6 +2875,66 @@ sym | num
 2 | 2
 3 | 3
 4 | 4
+
+
+<a name="joins_table"></a>
+### 🔵 12.17 Joins on Tables
+
+```q
+/ vertical joins
+/ keeps columns, adds additional rows
+/ both tables must have same schema (column names + types)
+
+t1
+sym  side price size
+---------------------
+IBM	  buy	  10 	 100
+AAPL	sell	  20	  200
+
+t2
+sym  side price size
+---------------------
+GOOG	 buy	   30 	 300
+MSFT	sell	   40	  400
+
+t1,t2
+
+sym  side price size
+---------------------
+IBM 	 buy	  10 	 100
+AAPL	sell	  20	  200
+GOOG	 buy	  30 	 300
+MSFT	sell	  40	  400
+```
+```q
+/ horizontal rows joins tables with same number of rows
+/ adds extra set of columns
+
+t1
+sym  ex
+----------
+IBM	 nyse
+AAPL	nyse
+GOOG	nasdaq
+
+t2
+price size
+----------
+10	   100
+20	   200
+30	   300
+
+t1,'t2
+
+sym  ex     price size
+----------------------
+IBM	 nyse 	   10   100
+AAPL	nyse	    20   200
+GOOG	nasdaq	  30   300
+
+/ this actually uses each both to join the 2 tables horizontally
+```
+
 
 <hr>
 
