@@ -100,9 +100,9 @@
 4. [Mixed Table](#mixed_table)
 5. [Meta / Data Type Table](#meta_datatypes_table)
 6. [Count Row Table](#countrowsimple_table)
-7. [Rename Column Table](#rename_column_table)
+7. [Rename, Reorder Columns (xcol, xcols)](#rename_column_table)
 8. [Add Column Table](#add_column_table)
-9. [Sort Column Table](#sort_column_table)
+9. [Sort Columns (xasc, xdesc)](#sort_column_table)
 10. [Union Table](#union_table)
 11. [Except Table](#except_table)
 12. [Inter Table](#inter_table)
@@ -165,6 +165,13 @@
 16. [Sort Ascending / Descending](#sort_asc_desc)
 17. [Renaming / Reordering Columns](#rename_reorder_columns)
 18. [Filter By fby](#fby_sql)
+19. [xgroup](#xgroup_sql)
+20. [Differ](#differ_sql)
+21. [Deltas](#deltas_sql)
+22. [Next/Prev](#nextprev_sql)
+23. [^ Carrot](#carrot_sql)
+24. [iasc/idesc](#iasc_sql) 
+25. [xrank](#xrank_sql)
 
 ## 20. [qSQL Problem Set](#qsql_problem_set)
 
@@ -4933,7 +4940,259 @@ update num: (sums;num) fby sym from`sym`time xasc timeline
 * aggregate running sums by sym
 * backtick sym, time xasc timeline sorts the timeline table ascending first by sym, then by time
 
-<hr>
+
+<a name="xgroup_sql"></a>
+### 🔵 19.19) xgroup
+
+```q
+
+`sym xgroup trade
+
+sym | date
+----| -----
+C   | 2021.10.19 
+MSFT| 2021.10.19 
+RBS | 2021.10.19
+
+/ group by column `sym
+/ the same as saying:
+
+select time by sym from trade
+
+/ to flatten this out, use ungroup
+
+ungroup select time by sym from trade
+```
+
+<a name="differ_sql"></a>
+### 🔵 19.20) Differ
+
+```q
+/ boolean list indicating if consecutive pairs are different
+/ true 1b = if consecutive elements are different
+/ false ob = consecutive elements are the same
+
+differ 1 1 1 2 2 3
+100101b
+```
+
+```q
+/ can be used to see if trade price has changed
+
+update change:differ price from trade
+
+date       time         sym  price    size  cond change
+-------------------------------------------------------
+2021.10.19 09:30:02.553 C    107.2018 63500 B    1     
+2021.10.19 09:30:02.701 MSFT 96.87488 1700  B    1     
+2021.10.19 09:30:02.743 RBS  97.11338 80700 C    1     
+
+/ or, to select those trades who's price has changed
+
+select from trade where differ price
+
+date       time         sym  price    size  cond
+------------------------------------------------
+2021.10.19 09:30:02.553 C    107.2018 63500 B   
+2021.10.19 09:30:02.701 MSFT 96.87488 1700  B   
+2021.10.19 09:30:02.743 RBS  97.11338 80700 C   
+```
+
+<a name="deltas_sql"></a>
+### 🔵 19.20) Deltas
+
+```q
+/ returns the difference between consecutive list elements
+
+deltas 1 3 2 4 
+1 2 -1 2
+
+/ can be used to view price changes between trades
+
+update change:deltas price from trade
+
+date       time         sym  price    size  cond change    
+--------------------------------------------------------
+2021.10.19 09:30:02.553 C    107.2018 63500 B    107.201  
+2021.10.19 09:30:02.701 MSFT 96.87488 1700  B    -10.326 
+2021.10.19 09:30:02.743 RBS  97.11338 80700 C      0.238
+
+/ or, to select those trades who's price has increased
+
+select from trade where (deltas price)> 0
+
+date       time         sym    price    size  cond 
+--------------------------------------------------
+2021-10-19	09:30:02.553	C	     107.2	   63500	  B
+2021-10-19	09:30:02.743	RBS	    97.1	   80700	  C
+2021-10-19	09:30:02.758	A	     100.3	   50300	  B
+```
+
+<a name="nextprev_sql"></a>
+### 🔵 19.22) Next/Prev
+
+```q
+/ next - moves each element of list one space to left
+/ prev - moves each element of list one space to right
+/ can be used to find the duration between trades
+
+update duration:time - prev time from trade
+
+date       time         sym  price    size  cond duration    
+-------------------------------------------------------------
+2021.10.19 09:30:02.701 MSFT 96.87488 1700  B    00:00:00.148
+2021.10.19 09:30:02.743 RBS  97.11338 80700 C    00:00:00.042
+2021.10.19 09:30:02.758 A    100.35   50300 B    00:00:00.015
+```
+```q
+/ xprev - moves each element of list n spaces to the right
+
+3 xprev 1 2 3 4 5 6
+0N 0N 0N 1 2 3
+
+/ note - no such thing as xnext. instead, use negative xprev
+
+-3 xprev 1 2 3 4 5 6
+4 5 6 0N 0N 0N
+```
+
+<a name="carrot_sql"></a>
+### 🔵 19.23) ^ Carrot
+
+```q
+/ ^ replaces nulls with atom on left
+/ has to be of compatible type
+
+3 ^ 1 2 0N 4 5 0N
+1 2 3 4 5 3
+```
+
+```q
+/ can also be used as index replacement
+
+1 2 3 4 ^ 5 0N 6 0N
+5 2 6 4 
+
+/ the first 0N is replaced with 2
+/ the 2nd 0N is replaced with 4
+```
+
+<a name="iasc_sql"></a>
+### 🔵 19.24) iasc/idesc
+
+```q
+/ iasc - returns indices needed to sort a list in ascending order
+/ idesc - returns indices needed to sort a list in descending order 
+
+iasc 1 2 5 4
+0 1 3 2
+
+idesc 1 2 5 4
+2 3 1 0
+```
+```q
+/ case study
+
+m:(1 2 3 4; 6 4 5; 2 6 3 7 5; 2 5)
+1 2 3 4
+6 4 5
+2 6 3 7 5
+2 5
+
+/ m is a nested list
+
+count each m
+4 3 5 2
+
+/ tells you how much elements in each nested list
+
+m iasc count each m
+2 5
+6 4 5
+1 2 3 4
+2 6 3 7 5
+
+/ order m by number of elements in each sublist
+```
+```q
+/ Case Study: Pull the best bid from orderbook
+
+table t:
+
+t         bidPrices            bidSizes
+------------------------------------------------
+05:15:43	 7.83 8.20 9.84 6.93	 57 0 72 50 62 51
+00:59:05	 0.97 7.44 9.33 2.93	 97 99 27 31
+01:19:44  2.88 5.63 4.98 5.56	 47 57 31 15 68 49
+
+update bidIndex:({idesc x} each bidPrices) from t
+
+t         bidPrices            bidSizes           bidIndex
+----------------------------------------------------------
+05:15:43	 7.83 8.20 9.84 6.93	 57 0 72 50 62      2 1 0 4 
+00:59:05	 0.97 7.44 9.33 2.93	 97 99 27 31        2 1 4 0
+01:19:44  2.88 5.63 4.98 5.56	 47 57 31 15 68 49  1 4 3 0
+
+/ from col bidPrices, shows index position of descending values
+/ 2nd index position = 3rd value = 9.84 largest
+
+update bidIndex:({first idesc x} each bidPrices) from t
+
+t         bidPrices            bidSizes           bidIndex
+----------------------------------------------------------
+05:15:43	 7.83 8.20 9.84 6.93	 57 0 72 50 62      2 
+00:59:05	 0.97 7.44 9.33 2.93	 97 99 27 31        2
+01:19:44  2.88 5.63 4.98 5.56	 47 57 31 15 68 49  1
+
+/ adding first = only retrieves first value 
+/ largest bid since ordered by idesc
+
+update bestBid:bidPrices@'bidIndex from update bidIndex:({first idesc x} each bidPrices) from t
+
+t         bidPrices            bidSizes     bidIndex   bestBid
+--------------------------------------------------------------
+05:15:43	 7.83 8.20 9.84 6.93	 0 72 50 62   2          9.84 
+00:59:05	 0.97 7.44 9.33 2.93	 23 99 27 31  2          9.33
+01:19:44  2.88 5.63 4.98 5.56	 57 31 15 49  1          5.63
+
+/ bestbid = looks at bidIndex col, retrieves index position 2 from bidPrice col = 9.8
+/ everything after from is what we calculated above as the bidIndex col
+
+update bestBidSize:bidSizes@'bidIndex from update bidIndex:({first idesc x} each bidPrices) from t
+
+t         bidPrices            bidSizes     bidIndex   bestBidSize
+------------------------------------------------------------------
+05:15:43	 7.83 8.20 9.84 6.93	 0 72 50 62   2          50 
+00:59:05	 0.97 7.44 9.33 2.93	 23 99 27 31  2          27
+01:19:44  2.88 5.63 4.98 5.56	 57 31 15 49  1          31
+
+/ bestBidSize = looks at bidIndex col, retrieves index position 2 from bidSizes col = 50
+
+/ can combine all 3 queries into single one:
+
+update bestBid:bidPrices@'bidIndex, bestBidSize:bidSizes@'bidIndex from update bidIndex:({first idesc x}each bidPrices) from t
+
+t         bidPrices            bidSizes     bidIndex   bestBid  bestBidSize
+---------------------------------------------------------------------------
+05:15:43	 7.83 8.20 9.84 6.93	 0 72 50 62   2          9.84      50
+00:59:05	 0.97 7.44 9.33 2.93	 23 99 27 31  2          9.33      27
+01:19:44  2.88 5.63 4.98 5.56	 57 31 15 49  1          5.63      31
+
+/ useful to use index position to retrieve value in another column
+/ lookup colum @`source column
+/ you can have multiple update statements to add new columns
+/ the bestBid and bestBidSize columns actually retrieve from a new column called bidIndex
+```
+
+<a name="xrank_sql"></a>
+### 🔵 19.25) xrank
+
+```q
+/ xrank partitions list into buckets based on values
+/ can be used to add price ranking to table
+
+
+
 
 <a name="qsql_problem_set"></a>
 ## 🔴 20. qSQL Problem Set
