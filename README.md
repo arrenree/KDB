@@ -5184,21 +5184,64 @@ t         bidPrices            bidSizes     bidIndex   bestBid  bestBidSize
 / the bestBid and bestBidSize columns actually retrieve from a new column called bidIndex
 ```
 
-<a name="xrank_sql"></a>
-### 🔵 19.25) xrank
+<a name="rank_sql"></a>
+### 🔵 19.25) rank / xrank
+
+```q
+/ rank returns the position of each element of a list would appear if it were sorted in ascending order
+/ same as iasc iasc x
+
+rank 2 7 3 2 5
+0 4 2 1 3
+
+/ 0 index pos = 2
+/ 4th index pos = 7
+/ 2nd index pos = 3
+/ 1st index pos = 2
+/ 3rd index pos = 5
+```
 
 ```q
 / xrank partitions list into buckets based on values
-/ can be used to add price ranking to table
 
+2 xrank 1 2 3 4 5 6
+0 0 0 1 1 1
 
+3 xrank 1 2 3 4 5 6
+0 0 1 1 2 2 
+```
+
+```q
+t:([] val: 8?20; name: (8?`MSFT`ORCL`CSCO))
+
+val name
+--------
+12	 MSFT
+8	  ORCL
+13	 CSCO
+16	 MSFT
+15	 ORCL
+16	 CSCO
+2	  MSFT
+4	  ORCL
+
+select Min: min val, Max:max val, Count: count i by bucket: 4 xrank val from t
+
+bucket Min Max Count
+--------------------
+0	      2	   4	    2
+1	      8	  12	    2
+2	     13	  15	    2
+3	     16	  16	    2
+
+```
 
 
 <a name="qsql_problem_set"></a>
 ## 🔴 20. qSQL Problem Set
 [Top](#top)
 
-**🔵 1. Extract from trade table, trades for MS greater than 1,000 in size**
+**🔵 20.1 Extract from trade table, trades for MS greater than 1,000 in size**
 
 ```q
 select from trade where sym=`MS, size >1000
@@ -5213,7 +5256,7 @@ dt|sym|price|size
 * sym has to be back tick MS
 <hr>
 
-**🔵 2. From the trade table, find the total size of all trades and the average price paid per sym**
+**🔵 20.2 From the trade table, find the total size of all trades and the average price paid per sym**
 
 ```q
 select total: sum size, avg price by sym from trade
@@ -5232,7 +5275,7 @@ sym|total | price
 
 <hr>
 
-**🔵 3. From the trade table, find the trade that was largest size for each sym**
+**🔵 20.3 From the trade table, find the trade that was largest size for each sym**
 
 ```q
 select from (update mx:max size by sym from trade) where size = mx
@@ -5266,7 +5309,7 @@ date|time|sym|price|size|cond
 
 <hr>
 
-**🔵 4. From the trade table, select the latest trade for each sym, and include all details**
+**🔵 20.4 From the trade table, select the latest trade for each sym, and include all details**
 
 ```q
 select last date, last price, last size by sym from trade
@@ -5290,7 +5333,7 @@ AAPL|	2021-06-03|	87.54| 49100 | C
 
 <hr>
 
-**🔵 5. Find all trades that have sym GOOG**
+**🔵 20.5 Find all trades that have sym GOOG**
 
 ```q
 select from trade where sym=`GOOG
@@ -5302,7 +5345,7 @@ GOOG|	2021-06-03|	87.54| 49100 | C
 
 <hr>
 
-**🔵 6. Find all trades that have sym GOOG or RBS or A**
+**🔵 20.6 Find all trades that have sym GOOG or RBS or A**
 
 ```q
 select from trade where sym in `GOOG`RBS`A
@@ -5315,7 +5358,7 @@ A|	2021-06-03|	87.54| 49100 | C
 
 <hr>
 
-**🔵 7. Find all trades for google that had a price between 70 and 80**
+**🔵 20.7 Find all trades for google that had a price between 70 and 80**
 
 ```q
 select from trade where sym=`GOOG, price within 70 80
@@ -5329,7 +5372,7 @@ GOOG|	2021-06-03|	78 | 49100 | C
 
 <hr>
 
-**🔵 8. Count the number of trades and total size of trades per hour for sym RBS**
+**🔵 20.8 Count the number of trades and total size of trades per hour for sym RBS**
 
 ```q
 select NumberTrades: count i, totalSize: sum size by time.hh from trade where sym=`RBS
@@ -5347,7 +5390,7 @@ hh|NumberTrades|totalSize
 
 <hr>
 
-**🔵 9. Select the number of trades and total size of trades every 30 mins for the sym RBS**
+**🔵 20.9 Select the number of trades and total size of trades every 30 mins for the sym RBS**
 
 ```q
 select numbertrades: count i, totalsize: sum size by 30 xbar time.minute from trade where sym=`RBS
@@ -5363,7 +5406,7 @@ minute|numbertrades|totalsize
 
 <hr>
 
-**🔵 10. Find all trades for `A where the price was cheaper than the average for that day**
+**🔵 20.10 Find all trades for `A where the price was cheaper than the average for that day**
 
 ```q
 a: update avgPrice: avg price by date from select from trade where sym=`A
@@ -5376,7 +5419,7 @@ a: update avgPrice: avg price by date from select from trade where sym=`A
 [Top](#top)
 
 <a name="left_join"></a>
-### 🔵 qSQL Join Left 
+### 🔵 21.1 qSQL Join Left 
 
 * syntax = **source table** lj **lookup table** (must be keyed)
 * for each row in **source**, find corresponding values in **lookup** (keyed)
@@ -5424,7 +5467,7 @@ x|date |      time |        sym|  price|    size|  cond| sector |   employees
 * will always be same number of rows as source table (5)
 
 <a name="plus_join"></a>
-### 🔵 qSQL Plus Join 
+### 🔵 21.2 qSQL Plus Join 
 
 * finds the same value across 2 tables, adds their values
 
@@ -5464,7 +5507,7 @@ x|`sym`| sector | employees
 * if value doesnt exist (RBS) just leave as is
 
 <a name="inner_join"></a>
-### 🔵 qSQL Inner Join 
+### 🔵 21.3 qSQL Inner Join 
 
 * similar to left join, but **only returns rows where matches occur**
 
@@ -5496,7 +5539,7 @@ x|date |        sym|  price|    size  | sector | employees
 * removes row UBS since no match
 
 <a name="union_join"></a>
-### 🔵 qSQL Union Join 
+### 🔵 21.4 qSQL Union Join 
 
 * adds ALL rows/columns together
 * if key matches, will upsert (update or insert)
@@ -5548,7 +5591,7 @@ x|date |        sym|  price|    size | book
 * **stock** (headers = sym, sector, employees)\
 * **trade** (headers = dt, sym, price, size)
 
-**🔵 1. Find the total value of trades by sector, include those who's sector is unknown (totalvalue = price x size)**
+**🔵 22.1 Find the total value of trades by sector, include those who's sector is unknown (totalvalue = price x size)**
 
 * the columns you need are price x size (trade table) and sector (stock table) 
 * need to use left join because you want to keep the same number of rows, and add in the relevant columns
@@ -5589,7 +5632,7 @@ unknown|	1958.0
 
 <hr>
 
-**🔵 2. Combine trades from trade and fbTrades Table into a table t2, sorted by date. Include all columns**
+**🔵 22.2 Combine trades from trade and fbTrades Table into a table t2, sorted by date. Include all columns**
 
 * include all columns, so we use union join
 
@@ -5622,7 +5665,7 @@ dt|sym|price|size|book
 
 <hr>
 
-**🔵 3. Find the highest and lowest price in the trade table for each sym**
+**🔵 22.3 Find the highest and lowest price in the trade table for each sym**
 
 ```q
 select max price by sym from trade
@@ -5646,7 +5689,7 @@ MS|	254.0
 
 <hr>
 
-**🔵 4. Find the 2 highest trade prices for each sym**
+**🔵 22.4 Find the 2 highest trade prices for each sym**
 
 ```q
 ungroup select 2 sublist desc price by sym from trade
@@ -5677,7 +5720,7 @@ MS|	260 255f
 
 <hr>
 
-**🔵 5. Find the average daily price for each sym in trade table. Join the newsItems table to show only those items where the sym had a newsItem on that date**
+**🔵 22.5 Find the average daily price for each sym in trade table. Join the newsItems table to show only those items where the sym had a newsItem on that date**
 
 * from trade table, find avg price. then join the newsItem table where matches date and sym
 * so date and sym need to be keys in the newsItems table
@@ -5714,7 +5757,7 @@ dt| sym| price|title
 
 <hr>
 
-**🔵 6. Take the newsItems table and join the trade table to bring in the latest price for each ticker**
+**🔵 22.6 Take the newsItems table and join the trade table to bring in the latest price for each ticker**
 
 ```q
 aj [`ticker`ndate;newsItems; `ndate`ticker xcol trade]
@@ -5746,7 +5789,7 @@ ndate|ticker|title|price
 [Top](#top)
 
 <a name="asof_join"></a>
-### 🔵 Asof Time Join
+### 🔵 23.1 Asof Time Join
 * joins the closest matches from one table to another
 * syntax = aj [column; source table; lookup table]
 * last item of columns will be less than or equal join
@@ -5830,7 +5873,7 @@ time|sym|price|size|ftime|fsym|bid|qtime|qsym
  * aj0 is the same as aj, but uses the lookup tables time column
 
 <a name="uniontime_join"></a>
-### 🔵 Union Time Join
+### 🔵23.2 Union Time Join
 
 * union join combines all entries from both tables, then can sort by time
 
@@ -5860,7 +5903,7 @@ time|sym|bid|price|size
 
 
 <a name="windowtime_join"></a>
-### 🔵 Window Time Join
+### 🔵 23.3 Window Time Join
 
 * wj pulls in values from that time window
 
@@ -5944,7 +5987,7 @@ wj vs wj1
 [Top](#top)
 
 <a name="eachboth_adverbs"></a>
-### 🔵 Each Both ,'
+### 🔵 24.1 Each Both ,'
 * modifies a dyadic function to operate on corresponding pairs of items between lists of equal length
 * acts like concatenate between 2 lists
 
@@ -6038,7 +6081,7 @@ a|b
 
 
 <a name="each_monadic"></a>
-### 🔵 Each Monadic
+### 🔵 24.2 Each Monadic
 
 each modifies a monadic function to make it operate one level deeper
 
@@ -6068,7 +6111,7 @@ reverse within each list
 c b a
 
 <a name="eachright_eachleft"></a>
-### 🔵 Each Right / Each Left
+### 🔵 24.3 Each Right / Each Left
 * similar to concatenate
 * x,/: each right; will join left item (x) to each item on right
 * x,\: each left; will join left item (x) to each item on left
@@ -6160,7 +6203,7 @@ st, \:"--->"
 "terminal--->" 
 
 <a name="scan_adverb"></a>
-### 🔵 Scan
+### 🔵 24.4 Scan
 * useful for calculations such as running totals, running products, where the previous value is used in the next value calculation
 
 ```q
@@ -6182,7 +6225,7 @@ st, \:"--->"
 1 2 3 4 5
 
 <a name="eachprevious_adverb"></a>
-### 🔵 Each Previous
+### 🔵 24.5 Each Previous
 
 ```q
 {x+y}': [1 2 3 4 7]
@@ -6209,7 +6252,7 @@ st, \:"--->"
 ## 🔴 25. Adverbs Problem Set
 [Top](#top)
 
-## 🔵 1. Given: ("cow"; "fox";"badger") use EACH RIGHT to prepend "the" before each item##
+## 🔵 25.1 Given: ("cow"; "fox";"badger") use EACH RIGHT to prepend "the" before each item##
 
 ```q
 strs: ("cow";"fox";"badger")
@@ -6223,7 +6266,7 @@ strs: ("cow";"fox";"badger")
 
 <hr>
 
-## 🔵 2. Use EACH LEFT to add "jumped" to strs ##
+## 🔵 25.2 Use EACH LEFT to add "jumped" to strs ##
 
 ```q
 strs,\: " jumped"
@@ -6236,7 +6279,7 @@ strs,\: " jumped"
 
 <hr>
 
-## 🔵 3. Given the nested list: dd: (1 5 10; 200 30 40; 20 23 24), find the max of each list ##
+## 🔵 25.3 Given the nested list: dd: (1 5 10; 200 30 40; 20 23 24), find the max of each list ##
 
 ```q
 dd: (1 5 10; 200 30 40; 20 23 24)
@@ -6246,7 +6289,7 @@ max each dd
 
 <hr>
 
-## 🔵 4. Using EACH PRIOR, create a function that calculates the moving sum with window size of 2 ##
+## 🔵 25.4 Using EACH PRIOR, create a function that calculates the moving sum with window size of 2 ##
 
 ```q
 L: 20 30 4 6 1 2
@@ -6267,7 +6310,7 @@ alternatively:
 
 <hr>
 
-## 🔵 5. Use EACH BOTH to join the lists to give (5 8; 7 3; 9 4) ##
+## 🔵 25.5 Use EACH BOTH to join the lists to give (5 8; 7 3; 9 4) ##
 
 numbers: 5 7 9 \
 powers: 8 3 4
@@ -6283,7 +6326,7 @@ key| value
 
 <hr>
 
-## 🔵 6. Use EACH BOTH to raise 5 to the power of 8, 7 to the power of 3, etc. ##
+## 🔵 25.6 Use EACH BOTH to raise 5 to the power of 8, 7 to the power of 3, etc. ##
 
 ```q
 numbers xexp' powers
@@ -6292,7 +6335,7 @@ numbers xexp' powers
 
 <hr>
 
-## 🔵 7. A bank account pays 5% interest a year. Write a function that takes the current balance and returns the new balance after one year. Then use scan\ with that function to display the interest every year, up to 7 years in the future ##
+## 🔵 25.7 A bank account pays 5% interest a year. Write a function that takes the current balance and returns the new balance after one year. Then use scan\ with that function to display the interest every year, up to 7 years in the future ##
 
 assume starting balance of 100
 
@@ -6314,7 +6357,7 @@ assume starting balance of 100
 
 <hr>
 
-## 8. Create a function, fib, that takes a fibonnaci sequence as its argument and returns the sequence complete with the next entry ##
+## 🔵 25.8 Create a function, fib, that takes a fibonnaci sequence as its argument and returns the sequence complete with the next entry ##
 
 ```q
 fib: {x, sum -2#x}
@@ -6324,7 +6367,7 @@ fib 1 1
 
 <hr>
 
-## 🔵 9. Use the over function to create a function fibn to generate a fib sequence n numbers long where n is the functions argument ##
+## 🔵 25.9 Use the over function to create a function fibn to generate a fib sequence n numbers long where n is the functions argument ##
 
 ```q
 fibn: {x fib/ 1 1}
@@ -6335,7 +6378,7 @@ fibn 5
 <hr>
 
 <a name="importexport_header"></a>
-## 26. 🔴 Importing and Exporting / Saving Data
+## 🔴 26. Importing and Exporting / Saving Data
 [Top](#top)
 
 <a name="txt_import"></a>
@@ -6545,10 +6588,6 @@ key | value
 p|	1
 o	|2
 i	|3
-
-
-
-
 
 
 <a name="Splayedtable_header"></a>
