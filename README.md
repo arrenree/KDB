@@ -5480,161 +5480,145 @@ a: update avgPrice: avg price by date from select from trade where sym=`A
 [Top](#top)
 
 <a name="left_join"></a>
-### 🔵 21.1 qSQL Join Left 
-
-* syntax = **source table** lj **lookup table** (must be keyed)
-* for each row in **source**, find corresponding values in **lookup** (keyed)
-* no match = nulls
-* column names must match
-* will always return same number of rows as **source** table
-
-trade table
-
-x|date |      time |        sym|  price|    size  
--|-----|-----------|-----------|---------|------
-1|2021.06.03| 09:30:02.553| C   | 107.2018| 63500
-2|2021.06.03| 09:30:02.701| MSFT |96.87488| 1700
-3|2021.06.03| 09:30:02.743| RBS  |97.11338| 80700
-4|2021.06.03| 09:30:02.758| A    |100.35  | 50300
-5|4021.06.03| 09:30:03.044| F    |79.48574| 54100
-
-stock table
-
-x|`sym`| sector | employees
--|---|--------|----------
-1|`C`    |Tech      |862      
-2|`MSFT` |Tech      |765      
-3|`RBS`  |Tech      |377      
-4|`A`    |Financial |167      
-5|`F`    |Financial | 615     
+### 🔵 21.1 qSQL Left Join
 
 ```q
+/ t1 lj t2 (t2 must be keyed)
+/ for each row in **source table**, find corresponding values in **lookup table** (keyed)
+/ no match = nulls
+/ column names must match and 2nd table must be keyed
+/ will always return same number of rows as **source** table
+
+trade table:
+x date        time         sym     price    size  
+-------------------------------------------------
+1|2021.06.03| 09:30:02.553| C    | 107.20 | 63500
+2|2021.06.03| 09:30:02.701| MSFT | 96.87  | 1700
+3|2021.06.03| 09:30:02.743| RBS  | 97.11  | 80700
+
+stock table:
+x `sym`   sector employees
+-------------------------
+1|`C`    |Tech  | 862      
+2|`MSFT` |Tech  | 765      
+3|`RBS`  |Tech  | 377      
+
+/ sym is keyed
+
 trade lj stock
+
+x date        time         sym    price     size cond  sector  employees
+-------------------------------------------------------------------
+1|2021.06.03| 09:30:02.553| C   | 107.2018| 63500| B |  Tech  | 862      
+2|2021.06.03| 09:30:02.701| MSFT| 96.87488| 1700 | B |  Tech  | 765      
+3|2021.06.03| 09:30:02.743| RBS | 97.11338| 80700| C |  Tech  | 377      
+
+/ sym is keyed from stock table
+/ takes trade table, for each sym, pulls in sector and employees columns
+/ will always be same number of rows as source table (5)
+/ here the tables are joined on `sym as the key
 ```
-
-x|date |      time |        sym|  price|    size|  cond| sector |   employees
--|-----|------------|------------|--------|----------|------|----------|-----
-1|2021.06.03| 09:30:02.553| C   | 107.2018| 63500| B |  Tech      |862      
-2|2021.06.03| 09:30:02.701| MSFT| 96.87488| 1700 | B |  Tech      |765      
-3|2021.06.03| 09:30:02.743| RBS | 97.11338| 80700| C |  Tech      |377      
-4|2021.06.03| 09:30:02.758| A   | 100.35  | 50300| B |  Financial |167      
-5|2021.06.03| 09:30:03.044| F   | 79.48574| 54100| A |  Financial |615      
-
-* all column names must match
-* **stock** table has **sector** and **employees**, which **trade** does not
-* **trade** = source table
-* **stock** = lookup table (keyed by sym)
-* takes trade table, for each sym, pulls in **sector** and **employees** columns
-* will always be same number of rows as source table (5)
 
 <a name="plus_join"></a>
 ### 🔵 21.2 qSQL Plus Join 
 
-* finds the same value across 2 tables, adds their values
-
-stock table
-
-x|`sym`| sector | employees
--|---|--------|----------
-1|`C`    |Tech      |100      
-2|`MSFT` |Tech      |100      
-3|`RBS`  |Tech      |100      
-
-trade table
-
-x|`sym`| sector | employees
--|---|--------|----------
-1|`C`    |Tech      |100      
-2|`MSFT` |Tech      |-100      
-
 ```q
+/ where key column names match across 2 tables, numeric values are added 
+/ other columns on left argument remain unchanged
+
+stock table:
+x `sym`  sector  employees
+-------------------------
+1|`C`    |Tech   |100      
+2|`MSFT` |Tech   |100      
+3|`RBS`  |Tech   |100      
+
+trade table:
+x `sym`  sector  employees
+-------------------------
+1|`C`    |Tech   |100      
+2|`MSFT` |Tech   |-100      
+
 stock pj trade
-```
-or
-```q
-stock pj [ (sym:`C`MSFT] employees: 100 -100)
-```
 
-* stock = source table
-* trade = lookup table
-
-x|`sym`| sector | employees
--|---|--------|----------
+x `sym`  sector  employees
+-------------------------
 1|`C`    |Tech      |200      
 2|`MSFT` |Tech      |0      
 3|`RBS`  |Tech      |100    
 
-* from stock table, find the corresponding syms, add values together
-* if value doesnt exist (RBS) just leave as is
+/ from stock table, find the corresponding sym (keyed), add numeric values together
+/ if value doesnt exist (RBS), remain unchanged
+```
 
 <a name="inner_join"></a>
 ### 🔵 21.3 qSQL Inner Join 
 
-* similar to left join, but **only returns rows where matches occur**
-
-trade table
-
-x|date |        sym|  price|    size  
--|-----|-----------|---------|------
-1|2021.06.03| C   | 107.2018| 63500
-2|2021.06.03| MSFT |96.87488| 1700
-3|2021.06.03| UBS    |100.35  | 50300
-
-stock table
-
-x|`sym`| sector | employees
--|---|--------|----------
-1|`C`    |Tech      |100      
-2|`MSFT` |Tech      |100      
-
 ```q
+/ similar to left join, but **only returns rows where matches occur**
+/ if match occurs, column added on, or updated if already exists
+/ non matches not returned - no nulls 
+
+trade table:
+x date       sym    price   size  
+--------------------------------------
+1|2021.06.03| C   | 107.2 | 63500
+2|2021.06.03| MSFT| 96.8  | 1700
+3|2021.06.03| UBS | 100.3 | 50300
+
+stock table:
+x `sym`  sector  employees
+-------------------------
+1|`C`    |Tech  | 100      
+2|`MSFT` |Tech  | 100      
+
 trade ij stock
+
+x date        sym    price  size  sector employees
+--------------------------------------------------
+1|2021.06.03| C    | 107.2| 63500| Tech | 100
+2|2021.06.03| MSFT | 96.8 |  1700| Tech | 100
+
+/ C and MSFT match on syms (keyed)
+/ adds on their corresponding values for sector and employees columns
+/ removes row UBS since no match
 ```
-* adds columns where the key matches (sym), otherwise remove
-
-x|date |        sym|  price|    size  | sector | employees
--|-----|-----------|---------|------| -|-
-1|2021.06.03| C   | 107.2018| 63500| Tech | 100
-2|2021.06.03| MSFT |96.87488| 1700| Tech | 100
-
-* removes row UBS since no match
 
 <a name="union_join"></a>
 ### 🔵 21.4 qSQL Union Join 
 
-* adds ALL rows/columns together
-* if key matches, will upsert (update or insert)
-* if no match, just append as new entry
-
-trade table
-
-x|date |        sym|  price|    size  
--|-----|-----------|---------|------
-1|2021.06.03| C   | 107.2018| 10
-2|2021.06.03| MSFT |96.87488| 10
-3|2021.06.03| UBS    |100.35  | 10
-
-stock table
-
-x|`sym`| sector | size | book
--|---|--------|---------|-
-1|`FB`    |Tech      |100| A      
-2|`GOOG` |Tech      |100 | B
-
 ```q
+/ allows tables with different columns to be joined
+/ adds ALL rows/columns together
+/ if key matches, will upsert (update or insert)
+/ if no match, just append as new entry
+
+trade table:
+x date       sym   price  size  
+------------------------------
+1|2021.06.03| C   | 107.2| 10
+2|2021.06.03| MSFT|  96.8| 10
+3|2021.06.03| UBS | 100.3| 10
+
+stock table:
+x`sym`   sector  size  book
+------------------------------
+1|`FB`  |Tech   |100  | A      
+2|`GOOG`|Tech   |100  | B
+
 trade uj stock
+
+x date       `sym`  price  size book
+-------------------------------------
+1|2021.06.03| C   | 107.2 | 10 | 
+2|2021.06.03| MSFT| 96.8  | 10 |
+3|2021.06.03| UBS | 100.3 | 10 |
+4|          | FB  |       |100 | A
+5|          | GOOG|       |100 | A
+
+/ no key match for FB or GOOG, so appends new row
+/ adds new column book; blank for existing, pulls in value from new
 ```
-x|date |        sym|  price|    size | book 
--|-----|-----------|---------|------|--
-1|2021.06.03| C   | 107.2018| 10 | 
-2|2021.06.03| MSFT |96.87488| 10 |
-3|2021.06.03| UBS    |100.35  | 10 |
-4| | FB |  |100 |A
-5| | GOOG |  |100 | A
-
-* no key match for FB or GOOG, so appends new row
-* adds new column book; blank for existing, pulls in value from new
-
 
 <a name="qsqljoins_problem_set"></a>
 ## 🔴 22. qSQL Joins Problem Set
@@ -5851,87 +5835,85 @@ ndate|ticker|title|price
 
 <a name="asof_join"></a>
 ### 🔵 23.1 Asof Time Join
-* joins the closest matches from one table to another
-* syntax = aj [column; source table; lookup table]
-* last item of columns will be less than or equal join
 
 ```q
+aj [`col_1`col_2; soure_table; lookup_table]
+
+/ joins the closest matches from one table to another
+/ syntax = aj [column; source table; lookup table]
+/ last item of columns will be less than or equal join
+
 t: ( [] time: 07:00 08:30 09:59t; sym:`a`a`b; price: 0.9 1.5 1.9; size:100 200 300)
 q: ( [] time: 08:00 09:00 10:00t; sym:`a`b`a; bid: 1 9 4)
-```
-table t
 
-time|sym|price|size
--|-|-|-
-07:00:00.000|	a|	0.9|	100
-08:30:00.000|	a|	1.5|	200
-09:59:00.000|	b|	1.9|	300
+table t:
+time     sym price size
+-------------------------
+07:00:00|	a |	0.9|	100
+08:30:00|	a |	1.5|	200
+09:59:00|	b |	1.9|	300
 
-table q
+table q:
+time     sym bid
+-----------------
+08:00:00|	a |	1
+09:00:00|	b |	9
+10:00:00|	a |	4
 
-time|sym|bid
--|-|-
-08:00:00.000|	a|	1
-09:00:00.000|	b|	9
-10:00:00.000|	a|	4
-
-```q
 aj [`sym`time; t;q]
+
+/ syntax = aj [column; source table; lookup table]
+/ columns = sym, time
+/ t = source table
+/ q = lookup table
+/ column names must match
+
+time     sym price size  bid
+----------------------------
+07:00:00| a |	0.9 |	100 |	
+08:30:00| a |	1.5 |	200	|1
+09:59:00| b |	1.9 |	300	|9
+
+/ from trade table, look through each sym, then time (less than or equal to)
+/ from t, first row = a. lookup a in q, but no time less than or equal to 7:00am. so bid = null
+/ from t, 2nd row = a. lookup a in q, found 8:00am <= 8:30, so pull in bid = 1
+/ from t, 3rd row = b. lookup bi n q, found 9:00am <=9:59, so bid = 9
 ```
-* syntax = aj [column; source table; lookup table]
-* columns = sym, time
-* t = source table
-* q = lookup table
-* column names must match
-
-time|sym|price|size|bid
--|-|-|-|-
-07:00:00.000|	a|	0.9|	100|	
-08:30:00.000|	a|	1.5|	200	|1
-09:59:00.000|	b|	1.9|	300	|9
-
-* bid column pulled in
-* from trade table, look through each sym, then time (less than or equal to)
-* from trade, found a, but in q, no time less than or equal to 7:00am. so bid = null
-* from trade, found a, found 8:00am <= 8:30, so bid = 1
-* from trade, found b, found 9:00am <=9:59, so bid = 9
 
 ```q
 fq: update qtime:time, qsym: sym from q
 ft: update ftime:time, fsym:sym from t
-```
-* create new table fq with columns qtime and qsym
-* create new table ft with columns ftime and fsym
 
-table fq
+/ create new table fq with columns qtime and qsym
+/ create new table ft with columns ftime and fsym
 
-time|sym|bid|qtime|qsym
--|-|-|-|-
-08:00:00.000|	a|	1|	08:00:00.000|	a
-09:00:00.000|	b|	9|	09:00:00.000|	b
-10:00:00.000|	a|	4|	10:00:00.000|	a
+table fq:
+time     sym bid qtime     qsym
+--------------------------------
+08:00:00|	a |	1 |	08:00:00|	a
+09:00:00|	b |	9 |	09:00:00|	b
+10:00:00|	a |	4 |	10:00:00|	a
 
-table ft
+table ft:
+time     sym  bid  size  ftime      fsym
+-------------------------------------------
+07:00:00|	a |	0.9 |	100 |	07:00:00 |	a
+08:30:00| a |	1.5 |	200 |	08:30:00 |	a
+09:59:00| b |	1.9 |	300 |	09:59:00 |	b
 
-time|sym|price|ftime|fsym
--|-|-|-|-
-07:00:00.000|	a|	0.9|	100|	07:00:00.000|	a
-08:30:00.000	|a|	1.5|	200|	08:30:00.000|	a
-09:59:00.000	|b|	1.9|	300|	09:59:00.000|	b
-
-```q
 aj [`sym`time;ft;fq]
+
+/ ft = source table
+/ fq = lookup table
+
+time     sym price size  ftime   fsym bid  qtime     qsym
+---------------------------------------------------------
+07:00:00|	a |	0.9 |	100|	07:00:00|	a	|	 	|          |
+08:30:00|	a |	1.5	| 200|	08:30:00|	a	| 1	| 08:00:00 |	a
+09:59:00|	b |	1.9	| 300|	09:59:00|	b |	9	| 09:00:00 |	b
+
+/ aj0 is the same as aj, but uses the lookup tables time column
 ```
-* ft = source table
-* fq = lookup table
-
-time|sym|price|size|ftime|fsym|bid|qtime|qsym
--|-|-|-|-|-|-|-|-|
-07:00:00.000|	a|	0.9|	100|	07:00:00.000|	a	|		| |
-08:30:00.000|	a|	1.5	|200|	08:30:00.000|	a	|1	|08:00:00.000|	a
-09:59:00.000|	b|	1.9	|300|	09:59:00.000|	b|	9	|09:00:00.000|	b
-
- * aj0 is the same as aj, but uses the lookup tables time column
 
 <a name="uniontime_join"></a>
 ### 🔵23.2 Union Time Join
