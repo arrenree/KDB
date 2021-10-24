@@ -194,7 +194,8 @@
 2. [Each Monadic](#each_monadic)
 3. [Each Right / Each Left](#eachright_eachleft)
 4. [Scan](#scan_adverb)
-5. [Each Previous](#eachprevious_adverb)
+5. [Over](#over_adverb)
+6. [Each Previous](#eachprevious_adverb)
 
 ## 25. [Adverbs Problem Set](#adverbs_problemset)
 
@@ -3528,249 +3529,258 @@ upsert [p; ([book:`C`D; ticker:`C`MS]size:400 500)]
 ## 🔴 16. Table Attributes
 [Top](#top)
 
+```q
+Attributes describe how the underlying data in lists are structured
+This speeds up queries and optimizes memory usage
+
+1. Sorted 's# - items in ascending order
+2. Unique 'u# - each element is unique
+3. Grouped 'g# - mapping from distinct item to each index is maintained
+4. Parted 'p# - items are contiguous
+```
+
 <a name="set_attribute_creation"></a>
 ### 🔵 16.1 Setting Attributes During Creation
+
 ```q
 l:`s# 1 2 3 4 5 
-```
 1 2 3 4 5
-* applies the sorted attribute during creation of the list
 
-```q
+/ applies the sorted attribute during creation of the list
+
 attr l
-```
 's
 
-* checks what attributes are applied to list l
-* 's means sorted attribute applied
+/ checks what attributes are applied to list l
+/ 's means sorted attribute applied
+```
 
 <a name="apply_attribute_data"></a>
 ### 🔵 16.2 Applying Attribute to Existing Data
 ```q
 k: 1 2 3 4 5
-```
-```q
 @ [ `.; `k;`s#]
-```
-* @ = apply
-* `. = within the default name space
-* within the default name space, apply the sorted attribute to list k
 
-```q
+/ @ = apply
+/ `. = within the default name space
+/ within the default name space, apply the sorted attribute to list k
+
 attr k
-```
 `s
-* confirms list k now has the `s# sorted attribute
+
+/ confirms list k now has the `s# sorted attribute
+```
 
 <a name="update_attribute_data"></a>
 ### Updating Attribute to Existing Data
 
-Given:
-
-table t
-
-time|name|val
--|-|-
-08:00:00.000 |	joe|	10
-08:30:00.000|	jim|	20
-09:10:00.000|	bob|	30
-
 ```q
+table t:
+
+time     name val
+------------------
+08:00:00 |joe|	10
+08:30:00 |jim|	20
+09:10:00 |bob|	30
+
 meta t
+
+c     t f a
+-----------
+time |t|	|
+name |s|	|	
+val	 |j|	|	
+
+/ t = type = time, sym, int
+/ f = foreign keys (none)
+/ a = attributes (none)
 ```
-c|t|f|a
--|-|-|-
-time|	t	|	
-name|	s|		
-val	|j|		
-
-* a = attributes = currently nothing
-
 ```q
 update `s#time from `t
+
+/ update column time from table t with the sorted attribute
+
+c     t f a
+-----------
+time |t|	|s
+name |s|	| 	
+val	 |j|	|
+
+/ attributes for time now has s (sorted) applied
 ```
-* update column time from table t with the sorted attribute
-
-c|t|f|a
--|-|-|-
-time|	t	|	|a
-name|	s|		
-val	|j|		
-
-* under attributes for column time, s sorted has been applied
 
 <a name="clear_attribute"></a>
 ### 🔵 16.3 Clear Attributes
+
 ```q
 @ [`.;`k;`#]
+
+attr k
+`
 ```
 
-```q
-attr k
-```
-`
 <a name="fast_attribute"></a>
-### Attribute Benefits
-Given:
+### 🔵 16.4 Attribute Benefits
+
 ```q
 k: til 1000000
-```
 0 1 2 3...999,999
 
-```q
 \t do[1000; k?500000]
-```
-* time 1,000 lookups for the number 500,000 in list k
 130
-* it took 130 miliseconds
 
-```q
+/ time 1,000 lookups for the number 500,000 in list k
+/ it took 130 miliseconds
+
 `s#k
-```
-* appy the sorted attribute to list k
 
-```q
+/ appy the sorted attribute to list k
+
 \t do[1000; k?500000]
-```
 0
-* after applying sort attribute, only took 0 miliseconds
-* applying sort applies a binary search. start in the middle, (ex 5), less than that, so checks mid (ex 3), more, so 4
+
+/ after applying sort attribute, only took 0 miliseconds
+/ applying sort applies a binary search. 
+/ start in the middle, (ex 5), less than that, so checks mid (ex 3), more, so 4
+```
 
 <a name="sort_attribute"></a>
-### 🔵 16.4 Sorted Attribute
-* sorted attribute applied to list or column to specify data is sorted in ascending order
-* the underlying list must already be in ascending order, otherwise error
-* `s# attribute only maintained during append that maintain the sort requirement, otherwise lost
-
+### 🔵 16.5 Sorted Attribute
+```q
+/ sorted attribute applied to list or column to specify data is sorted in ascending order
+/ requires elements to be sorted ascending, otherwise error
+/ `s# attribute only maintained on sorted append, lost on other modification
+/ allows binary search instead of linear (fully scanning), so much faster
+```
 ```q
 list: 1 2 3 4 5
-```
-```q
 `s#list
-```
-* apply sorted attribute to list
-```q
+
+/ apply sorted attribute to list
+
 attr list
-```
-* checks what attributes are applied to list; confirms sorted attributed applied
 `s
-```q
+
+/ checks what attributes are applied to list
+/ confirms sorted attributed applied
+
 list,: 6
-```
-* add 6 to list
-```q
+
+/ add 6 to list
+
 attr list
-```
-* checks attributes for list
-* the sort attribute maintained since 6 is in ascending order to list
 `s
 
-```q
+/ checks attributes for list
+/ the sort attribute maintained since 6 is in ascending order to list
+
 list,:3
-```
-* adds 3 to list
+/ adds 3 to list
 
-```q
 attr list
-```
-* sort attribute LOST because 3 is not ascending to existing list
+`
 
-```q
-`s#list
+/ sort attribute LOST because 3 is not ascending to existing list
+/ cannot apply sort attribute because underlying list is NOT ascending
 ```
-* cannot apply sort attribute because underlying list is NOT ascending
-s-fail
 
 <a name="unique_attribute"></a>
-### 🔵 16.5 Unique Attribute
-* unique attribute applied to a list where all values must be unique (no same values)
+### 🔵 16.6 Unique Attribute
+
+```q
+'u#listname
+
+/ unique attribute signifies all elements of list are unique 
+/ creates unique hash table in the background, allowing for constant time lookup of elements
+/ mainly used for single keyed tables and big dictionaries
+/ maintained on unique append
+```
 
 ```q
 lu:`u#1 2 3 4 5
-```
 `u
 
-```q
+/ apply unique attribute to list
+
 lu,:7
-```
-* appends 7 to list lu
 
-```q
+/ appends 7 to list 
+
 attr lu
-```
 `u
-* lu still has unique attribute
 
-```q
+/ list lu still has unique attribute since underlying elements all unique
+
 lu,:4
-```
-* adds 4 to list lu
 
-```q
+/ adds 4 to list lu
+
 attr lu
-```
 `
-* loses unique attribute since 4 already exists
+
+/ loses unique attribute since 4 already exists
+```
 
 <a name="group_attribute"></a>
-### 🔵 16.6 Grouped Attribute
-* groups same identifiers together for faster searches
+### 🔵 16.7 Grouped Attribute
+```q
+'g#listname
 
+/ groups same identifiers together for faster searches
+/ no searching, no requirement on order or content
+/ uses additional memory
+```
 ```q
 lg: 1 3 2 3 2 1 2 3
-```
-```q
 @ [`.;`lg;`g#]
-```
-* @ = apply
-* `. = within the default name space
-* g# = group attribute
-* within the default name space, apply the group attribute to list lg
 
-```q
+/ @ = apply
+/ `. = within the default name space
+/ g# = group attribute
+/ within the default name space, apply the group attribute to list lg
+
 attr lg
-```
 `g
-* confirms group attribute applied to list lg
 
-```q
+/ confirms group attribute applied to list lg
+
 group lg
-```
-key|value
--|-
-1|	0 5
-3|	1 3 7
-2|	2 4 6
 
-* stores lookup table from values to indices where they occur
+key|value
+--------
+1  |	0 5
+3  |	1 3 7
+2  |	2 4 6
+
+/ stores lookup table from values to indices where they occur
+```
 
 <a name="parted_attribute"></a>
-### 🔵 16.7 Parted Attribute
-* parted attribute marks a list of having same value occuring in sequential block
-* enables faster searches
-
+### 🔵 16.8 Parted Attribute
+```q
+/ parted attribute marks a list of having same value occuring in sequential blocks
+/ breakpoints of elements stored - no more searching, contiguous reads
+/ lost on any modification
+/ mainly used for on disk queries
+```
 ```q
 lp:`p#`a`a`a`b`b`b`c`c`c
-```
-* applied parted attribute to list lp
 
-```q
+/ applied parted attribute to list lp
+
 attr lp
-```
 `p
 
-* confirms parted attribtue applied to list lp
+/ confirms parted attribtue applied to list lp
 
-```q
 lp,:`a
-```
-* appends a to list
 
-```q
+/ appends a to list
+
 attr lp
-```
 `
-* loses group attribute since a now isnt in sequential block
+/ loses group attribute since a now isnt in sequential block
+```
 
 <hr>
 
@@ -6024,276 +6034,306 @@ wj vs wj1
 / wj pulls in prevailing values not within time window
 / wj1 strictly excludes values outside the interval (for ex, if time interval was 10:00 - 10:15)
 ```
-```q
-/ window join case study 2
-
-
-
-
 
 <a name="adverbs_header"></a>
 ## 🔴 24. Adverbs
 [Top](#top)
 
+```q
+/ an adverb modifies an existing verb or function to alter how its applied to its arguments
+/ combines 2 verbs and uses it as a new function
+
+each both x,'y 
+each left x,\: y
+each right x,/: y 	
+scan x \ y
+over x / y
+```
+
 <a name="eachboth_adverbs"></a>
 ### 🔵 24.1 Each Both ,'
-* modifies a dyadic function to operate on corresponding pairs of items between lists of equal length
-* acts like concatenate between 2 lists
-
-### EACH BOTH - 2 lists of integers
 
 ```q
-L: 1 2 3
-K: 50 60 70
-L,'K
+/ joins corresponding elements from two vectors of the same length
+
+EACH BOTH - 2 lists
+
+1 2 3 ,' 10 20 30
+1 10
+2 20
+3 30
+
+/ concatenates the first elements of L and to first element of K
+/ lists must be same length
 ```
-(1 50;2 60;3 70)
-
-L|K
--|-
-1| 50
-2 |60
-3 |70
-
-* concatenates the first elements of L and to first element of K
-* lists must be same length
-
-### EACH BOTH - 2 dictionaries
-
 ```q
-d1:`p`o`i ! 1 2 3
-d2:`p`o`k ! 4 5 6
-```
+EACH BOTH - 2 dictionaries 
+
 d1
-key|value
--|-
-p|	1
-o|	2
-i|	3
+key | value
+----------
+ p  |	 1
+ o  |	 2
+ i  |	 3
 
 d2
-key|value
--|-
-p|	4
-o|	5
-k|	6
+key | value
+---------
+ p  |	 4
+ o  |	 5
+ k  |	 6
 
-```q
-d1,d2
+d1,d2 / join
+
+key | value
+---------
+ p	 |  4
+ o	 |  5
+ i	 |  3
+ k	 |  6
+
+/ If you simply JOIN dictionaries, the d2 will override anything existing keys in d1 (p, o)
+/ acts like an UPSERT
+
+d1,'d2 / each both
+
+key| value
+---------
+ p |	1 4
+ o |	2 5
+ i |	3 
+ k | 6
+
+/ EACH BOTH will join the values together
+/ retains the keys, and combines the values together
 ```
-key|value
--|-
-p	|4
-o	|5
-i	|3
-k	|6
-
-* when you simply JOIN dictionaries, the d2 will override anything existing keys in d1 (p, o)
-* acts like an UPSERT
-
 ```q
-d1,'d2
-```
-key|value
--|-
-p|	1 4
-o|	2 5
-i|	3 
-k| 6
+EACH BOTH - Tables
 
-* EACH BOTH will join the values together
-* retains the keys, and combines the values together
+t1: ([] a: 1 2 3)
+t2: ([] b: 4 5 6)
 
-### EACH BOTH - Tables
-
-```q
-t1: ( [] a:1 2 3)
-t2: ( [] b:4 5 6)
-```
-
-```q
 t1, t2
-```
-can't simply join; mismatch (because rows have different columns names)
 
-```q
+/ can't simply join; mismatch (because rows have different columns names)
+
 t1, 't2
-```
 
-a|b
--|-
+a |b
+----
 1	|4
 2	|5
 3	|6
 
-* each both will stitch the two tables together
-
+/ each both will stitch the two tables together
+```
 
 <a name="each_monadic"></a>
-### 🔵 24.2 Each Monadic
+### 🔵 24.2 Each
 
 each modifies a monadic function to make it operate one level deeper
 
 ```q
 j: ("race fast, safe car."; 0 1 2; `a`b`c)
-```
-"race fast, safe car." \
-0 1 2 \
+"race fast, safe car." 
+0 1 2
 a b c
-
+```
 ```q
 reverse j
-```
-so this reverses the mixed list at the top most level
-
-a b c \
-0 1 2 \
+a b c
+0 1 2
 "race fast, safe car."
+
+/ so this reverses the mixed list at the top most level
+```
 
 ```q
 reverse each j
-```
-reverse within each list
-
 ".rac efas , tsaf ecar"
 2 1 0
 c b a
 
+/ reverse within each list
+```
+
 <a name="eachright_eachleft"></a>
 ### 🔵 24.3 Each Right / Each Left
 * similar to concatenate
-* x,/: each right; will join left item (x) to each item on right
 * x,\: each left; will join left item (x) to each item on left
+* x,/: each right; will join left item (x) to each item on right
 
-### each left ,\:
-x, \:y / each left, returns a list of each element from x with all of y
-so pegs to x (left) to each element of y (right)
+### Each Left
 
 ```q
-l: 1 2 3
-k: `a`b`c
-l,\:k
+x,\:
+/ The top of the \ points LEFT
+/ Adds EACH element of LEFT (x) to ENTIRE y 
 
-/ returns:
-/ 1`a`b`c
-/ 2`a`b`c
-/ 3`a`b`c
+x: 1 2 3
+y: `a`b`c
+x,\:y
+
+1`a`b`c
+2`a`b`c
+3`a`b`c
 ```
 
-### each right ,/:
-x,/:y / each right, returns a list of all the x with each element of y
-so pegs to y (right) to each element of x (left)
-
+### Each Right
 ```q
-l: 1 2 3
-k: `a`b`c
-l,/:k
+x,/:
+/ The top of the / points RIGHT
+/ Adds each element of y to the entirety of x
 
-/ returns:
-/ 1 2 3`a
-/ 1 2 3`b
-/ 1 2 3`c
+x: 1 2 3
+y: `a`b`c
+x,/:y
+
+1 2 3`a
+1 2 3`b
+1 2 3`c
 ```
 
 ```q
+/ EXAMPLE 1
+
 st:("welcome";"to the"; "terminal")
-```
-"welcome" \
-"to the " \
+"welcome"
+"to the "
 "terminal" 
 
-```q
 ">",/:st
-```
-* joins the left item to each item on right
 
-">welcome" \
-">to the " \
+/ joins the left item to each item on right
+
+">welcome"
+">to the "
 ">terminal" 
 
-```q
 ">",st
-```
-* if you simply joined it, it will join it at the top most level of the list
 
-">" \
-"welcome" \
-"to the " \
+/ if you simply joined it, it will join it at the top most level of the list
+
+">"
+"welcome"
+"to the "
 "terminal" 
 
-```q
-1 2 +/: 100 200 300
-```
-* each right; since 2 arguments on left, there will be 2 columns
+st,\:"--->"
 
-key | value
--|-
-101 | 102
-201 | 202
-301 | 302
-
-```q
-1 2 +\: 100 200 300
-```
-* each left (the bar tilts towards left); since 3 arguments on right, there will be 3 columns
-
-key | value
--|-
-101 | 201 | 301
-102 | 202 | 302
-
-```q
-st, \:"--->"
-```
-* each left; adds right hand argument to each of st
+/ each left; adds right hand argument to each of st
 
 "welcome--->" \
 "to the---> " \
 "terminal--->" 
+```
+
+```q
+/ EXAMPLE 2
+
+1 2 +/: 100 200 300
+
+/ each right; since 2 arguments on left, there will be 2 columns
+
+key | value
+-----------
+101 | 102
+201 | 202
+301 | 302
+```
+
+```q
+/ EXAMPLE 3
+
+1 2 +\: 100 200 300
+
+/ each left (the bar tilts towards left);
+/ since 3 arguments on right, there will be 3 columns
+
+key |  value
+---------------
+101 | 201 | 301
+102 | 202 | 302
+```
 
 <a name="scan_adverb"></a>
 ### 🔵 24.4 Scan
-* useful for calculations such as running totals, running products, where the previous value is used in the next value calculation
 
 ```q
+/ scan is an accumulating iterator
+/ returns the result of EACH result
+/ useful for running totals, running products, where the previous value is used in the next value calculation
+
+1 +\ 0 1 2 3
+1 2 4 7
+
+/ returns each result
+```
+
+```q
+/ EXAMPLE 2
+
 {x + y} \ [1 2 3 4 5]
 {x + y} scan [1 2 3 4 5]
-```
-* 1+0 =1; 1+2 = 3; 3+3=6; 4+6=10; 5+10=15
-* can also use "scan" instead of \
-
 1 3 6 10 15
+
+/ 1+0 =1; 1+2 = 3; 3+3=6; 4+6=10; 5+10=15
+/ can also use "scan" instead of \
+```
 
 ```q
 {x,y} \ [1 2 3 4 5]
-```
-1 \
-1 2 \
-1 2 3 \
-1 2 3 4 \
+1
+1 2
+1 2 3
+1 2 3 4
 1 2 3 4 5
+```
+
+<a name="over_adverb"></a>
+### 🔵 24.5 Over
+
+```q
+/ over is an accumulating iterator
+/ returns the final result
+
+1 +/ 0 1 2 3
+7
+```
 
 <a name="eachprevious_adverb"></a>
-### 🔵 24.5 Each Previous
+### 🔵 24.6 Each Previous / Prior
 
 ```q
 {x+y}': [1 2 3 4 7]
-```
 0N 3 5 7 11
 
-* O + 1 = ON
-* 1 + 2 = 3
-* 2 + 3 = 5
-* 3 + 4 = 7
+/ O + 1 = ON
+/ 1 + 2 = 3
+/ 2 + 3 = 5
+/ 3 + 4 = 7
+```
 
 ```q
 10 + ': 1 2 3 4 7
-```
 11 3 5 7 11
-* 10 + 1 = 11
-* 1 + 2 = 3
-* 2 + 3 = 5
-* 3 + 4 = 7
+
+/ 10 + 1 = 11
+/ 1 + 2 = 3
+/ 2 + 3 = 5
+/ 3 + 4 = 7
+```
+
+```q
+-': [1 2 3 4]
+1 1 1 1 
+
+/ same as deltas 
+
+deltas 1 2 3 4
+1 1 1 1 
+```
+
 
 <hr>
 
@@ -6421,8 +6461,33 @@ fib 1 1
 ```q
 fibn: {x fib/ 1 1}
 fibn 5
-```
 1 1 2 3 5 8 13
+```
+
+<hr>
+
+## 🔵 25.10 Use the scan to calculate the depreciation of cars 
+
+```q
+/ c = initial car value
+/ r = depreciation rate per year
+
+depr:{[c;r] c*1-r%100}
+depr[100;8]
+92
+
+/ What is the value after 5 years?
+
+depr[;8]\[5;100]
+100
+92
+84.64
+77.86
+71.63
+65.90
+
+/ use scan to iterate the function 5x
+```
 
 <hr>
 
@@ -6640,7 +6705,7 @@ i	|3
 
 
 <a name="Splayedtable_header"></a>
-## 27. 🔴 Splayed Table
+## 🔴 27. Splayed Table
 [Top](#top)
 
 * splaying a table in kdb+ allows saving a table with separate files for each column
@@ -6710,7 +6775,7 @@ set[`:trade/; trade]
 [Top](#top)
 
 <a name="load_csv"></a>
-### 🔵 1. Loading CSV Files
+### 🔵 28.1 Loading CSV Files
 
 With Column Headers
 
@@ -6733,7 +6798,7 @@ if the CSV file contains data but no column names, dont need to enlist a delimit
 <hr>
 
 <a name="cross_case"></a>
-### 🔵 2. Comparing Current Orders against Potential Crosses
+### 🔵 28.2 Comparing Current Orders against Potential Crosses
 
 Objectives:
 1. Pull in CSV file of current orders (trade)
@@ -6816,7 +6881,7 @@ ric|side|crossableqty
 <hr>
 
 <a name="nettingbuyssells_case"></a>
-### 🔵 3. Netting off buys and sells from same Stock
+### 🔵 28.3 Netting off buys and sells from same Stock
 
 * same stock, multiple lines of buys and sells in the same stock
 * determine what is the net quantity
@@ -6849,7 +6914,7 @@ AAPL |	120
 
 <hr>
 
-## 🔵 4. Turn 2 lists of symbols into one longer list. 
+## 🔵 28.4 Turn 2 lists of symbols into one longer list. 
 
 ```q
 `AAPL`IBM`VOD and `O`N`L
@@ -6892,7 +6957,7 @@ S1,'S2 / using EACH BOTH joins each element of s1 to each element of s2
 
 <hr> 
 
-## 🔵 5. Create a function that will return latest prices (with max timestamp within the date) for the date.
+## 🔵 28.5 Create a function that will return latest prices (with max timestamp within the date) for the date.
 If there is not any price for that particular date, return the latest previous price
 There is no predefined ordering of the source table.
 Try to preserve the column order.
@@ -6945,7 +7010,7 @@ f:{[t;d] select last price, max timestamp by date, sym from t where date<=d, tim
 * you want to filter the MAX TIMESTAMP by the date
 
 
-## 🔵 6. Given the 2 tables:
+## 🔵 28.6 Given the 2 tables:
 
 ```q
 t1: ([] sym:`a`b`c;ex:`x)
@@ -7079,7 +7144,7 @@ b|	y|	2.0|	50	|2.05	|150	|2.0667
 c|	y|	3.3|	200|	3.2	|150	|3.18
 
 
-## 🔵 7. Given the table:
+## 🔵 28.7 Given the table:
 
 ```q
 orders: ( [] order:10*1 + til 8; sym:`NYSE`NYSE,6#`NASDAQ; start: 08:00 09:00 09:00 08:00 10:00 12:30 13:30 18:00; end:11:00 13:00 15:30 13:30 11:30 13:30 14:30 19:00)
@@ -7483,10 +7548,6 @@ parse "update mid:(bid+ask)%2 from quotes"
 
 ![quotes;();0b;(enlist `mid!enlist(%;(+;`bid;`ask);2)]
 ```
-
-
-
-
 
 
 [Top](#top)
