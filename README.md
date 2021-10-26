@@ -218,6 +218,8 @@
 
 ## 30. [Functional Form](#functional_form)
 
+## 31. [On Disk Table Structure](#ondiskstructure)
+
 
 
 <hr>
@@ -7548,6 +7550,35 @@ parse "update mid:(bid+ask)%2 from quotes"
 
 ![quotes;();0b;(enlist `mid!enlist(%;(+;`bid;`ask);2)]
 ```
+
+<hr>
+
+<a name="ondiskstructure"></a>
+## 30. 🔴 On Disk Table Structure
+[Top](#top)
+
+```q
+1. Flat Table
+   a) saved to disk as is, all info in one file 
+   b) can only be accessed by loading into memory
+   c) generally small, freq accessed datasets 
+   d) not suitable for large datasets
+
+2. Splayed Table
+   a) each column of the table saved as separate file
+   b) .d file is created to store the correct order of the columns
+   c) when a splayed tab is loaded to a session, it is mapped in, not loaded to physical memory
+   d) if i have large table and only want to access one column, only that one column loaded
+
+3. Partitioned Table
+   a) most frequently used for large databases
+   b) separate folders (directory) for each partition
+   c) most common partition = date
+   d) within each directory, splayed columns are saved
+```
+
+
+
 
 
 [Top](#top)
