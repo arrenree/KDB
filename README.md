@@ -220,6 +220,7 @@
 
 ## 31. [On Disk Table Structure](#ondiskstructure)
 
+## 32. [Partitioned Database](#partitioned_db)
 
 
 <hr>
@@ -7911,6 +7912,15 @@ date       price qty
 
 / this will populate the partition accordingly
 ```
+
+<hr>
+
+<a name="partitioned_db"></a>
+## 30. 🔴 Partitioned Database
+[Top](#top)
+
+
+
 
 
 [Top](#top)
