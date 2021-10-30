@@ -7790,10 +7790,127 @@ price qty
 100	  10
 ```
 
+```q
+/ .Q.en used to enumerate sym colums in a splayed table
+/ symbol columns have to be enumerated before splaying the table
+/ to enumerate a column means the unique symbols are identified
+/ and an index assigned to each unique symbol
+
+fruitorders: ([] fruit:`apple`pear`banana; qty: 10 20 30; price: 100 200 300)
+`:fruitdb/fruitorders/ set .Q.en[`:fruitdb; fruitorders]
+
+/ fruitdb = directory for database
+/ set .Q.en enumerates the syms
+
+fruitdb
+    fruitorders (folder)
+         .d
+         fruit
+         price
+         qty
+    sym file
+
+load `:fruitdb/fruitorders
+
+/ this loads the fruitdb database to memory
+
+fruitorders
+
+fruit  qty price
+---------------
+apple	 10	 100
+pear	  20	 200
+banana	30	 300
+```
+
+```q
+/ .Q.dpft used to save a splayed table into a database partition 
+
+.Q.dpft[`:hdb;2021.01.01;`fruit;`fruitorders]
+
+/ 1st argument = database directory
+/ 2nd argument = database partition
+/ 3rd argument = column to sort and apply the parted attribute to
+/ 4th argument = the table to be saved
+
+hdb
+   2021.01.01
+      fruitorders
+         .d
+         fruit
+         price
+         qty
+```
+```q
+/ .Q.hdpf used to save all tables in the global namespace to hdb  and purge all data in tables
+
+.Q.hdpf[0;`:hdb;2021.01.01;`fruit]
+
+/ 0 = historical port
+/ hdb = database directory
+/ 2021.01.01 = partition
+/ `fruit = column which is to be sorted and parted enumerated column
+
+fruitorders
+
+fruit quantity prrices
+----------------------
+
+/ all data has been purged
+```
+
 ### Partitioned Table
 
 ```q
+/ a partitioned table is usually first split by date
+/ then within each date, the table is splayed by columns
 
+price2: ([] price: 100 200 300; qty: 10 20 30)
+price3: ([] price: 500 600 700; qty: 50 60 70)
+
+`:parprice/2021.01.01/ex/ set price2
+`:parprice/2021.01.02/ex/ set price3
+
+/ set partition by date (one for each date)
+/ table name = ex
+/ within each ex, each individual column is saved as a file
+/ hierarchy goes DATE -> EX -> (individual columns)
+/ remember to include the last / after table name! 
+
+\l parprice
+ex
+
+/ loads the partitioned table on the overall directory
+
+date       price qty
+--------------------
+2021.01.01 100	  10
+2021.01.01 200	  20
+2021.01.01 300	  30
+2021.01.02 500	  50
+2021.01.02 600	  60
+2021.01.02 700	  70
+```
+```q
+/ can use .Q.ind to access table using indexing
+
+.Q.ind[ex; 1 2]
+
+date       price qty
+--------------------
+2021.01.01 200	  20
+2021.01.01 300	  30
+
+/ returns rows 2, 3 (index position 1, 2)
+```
+```q
+/ can use .Q.chk to fill missing tables within a partitioned database
+/ suppose we have empty 2021.01.03 
+
+.Q.chk[`:.]
+
+/ this will populate the partition accordingly
+```
 
 
 [Top](#top)
