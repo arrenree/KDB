@@ -7573,11 +7573,226 @@ parse "update mid:(bid+ask)%2 from quotes"
 3. Partitioned Table
    a) most frequently used for large databases
    b) separate folders (directory) for each partition
-   c) most common partition = date
-   d) within each directory, splayed columns are saved
+   c) most common partition is by date
+   d) each date has own directory, and within each directory, there are folders for each splayed table
 ```
 
+### Flat Table
+```q
+price: ([] fruit:`apple`pear`banana; qty: 10 20 30; price: 100 200 300)
 
+fruit  qty price
+---------------
+apple	 10	 100
+pear	  20	 200
+banana	30	 300
+
+/ to save as flat file to directory:
+
+`:price
+
+/ this will save the table to your directory with table name = price
+
+`:new_name set price
+
+/ this will save and rename the table = new_name
+/ set + (price = table name)
+```
+```q
+/ to load these flat files:
+
+fruitorders: get`:new_name
+
+/ use get function, can rename table as you load it
+
+load `:price
+
+/ can also use load `: function
+```
+### Splayed Table
+```q
+/ Splayed Table = each column stored as separate file
+/ A directory(folder) is created which contains a file for each column + a .d file (order of column)
+
+prices2: ([] price: 100 200 300; qty: 10 20 30)
+
+`:splayprice2/ set price2
+
+/ syntax = `: + table name you want to save to + / + original table name
+/ renames table to splayprice2
+/ adding a backslash saves the table as a splayed table
+/ this will create a folder called splayprice2, and within it, have individual columns as files
+/ saving a table with a sym column requires some extra step
+```
+```q
+/ when load splayed table into q session, it is mapped to memory, not read to physical memory
+/ shown by mmap function using .Q.w function
+
+.Q.w[]
+
+/ displays memory usage
+
+key  value
+--------------
+used	359680
+heap	67108864
+peak	67108864
+wmax	0
+mmap	0
+mphy	16556564480
+syms	680
+symw	28177
+
+/ mmapp = 0
+
+prices2: get`:splayprice2
+prices2
+
+key  value
+----------------
+used	359680
+heap	67108864
+peak	67108864
+wmax	0
+mmap	80
+mphy	16556564480
+syms	680
+symw	28177
+
+/ after loading the splayed table, mmap now 80
+```
+```q
+/ check what columns are available in .d file for splayed table
+
+get `:splayedprice2/.d
+`price`qty
+```
+```q
+/ re-arrange column order in .d file for splayed table
+
+`:splayedprice2/.d set `qty`price
+
+/ changed order from `price`qty to `qty`price
+
+load `:splayedprice2
+splayedprice2
+
+qty price
+---------
+10	 100
+20	 200
+30	 300
+```
+```q
+/ retrieve values from individual columns
+
+get `:splayedprice2/qty
+10 20 30
+
+get `:splayedprice2/price
+100 200 300
+```
+```q
+/ add new column to splayed table
+
+`:splayedprice2/date set 2020.01.01 2020.01.02 2020.01.03
+
+/ this will append a new column called date with the values
+/ will also add a new directory=date in the splayed table folder
+/ but still need to update .d file!
+
+splayedprice2
+
+price qty
+---------
+100	  10	
+200	  20	
+300	  30	
+
+`:splayedprice2/.d set `price`qty`date
+
+/ sets and reorders columns in .d
+
+load `:splayedprice2
+splayedprice2
+
+price qty date
+--------------------
+100	  10	 2021-01-01
+200	  20	 2021-01-02
+300	  30	 2021-01-03
+
+/ now when you query the splayedprice2 table, column date is added
+```
+```q
+/ to delete a column in a splayed table
+
+hdel `:splayedprice2/date
+
+/ use hdel function to remove file from disc
+/ deletes the column date file
+
+`:splayedprice2/.d set `price`qty
+
+/ then you need to update the .d file
+
+load `:splayedprice2
+splayedprice2
+
+/ reload the splayed table
+
+price qty
+---------
+100	  10
+200	  20
+300	  30
+
+/ now the date column is gone
+```
+```q
+/ add new row to splayed table
+
+`:splayedprice2/ upsert (400; 40)
+splayedprice2
+
+price qty
+---------
+100	  10
+200	  20
+300	  30
+
+/ if you immediately try to query the table, the new row is NOT added
+/ need to first re-load the table
+
+\l splayedprice2
+splayedprice2
+
+price qty
+---------
+100	  10
+200	  20
+300	  30
+400   40
+```
+```q
+/ sort splayed table by ascending/descending
+
+`price xdesc `:splayedprice2/
+get `:splayedprice2/
+
+/ after sorting use get to retrieve table
+
+price qty
+---------
+400	  40
+300	  30
+200	  20
+100	  10
+```
+
+### Partitioned Table
+
+```q
 
 
 
