@@ -217,11 +217,23 @@
 ## 30. [Functional Form](#functional_form)
 
 ## 31. [Flat Tables](#flat_tables)
+1. [Saving Flat Tables](#flat_tables)
+2. [Renaming Flat Tables when Saving](#rename_flatfiles)
+3. [Loading Flat Files](#loading_flatfiles)
 
 ## 32. [Splayed Database Tables](#splayed_tables)
+1. [Get Function - TS](#splay_getfuncTS)
+2. [Enumerating Syms - TS](#splay_enusymTS)
+3. [Saving Splayed Tables - AQ](#splay_savingAQ)
+4. [Memory Considerations](#splay_memoryAQ)
+5. [Rearranging Columns/Orders](#splay_arrangecolsAQ)
+6. [Retrieving Values from Splayed Columns](#splay_retrievecolsAQ)
+7. [Adding New Columns to Splayed Table](#splay_addcolsAQ)
+8. [Adding New Row to Splayed Table](#splay_addrowAQ)
+9. [Sorting Splayed Tables](#splay_sortAQ)
+10. [Enumerating Syms for Splayed Tables](#splay_enusymAQ)
 
 ## 33. [Partitioned Database Tables](#partitioned_db)
-
 
 <hr>
 
@@ -7495,11 +7507,10 @@ parse "update mid:(bid+ask)%2 from quotes"
 [Top](#top)
 
 ```q
-1. Flat Table
-   a) saved to disk as is, all info in one file 
-   b) can only be accessed by loading into memory
-   c) generally small, freq accessed datasets 
-   d) not suitable for large datasets
+/ saved to disk as is, all info in one file 
+/ can only be accessed by loading into memory
+/ generally small, freq accessed datasets 
+/ not suitable for large datasets
 ```
 
 ```q
@@ -7516,12 +7527,21 @@ banana	30	 300
 `:price
 
 / this will save the table to your directory with table name = price
+```
 
+<a name="rename_flatfiles"></a>
+### 🔵 31.2 Renaming Flat Files When Saving 
+
+```q
 `:new_name set price
 
 / this will save and rename the table = new_name
 / set + (price = table name)
 ```
+
+<a name="loading_flatfiles"></a>
+### 🔵 31.3 Loading Flat Files 
+
 ```q
 / to load these flat files:
 
@@ -7540,6 +7560,9 @@ load `:price
 [Top](#top)
 
 ### TimeStored Set Method
+
+<a name="splay_setfunc"></a>
+### 🔵 32.1 Set Function Method - TimeStored
 
 ```q
 / splaying a table in kdb+ allows saving a table with separate files for each column
@@ -7563,6 +7586,9 @@ set[`:splay/t/; t]
 / the .d file is a list that contains the column names and order
 ```
 
+<a name="splay_getfuncTS"></a>
+### 🔵 32.1 Get Function - TimeStored
+
 ```q
 get `:splay/t/a
 1 2 3
@@ -7574,6 +7600,8 @@ a b
 
 / .d file contains the name of all columns
 ```
+<a name="splay_enusymTS"></a>
+### 🔵 32.2 Enumerating Syms - TimeStored
 
 ```q
 / any sym column you want splayed must first be enumerated
@@ -7594,6 +7622,9 @@ set[`:trade/; trade]
 ```
 
 ### AquaQ Method
+
+<a name="splay_savingAQ"></a>
+### 🔵 32.3 Saving Splayed Tables - AquaQ
 
 ```q
 / each column of the table saved as separate file
@@ -7616,6 +7647,10 @@ prices2: ([] price: 100 200 300; qty: 10 20 30)
 / this will create a folder called splayprice2, and within it, have individual columns as files
 / saving a table with a sym column requires some extra step
 ```
+
+<a name="splay_memoryAQ"></a>
+### 🔵 32.4 Memory Considerations - AquaQ
+
 ```q
 / when load splayed table into q session, it is mapped to memory, not read to physical memory
 / shown by mmap function using .Q.w function
@@ -7653,6 +7688,10 @@ symw	28177
 
 / after loading the splayed table, mmap now 80
 ```
+
+<a name="splay_arrangecolsAQ"></a>
+### 🔵 32.5 Rearrange Columns / Orders - AquaQ
+
 ```q
 / check what columns are available in .d file for splayed table
 
@@ -7675,6 +7714,9 @@ qty price
 20	 200
 30	 300
 ```
+<a name="splay_retrievecolsAQ"></a>
+### 🔵 32.6 Retrieving Values from Splayed Columns - AquaQ
+
 ```q
 / retrieve values from individual columns
 
@@ -7684,6 +7726,10 @@ get `:splayedprice2/qty
 get `:splayedprice2/price
 100 200 300
 ```
+
+<a name="splay_addcolsAQ"></a>
+### 🔵 32.7 Adding new Column to Splayed Table - AquaQ
+
 ```q
 / add new column to splayed table
 
@@ -7741,6 +7787,10 @@ price qty
 
 / now the date column is gone
 ```
+
+<a name="splay_addrowAQ"></a>
+### 🔵 32.8 Adding New Row to Splayed Table - AquaQ
+
 ```q
 / add new row to splayed table
 
@@ -7766,6 +7816,10 @@ price qty
 300	  30
 400   40
 ```
+
+<a name="splay_sortAQ"></a>
+### 🔵 32.9 Sorting Splayed Tables - AquaQ
+
 ```q
 / sort splayed table by ascending/descending
 
@@ -7781,6 +7835,9 @@ price qty
 200	  20
 100	  10
 ```
+
+<a name="splay_enusymAQ"></a>
+### 🔵 32.10 Enumerating Syms for Splayed Tables - AquaQ
 
 ```q
 / .Q.en used to enumerate sym colums in a splayed table
@@ -8019,13 +8076,6 @@ select max price from trade where date = 2021.01.01
 / selects max price
 / so very efficient query
 ```
-
-
-
-
-
-
-
 
 
 
