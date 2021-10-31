@@ -234,6 +234,12 @@
 10. [Enumerating Syms for Splayed Tables](#splay_enusymAQ)
 
 ## 33. [Partitioned Database Tables](#partitioned_db)
+1. [Saving Partitioned Tables](#savingpartition)
+2. [Index Querying](#part_index)
+3. [Fill Missing Tables](#part_fillmissing)
+4. [Saving Splayed Table into Database Partition](#part_savingsplayed)
+5. [Using Functions to Save - no sym](#part_functions)
+6. [Using Functions to Save - sym](#part_functionssym)
 
 <hr>
 
@@ -7875,7 +7881,7 @@ banana	30	 300
 <hr>
 
 <a name="partitioned_db"></a>
-## 33. 🔴 Partitioned Database
+## 🔴 33. Partitioned Database
 [Top](#top)
 
 ```q
@@ -7885,7 +7891,8 @@ banana	30	 300
 / each date has own directory, and within each directory, there are folders for each splayed table
 ```
 
-### AquaQ Explanation
+<a name="savingpartition"></a>
+### 🔵 33.1 Saving Partitioned Tables - AquaQ
 
 ```q
 / a partitioned table is usually first split by date
@@ -7918,6 +7925,10 @@ date       price qty
 2021.01.02 700	  70
 ```
 
+
+<a name="part_index"></a>
+### 🔵 33.2 Index Querying - AquaQ
+
 ```q
 / can use .Q.ind to access table using indexing
 
@@ -7930,6 +7941,10 @@ date       price qty
 
 / returns rows 2, 3 (index position 1, 2)
 ```
+
+<a name="part_fillmissing"></a>
+### 🔵 33.3 Fill Missing Tables - AquaQ
+
 ```q
 / can use .Q.chk to fill missing tables within a partitioned database
 / suppose we have empty 2021.01.03 
@@ -7939,15 +7954,18 @@ date       price qty
 / this will populate the partition accordingly
 ```
 
+<a name="part_savingsplayed"></a>
+### 🔵 33.4 Saving a Splayed Table into a Database Partition
+
 ```q
 / .Q.dpft used to save a splayed table into a database partition 
 
 .Q.dpft[`:hdb;2021.01.01;`fruit;`fruitorders]
 
-/ 1st argument = database directory
-/ 2nd argument = database partition
-/ 3rd argument = column to sort and apply the parted attribute to
-/ 4th argument = the table to be saved
+/ 1st argument = database directory (hdb)
+/ 2nd argument = database partition (date)
+/ 3rd argument = column to sort and apply the parted attribute to (fruit)
+/ 4th argument = the table to be saved 
 
 hdb
    2021.01.01
@@ -7959,7 +7977,7 @@ hdb
 ```
 
 ```q
-/ .Q.hdpf used to save all tables in the global namespace to hdb  and purge all data in tables
+/ .Q.hdpf used to save all tables in the global namespace to hdb and purge all data in tables
 
 .Q.hdpf[0;`:hdb;2021.01.01;`fruit]
 
@@ -7976,7 +7994,8 @@ fruit quantity prrices
 / all data has been purged
 ```
 
-### TimeStored Explanation
+<a name="part_functions"></a>
+### 🔵 33.5 Using Functions to save a Partitioned Table (no sym)
 
 ```q
 / using a function to save a partitioned table
@@ -8025,6 +8044,10 @@ pdb
           size
           time
 ```
+
+<a name="part_functionssym"></a>
+### 🔵 33.6 Using Functions to save a Partitioned Table with Sym
+
 ```q
 / Using a function to save a partitioned table containing sym columns
 
