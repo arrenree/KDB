@@ -199,7 +199,7 @@
 
 ## 25. [Adverbs Problem Set](#adverbs_problemset)
 
-## 26. [Import and Exporting Data](#importexport_header)
+## 26. [Saving and Loading Data](#importexport_header)
 1. [Importing / Loading TXT Files](#txt_import)
 2. [Exporting / Saving TXT Files](#txt_export)
 3. [Exporting / Saving Tables as txt, csv, excel, and xml files](#tables_exportformat)
@@ -6513,11 +6513,11 @@ depr[;8]\[5;100]
 <hr>
 
 <a name="importexport_header"></a>
-## 🔴 26. Importing and Exporting / Saving Data
+## 🔴 26. Saving and Loading Data
 [Top](#top)
 
 <a name="txt_import"></a>
-### 🔵 26.1) Importing TXT files
+### 🔵 26.1) Reading TXT files
 
 ```q
 / assume you have a txt file in your directory called test.txt
@@ -6531,7 +6531,7 @@ read0 `:test.txt
 ```
 
 <a name="txt_export"></a>
-### 🔵 26.2a) Exporting / Saving TXT files
+### 🔵 26.2a) Manipulating File Handle
 
 ```q
 / to write to txt, simply use hopen to get the file handle, store the file handle, and store strings to it
@@ -6553,21 +6553,17 @@ hclose fh
 ```
 
 <a name="tables_exportformat"></a>
-
-### 🔵 26.2b) Saving TXT files
+### 🔵 26.2b) Saving CSV files
 ```q
 / there are 2 ways to save to text:
 /       1) save function (save `name.csv)
 /       2) 0: operator 
  
-/ 0: is more flexible and powerful, allowing selection of a table subset and any name of file desired.
-/ The benefit of exporting to CSV is that for transferring data to other systems their support is ubiquitous. 
-/ However the space requirement of converting each digit of a number to separate characters is significant.
-```
-```q
+/ 0: is used to load, prepare, and save text files
+/ The benefit of exporting to CSV is that for transferring data to other systems their support is ubiquitous
+/ However the space requirement of converting each digit of a number to separate characters is significant
 
 trade
-
 date        time          sym   price      size   cond
 ------------------------------------------------------
 2013.09.28| 09:30:02.553| C   | 107.2018 | 63500 | B
@@ -6580,21 +6576,18 @@ save `trade.csv
 
 / syntax = save backtick filename.csv
 / this will be saved to your q folder
-```
-
-Savng Table as a CSV File
-
-```q
-";" 0: trade / converts table to list of strings separated by semi colons
-`newfilename.csv 0: ";" 0: trade / saves to csv file
 
 / 0: allows you to choose custom separaters and file names
+
+`newfilename.csv 0: ";" 0: trade 
+
+/ saves trade table, separated by ; and newfilename 
+/ ";" 0: trade = converts table to list of strings separated by semi colons
 / ; is what you are separating items with
 / trade = table name
 ```
 
-
-### 🔵 26.3) Exporting / Saving tables as txt, csv, excel, and xml files
+### 🔵 26.3) Saving tables as txt, csv, excel, and xml files
 ```q
 
 cars: ( [] maker: `Ford`Tesla`Honda; price: 100 200 300; weight: 1000 2000 3000)
@@ -6619,7 +6612,7 @@ save `$"newdir/cars.txt"
 ```
 
 <a name="export_tablenewname"></a>
-### 🔵 26.4) Exporting / Saving tables with a new name
+### 🔵 26.4) Saving tables with a new name
 
 ```q
 `carsnewname.csv 0: "," 0: cars
@@ -6634,14 +6627,70 @@ Honda,300,3000
 ```
 
 <a name="csv_import"></a>
-### 🔵 26.5) Importing CSV Files
+### 🔵 26.5) Loading CSV Files
 
 ```q
-/ assume you have a file called nyse_20110621.csv on your computer
+/ the 0: function prepares, saves, and loads text files. 
+
+tab1: ("ICS";enlist",")0: `:tab1.csv
+
+/ 1st argument = datatype. "ICS" = Int, Char, Sym
+/ 2nd argument = delimiter. For CSV it's a comma. Enlisting comma = column headers exist
+
+tab1
+a b c
+------
+1 A 4
+2 B 5
+3 C 6
+
+/ to leave out certain columns, simply omit datatype in first argument
+
+tab1: ("IC ";enlist",")0: `:tab1.csv
+tab1
+a b
+---
+1 A
+2 B
+3 C
+```
+
+```q
+/ to load table with no column headers
+/ leave out the enlisting of the delimiter
+
+("ICS";",")0: `:tab2.csv
+
+tab2
+1 2 3
+A B C
+4 5 6
+
+/ to turn into dictionary, set `a`b`c as keys
+
+`a`b`c!("ICS";",")0: `:tab2.csv
+
+a | 1 2 3
+b | A B C
+c | 4 5 6
+
+/ to turn into table, flip dictionary
+
+flip `a`b`c!("ICS";",")0: `:tab2.csv
+
+a b c
+-----
+1 A 4
+2 B 5
+3 C 6
+```
+```q
+/ Example 2
 
 ("**********"; ",") 0: `:nyse_20110621.csv
 
-/ so the 0: loads the file on the right hand side
+/ right hand of 0: = filename
+/ left hand argument = how to prepare the data
 / the **** are just KDB datatype layers; one * for each column
 / this will interpret all values as strings, allowing for easy way to check the data
 
@@ -6716,7 +6765,7 @@ set[`:q/dict;d]
 ```
 
 <a name="binaryfile_export"></a>
-### 🔵 26.7) Retrieving / Loading Binary Files
+### 🔵 26.7) Loading Binary Files
 
 ```q
 get `:q/dict
