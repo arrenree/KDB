@@ -7919,6 +7919,109 @@ date       price qty
 ## 30. 🔴 Partitioned Database
 [Top](#top)
 
+```q
+/ using a function to save a partitioned table
+
+saveTradePartition:{ [d] 
+    show "saving trade ",string d;
+    dirHandle: hsym `$"pdb/",string[d],"/trade/";
+    dirHandle set select time, price, size from trade where date= d};
+
+/ d = argument for date. (Will partition by date)
+/ first row = just tells you saving xxx date
+/ second row = this is the directory being saved to
+             / hsym = converts sym to file sym
+             / pdb/ = database directory (splayed /)
+             / string d = give us date as a string
+             / trade = tablename
+/ third row = set function with dirHandle = path to save to (has / at end so splayed)
+/ followed by columns you want to choose, from date = d
+/ don't need date column since since partitioned by date
+
+
+exec distinct date from trade
+
+/ get all distinct dates from trade table
+
+dts: exec distinct date from trade
+
+/ save as dts
+
+saveTradePartition each dts
+
+/ runs function on each distinct date (dts)
+/ will save each date as a partition
+
+pdb
+   2021.10.27
+       trade
+          .d
+          price
+          size
+          time
+   2021.10.28
+       trade
+          .d
+          price
+          size
+          time
+```
+```q
+/ Using a function to save a partitioned table containing sym columns
+
+/ saving partitioned tables containing sym columns
+/ sym columns have to be enumerated against a sym file
+/ enumerate = converting values to a defined domain which restricts values to that domain
+/ can use KDB built in function .Q.dpft
+
+saveTQPartition:{ [d] 
+    show "saving ",string d;
+    t::trade; / set trade table to global variable t (req for dpft)
+    q::quote; 
+	trade:: delete date from select from trade where date=d; / remove date col
+	quote:: delete date from select from quote where date=d;
+    r:.Q.dpft[`:pdb2; d; `sym; `trade];
+    r:.Q.dpft[`:pdb2; d; `sym; `quote];
+    trade::t; / restore trade table to full t
+    quote::q;
+    delete t from `.; / remove temp variables
+    delete q from `.;
+    r};
+
+/ this time save both trade and quote table
+/ remove date column because dont need to save date col cuz that is partitioned column
+/ dpft = directory filepath, partitioned data (date), partedField (`p# attribute applied to), table of data
+/ last argument of dpft must be a global variable !!
+/ that's why we defined t::trade and q::quote earlier (set as global variable)
+
+dts:exec distinct date from trade
+
+/ shows distinct dates from trade table
+
+saveTQPartition each dts
+
+/ saves each date as a separate partition using above function
+/ so function saves table to selected directory of partition
+/ applies p attribute to sym column
+/ enumerates any syms to sym file that's in the top most database directory
+
+```
+```q
+/ what happens when you query a partitioned table?
+
+select max price from trade where date = 2021.01.01
+
+/ starts from date folder
+/ looks at trade folder
+/ looks at price file
+/ selects max price
+/ so very efficient query
+```
+
+
+
+
+
 
 
 
