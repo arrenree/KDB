@@ -6519,194 +6519,199 @@ depr[;8]\[5;100]
 <a name="txt_import"></a>
 ### 🔵 26.1) Importing TXT files
 
-Assume you have a txt file in your directory called test.txt
-
 ```q
+/ assume you have a txt file in your directory called test.txt
+
 hopen `:test.txt
 read0 `:test.txt
-```
 
-* file handler = a temporary reference number that an OS assigns to a file requested by a user to be opened
-* hopen function will open the txt file
-* read0 function will read the txt file
+/ file handler = a temporary reference number that an OS assigns to a file requested by a user to be opened
+/ hopen function will open the txt file
+/ read0 function will read the txt file
+```
 
 <a name="txt_export"></a>
 ### 🔵 26.2a) Exporting / Saving TXT files
 
-to write to txt, simply use hopen to get the file handle, store the file handle, and store strings to it
-
 ```q
+/ to write to txt, simply use hopen to get the file handle, store the file handle, and store strings to it
+
 fh:hopen `:hi.txt
 fh "10"
 fh "20"
 neg[fh] "30"
 read0 `:hi.txt
-```
-"1020" \
+
+"1020"
 "30"
 
-* by putting neg[fh], you enter into a new line
+/ by putting neg[fh], you enter into a new line
 
-```q
 hclose fh
-```
-closes the file handle so you can no longer edit it
 
+/ closes the file handle so you can no longer edit it
+```
 
 <a name="tables_exportformat"></a>
 
 ### 🔵 26.2b) Saving TXT files
-There are 2 ways to save to text: save function or 0 operator
-
-1) save function (save `name.csv)
-2) 0: operator 
+```q
+/ there are 2 ways to save to text:
+/       1) save function (save `name.csv)
+/       2) 0: operator 
  
-0: is more flexible and powerful, allowing selection of a table subset and any name of file desired.
-The benefit of exporting to CSV is that for transferring data to other systems their support is ubiquitous. However the space requirement of converting each digit of a number to separate characters is significant.
+/ 0: is more flexible and powerful, allowing selection of a table subset and any name of file desired.
+/ The benefit of exporting to CSV is that for transferring data to other systems their support is ubiquitous. 
+/ However the space requirement of converting each digit of a number to separate characters is significant.
+```
+```q
 
 trade
 
-date |       time |        sym|  price |   size | cond
--|-|-|-|-|-
-2013.09.28| 09:30:02.553 | C |   107.2018 | 63500 | B
-2013.09.28| 09:30:02.701| MSFT | 96.87488 | 1700  | B
-2013.09.28| 09:30:02.743| RBS |  97.11338 | 80700 | C
-2013.09.28| 09:30:02.758| A   | 100.35    | 50300 | B
-2013.09.28| 09:30:02.907| B   | 55.82187  | 92700 | A
+date        time          sym   price      size   cond
+------------------------------------------------------
+2013.09.28| 09:30:02.553| C   | 107.2018 | 63500 | B
+2013.09.28| 09:30:02.701| MSFT| 96.87488 | 1700  | B
+2013.09.28| 09:30:02.743| RBS | 97.11338 | 80700 | C
+2013.09.28| 09:30:02.758| A   | 100.35   | 50300 | B
+2013.09.28| 09:30:02.907| B   | 55.82187 | 92700 | A
 
-```q
 save `trade.csv
-/ syntax is save backtick filename.csv
+
+/ syntax = save backtick filename.csv
 / this will be saved to your q folder
 ```
+
+Savng Table as a CSV File
 
 ```q
 ";" 0: trade / converts table to list of strings separated by semi colons
 `newfilename.csv 0: ";" 0: trade / saves to csv file
-```
 
-0: allows you to choose custom separaters and file names
-; is what you are separating items with
-trade = table name
+/ 0: allows you to choose custom separaters and file names
+/ ; is what you are separating items with
+/ trade = table name
+```
 
 
 ### 🔵 26.3) Exporting / Saving tables as txt, csv, excel, and xml files
-
-Given table cars:
 ```q
+
 cars: ( [] maker: `Ford`Tesla`Honda; price: 100 200 300; weight: 1000 2000 3000)
-```
-maker|price|weight|
--|-|-
-Ford|	100|	1000
-Tesla|	200|	2000
-Honda|	300|	3000
 
-```q
+maker| price| weight
+---------------------
+Ford | 100  | 1000
+Tesla| 200  | 2000
+Honda| 300  | 3000
+
 save `cars.txt
 save `cars.csv
 save `cars.xls
 save `cars.xml
-```
-* this will automatically save and export your table to any of the file types in your directory
 
-```q
+/ this will automatically save and export your table to any of the file types in your directory
+
 save `$"newdir/cars.txt"
+
+/ this will create a new filepath and directory for your file to save your file
+/ the new folder will be called "newdir"
 ```
-* this will create a new filepath and directory for your file to save your file
-* the new folder will be called "newdir"
 
 <a name="export_tablenewname"></a>
 ### 🔵 26.4) Exporting / Saving tables with a new name
 
 ```q
 `carsnewname.csv 0: "," 0: cars
-```
-maker,price,weight \
-Ford,100,1000 \
-Tesla,200,2000 \
+
+maker,price,weight
+Ford,100,1000
+Tesla,200,2000
 Honda,300,3000
 
-* by using the 0: function, you can rename your file to anything you want (carsnewname)
+/ by using the 0: function, you can rename your file to anything you want (carsnewname)
+/ "," 0: cars converts table to list of strings separated by commas
+```
 
 <a name="csv_import"></a>
 ### 🔵 26.5) Importing CSV Files
 
-Assume you have a file called nyse_20110621.csv on your computer
-
 ```q
+/ assume you have a file called nyse_20110621.csv on your computer
+
 ("**********"; ",") 0: `:nyse_20110621.csv
-```
-* so the 0: loads the file on the right hand side
-* the **** are just KDB datatype layers; one * for each column
-* this will interpret all values as strings, allowing for easy way to check the data
+
+/ so the 0: loads the file on the right hand side
+/ the **** are just KDB datatype layers; one * for each column
+/ this will interpret all values as strings, allowing for easy way to check the data
 
 "symbol" | "A"
--|-
-"date" |"21-june-2011"
-"open" | "14.94"
-"high" | "15.94"
-"low" |"13.43"
-"close" | "24.52"
-"volume"| "100"
+-------------------------
+"date"   | "21-june-2011"
+"open"   | "14.94"
+"high"   | "15.94"
+"low"    | "13.43"
+"close"  | "24.52"
+"volume" | "100"
 
-```q
 ("SSFFFFJ"; ",") 0: `:nyse_20110621.csv
-```
-* replace the * with the datatype (string string, float float, long etc)
-* interprets the values more sensibly
+
+/ replace the * with the datatype (string string, float float, long etc)
+/ interprets the values more sensibly
 
 symbol | A
--|-
-date |21-june-2011
-open | 14.94
-high | 15.94
-low |13.43
-close | 24.52
-volume| 100
+-------------------
+date   | 21-june-2011
+open   | 14.94
+high   | 15.94
+low    | 13.43
+close  | 24.52
+volume | 100
 
-```q
 ("SSFFFFJ"; enlist ",") 0: `:nyse_20110621.csv
+
+/ by adding in the enlist, you are treating the first column as a header
+/ converts it into a table
+
+symbol| date       | open | high | low | close  | volume
+---------------------------------------------------------
+A     |	21-Jun-2011| 48.7 | 50.32| 48.67| 49.82 | 3509600
+AA    |	21-Jun-2011| 14.9 | 15.42| 14.92| 15.37 | 18310600
 ```
-* by adding in the enlist, you are treating the first column as a header
-* converts it into a table
-
-symbol | date | open | high | low | close | volume
--|-|-|-|-|-|-
-A|	21-Jun-2011|	48.7|	50.32|	48.67|	49.82|	3509600
-AA|	21-Jun-2011|	14.94	|15.42|	14.92|	15.37|	18310600
-
 
 <a name="binaryfile_export"></a>
 ### 🔵 26.6) Saving to Binary Files
-Binary files are a direct byte stream that is similar to kdb's in-memory representation of data. 
-Features include:
+```q
 
-1) Requires significantly less space than a text file (kdb+ supports compression) 
-2) Quicker to save load
-3) Reading / writing is simply streaming bytes, it is extremely fast.
-4) We use get / set to read/write.
-5) You can append and upsert.
-6) Once loaded in, the entire entity is stored in memory.
-
+/ binary files are a direct byte stream that is similar to kdb's in-memory representation of data. 
+/ features include:
+    1) Requires significantly less space than a text file (kdb+ supports compression) 
+    2) Quicker to save load
+    3) Reading / writing is simply streaming bytes, it is extremely fast.
+    4) We use get / set to read/write.
+    5) You can append and upsert.
+    6) Once loaded in, the entire entity is stored in memory.
+```
 ```q
 set[filepath; data] / save data to selected filepath
+
 / filepath = symbol beginning with `: that specifies a file location using / as folder separators
 / data = any format of data structure is supported (tables, dictionaries, lists, atoms, etc)
 ```
 
 ```q
 set[`:q/trade;trade]
+
 / filepath is q folder, trade binary file
 / trade table
 / this will save as binary file to your q file path
 ```
 
-Assume dictionary d
 ```q
 d: `p`o`i!1 2 3
 
 set[`:q/dict;d]
+
 / this will save as dictionary d to your folder
 ```
 
@@ -6716,14 +6721,13 @@ set[`:q/dict;d]
 ```q
 get `:q/dict
 / this will load the dict dictionary 
-```
 
 key | value
--|-
-p|	1
-o	|2
-i	|3
-
+------------
+p   | 1
+o   | 2
+i   | 3
+```
 
 <hr>
 
