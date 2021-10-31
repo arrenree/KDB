@@ -207,8 +207,6 @@
 5. [Importing CSV Files](#csv_import)
 6. [Saving to Binary Files](#binaryfile_export)
 
-## 27. [Splayed Tables](#splayedtable_header)
-
 ## 28. [Case Studies](#casestudies_header)
 1. [Loading CSV Files](#load_csv)
 2. [Comparing Current Orders against Potential Crosses](#cross_case)
@@ -218,9 +216,11 @@
 
 ## 30. [Functional Form](#functional_form)
 
-## 31. [On Disk Table Structure](#ondiskstructure)
+## 31. [Flat Tables](#flat_tables)
 
-## 32. [Partitioned Database](#partitioned_db)
+## 32. [Splayed Database Tables](#splayed_tables)
+
+## 33. [Partitioned Database Tables](#partitioned_db)
 
 
 <hr>
@@ -6707,70 +6707,6 @@ o	|2
 i	|3
 
 
-<a name="Splayedtable_header"></a>
-## 🔴 27. Splayed Table
-[Top](#top)
-
-* splaying a table in kdb+ allows saving a table with separate files for each column
-* this reduces memory required as columns are only memory mapped as needed
-* you cannot splay a table that is keyed! must 0! to remove key first
-
-Given Table T:
-```q
-t: ([] a: 1 2 3; b: .z.d+1 3 5)
-```
-a|b
--|-
-1|	2021-06-30
-2|	2021-07-02
-3|	2021-07-04
-
-
-```q
-set[`:splay/t/; t]
-```
-* set = saves binary / splayed tables
-* first argument = file path. splay is the folder name (make sure you have / after t to SPLAY the table)
-* t = the data you want to save
-* the table (t) becomes a folder, and each column becomes a file
-* the .d file is a list that contains the column names
-
-```q
-get `:splay/t/a
-```
-1 2 3
-
-* the get syntax will return the values in that column
-
-```q
-get `:splay/t/.d
-```
-a b
-
-* the .d file contains thhe name of all columns
-
-Any sym column you want splayed must first be enumerated
-enumerate = converting a list of values to a defined domain which restricts values to that domain
-
-Assume trade table t
-
-```q
-sy: exec distinct sym from trade
-```
-C MSFT RBS A B BAC etc.
-
-* exec will return your query in a single row (instead of column)
-
-```q
-update sym: `sy$sym from `trade
-```
-* this will enumerate all the syms from trade table to the domain of sy
-
-```q
-set[`:trade/; trade]
-```
-* now you can save your trade table as a splayed table
-
 <hr>
 
 <a name="casestudies_header"></a>
@@ -7454,7 +7390,7 @@ t:t,([] company:`bmw`skoda; employees:200 300)
 <hr> 
 
 <a name="functional_form"></a>
-## 30. 🔴 Functional Form
+## 🔴 30. Functional Form
 [Top](#top)
 
 ### Functional Select
@@ -7554,8 +7490,8 @@ parse "update mid:(bid+ask)%2 from quotes"
 
 <hr>
 
-<a name="ondiskstructure"></a>
-## 30. 🔴 On Disk Table Structure
+<a name="flat_tables"></a>
+## 🔴 31. Flat Tables
 [Top](#top)
 
 ```q
@@ -7564,21 +7500,8 @@ parse "update mid:(bid+ask)%2 from quotes"
    b) can only be accessed by loading into memory
    c) generally small, freq accessed datasets 
    d) not suitable for large datasets
-
-2. Splayed Table
-   a) each column of the table saved as separate file
-   b) .d file is created to store the correct order of the columns
-   c) when a splayed tab is loaded to a session, it is mapped in, not loaded to physical memory
-   d) if i have large table and only want to access one column, only that one column loaded
-
-3. Partitioned Table
-   a) most frequently used for large databases
-   b) separate folders (directory) for each partition
-   c) most common partition is by date
-   d) each date has own directory, and within each directory, there are folders for each splayed table
 ```
 
-### Flat Table
 ```q
 price: ([] fruit:`apple`pear`banana; qty: 10 20 30; price: 100 200 300)
 
@@ -7610,7 +7533,75 @@ load `:price
 
 / can also use load `: function
 ```
-### Splayed Table
+<hr>
+
+<a name="splayed_tables"></a>
+## 🔴 32. Splayed Database Tables
+[Top](#top)
+
+### TimeStored Set Method
+
+```q
+/ splaying a table in kdb+ allows saving a table with separate files for each column
+/ this reduces memory required as columns are only memory mapped as needed
+/ you cannot splay a table that is keyed! must 0! to remove key first
+
+t: ([] a: 1 2 3; b: .z.d+1 3 5)
+
+a b
+------------
+1 2021-06-30
+2 2021-07-02
+3 2021-07-04
+
+set[`:splay/t/; t]
+
+/ set = saves binary / splayed tables
+/ first argument = file path. splay is the folder name (make sure you have / after t to SPLAY the table)
+/ t = the underly table you want to save
+/ the table (t) becomes a folder, and each column becomes a file
+/ the .d file is a list that contains the column names and order
+```
+
+```q
+get `:splay/t/a
+1 2 3
+
+/ get function = returns values in that column
+
+get `:splay/t/.d
+a b
+
+/ .d file contains the name of all columns
+```
+
+```q
+/ any sym column you want splayed must first be enumerated
+/ enumerate = converting a list of values to a defined domain which restricts values to that domain
+
+sy: exec distinct sym from trade
+C MSFT RBS A B BAC...
+
+/ exec returns your query in a single row (instead of column)
+
+update sym: `sy$sym from `trade
+
+/ this will enumerate all the syms from trade table to the domain of sy
+
+set[`:trade/; trade]
+
+/ now you can save your trade table as a splayed table
+```
+
+### AquaQ Method
+
+```q
+/ each column of the table saved as separate file
+/ .d file is created to store the correct order of the columns
+/ when a splayed tab is loaded to a session, it is mapped in, not loaded to physical memory
+/ if i have large table and only want to access one column, only that one column loaded
+```
+
 ```q
 / Splayed Table = each column stored as separate file
 / A directory(folder) is created which contains a file for each column + a .d file (order of column)
@@ -7824,43 +7815,20 @@ pear	  20	 200
 banana	30	 300
 ```
 
+<hr>
+
+<a name="partitioned_db"></a>
+## 33. 🔴 Partitioned Database
+[Top](#top)
+
 ```q
-/ .Q.dpft used to save a splayed table into a database partition 
-
-.Q.dpft[`:hdb;2021.01.01;`fruit;`fruitorders]
-
-/ 1st argument = database directory
-/ 2nd argument = database partition
-/ 3rd argument = column to sort and apply the parted attribute to
-/ 4th argument = the table to be saved
-
-hdb
-   2021.01.01
-      fruitorders
-         .d
-         fruit
-         price
-         qty
-```
-```q
-/ .Q.hdpf used to save all tables in the global namespace to hdb  and purge all data in tables
-
-.Q.hdpf[0;`:hdb;2021.01.01;`fruit]
-
-/ 0 = historical port
-/ hdb = database directory
-/ 2021.01.01 = partition
-/ `fruit = column which is to be sorted and parted enumerated column
-
-fruitorders
-
-fruit quantity prrices
-----------------------
-
-/ all data has been purged
+/ most frequently used for large databases
+/ separate folders (directory) for each partition
+/ most common partition is by date
+/ each date has own directory, and within each directory, there are folders for each splayed table
 ```
 
-### Partitioned Table
+### AquaQ Explanation
 
 ```q
 / a partitioned table is usually first split by date
@@ -7892,6 +7860,7 @@ date       price qty
 2021.01.02 600	  60
 2021.01.02 700	  70
 ```
+
 ```q
 / can use .Q.ind to access table using indexing
 
@@ -7913,11 +7882,44 @@ date       price qty
 / this will populate the partition accordingly
 ```
 
-<hr>
+```q
+/ .Q.dpft used to save a splayed table into a database partition 
 
-<a name="partitioned_db"></a>
-## 30. 🔴 Partitioned Database
-[Top](#top)
+.Q.dpft[`:hdb;2021.01.01;`fruit;`fruitorders]
+
+/ 1st argument = database directory
+/ 2nd argument = database partition
+/ 3rd argument = column to sort and apply the parted attribute to
+/ 4th argument = the table to be saved
+
+hdb
+   2021.01.01
+      fruitorders
+         .d
+         fruit
+         price
+         qty
+```
+
+```q
+/ .Q.hdpf used to save all tables in the global namespace to hdb  and purge all data in tables
+
+.Q.hdpf[0;`:hdb;2021.01.01;`fruit]
+
+/ 0 = historical port
+/ hdb = database directory
+/ 2021.01.01 = partition
+/ `fruit = column which is to be sorted and parted enumerated column
+
+fruitorders
+
+fruit quantity prrices
+----------------------
+
+/ all data has been purged
+```
+
+### TimeStored Explanation
 
 ```q
 / using a function to save a partitioned table
@@ -8017,6 +8019,7 @@ select max price from trade where date = 2021.01.01
 / selects max price
 / so very efficient query
 ```
+
 
 
 
