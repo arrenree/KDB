@@ -423,45 +423,80 @@ count each (til 6; 10 20 30)
 ```q
 k: 1 2 3 4
 2#k
-```
 1 2
-* take # will take the first 2 values of list k
 
-```q
+/ take # will take the first 2 values of list k
+
 -2#k
-```
 3 4
-* take last 2 values of list k
 
-```q
+/ take last 2 values of list k
+
 5 # 8
-```
 8 8 8 8 8 
-* take 5 values of 8
 
-```q
+/ take 5 values of 8
+
 5 # 1 2 3
-```
 1 2 3 1 2
-* take 5 values from this list
+
+/ take 5 values from this list
+/ notice take # wraps around until 5 elements are returned
+/ sublist is similar, but wont wrap. 
+
+```
 
 <a name="drop_intro"></a>
 ### 🔵 1.14 Drop
+```Q
+
 k: 1 2 3 4
 
-```q
 2_k
-```
 3 4
-* drop the first 2 values from list k
+
+/ dropS the first 2 values from list k
+
+-2_k
+1 2
+
+/ drops the last 2 values from list k
+
+k_2
+1 2 4
+
+/ if order is list _ number, then it drops the element at that index position
+/ 2nd index position = 3
+```
+
+### 🔵 1.14 Cut
 
 ```q
--2_k
-```
-1 2
-* drop the last 2 values from list k
+l: 1 2 3 4 5 6
 
-<hr>
+2 cut l
+(1 2; 3 4; 5 6)
+
+/ cuts list into elements of 2
+
+3 cut l
+(1 2 3; 4 5 6)
+
+/ cuts list into elements of 3
+
+1 4 cut l
+(2 3 4; 5 6)
+
+/ first element = drop all elements from this and before (1)
+/ 2nd element = cut after this (4)
+
+2 3 cut l
+(3; 4 5 6)
+
+/ drop all elements from 2 and before (1, 2)
+/ cut after 3
+```
+
 
 <a name="pluscolon"></a>
 ### 🔵 1.15 +:
@@ -944,6 +979,7 @@ m[ ; 1]
 1 2 3 4 5
 
 / take only what's available
+/ won't wrap around like take
 ```
 
 ```q
@@ -960,19 +996,21 @@ m[ ; 1]
 1 2 3 4 5 ? 3
 2
 
-/ find position of 3
+/ find index position of 3
 ```
 ```q
 1 2 3 4 5 ? 7
 5
 
+/ find index position 7
 / not found, returns max index + 1
 ```
 ```q
 1 2 2 3 4 ? 2
 1
 
-/ only returns first occurence
+/ find index position of 2
+/ multiple occurence, only returns first
 ```
 
 <a name="random_list"></a>
