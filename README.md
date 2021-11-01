@@ -1128,6 +1128,17 @@ raze string `a`b`c
 "abc"
 ```
 
+<a name="raze_intro"></a>
+### 🔵 4.15 Union Lists
+
+```q
+1 2 3 union 3 4 5
+1 2 3 4 5 
+
+/ union returns only the distinct elements in both lists
+```
+
+
 <hr>
 
 <a name="list_problemset"></a>
