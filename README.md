@@ -562,31 +562,35 @@ d.dd
 
 <a name="time_type"></a>
 ### 🔵 2.2 Time
+```q
 
-Given:
 t: 11:02:58:000
 
-```q
 t.hh
 t.mm
 t.minute
 t.ss
 t.second
-```
-11i \
-2i \
-11:02 \
-58i \
-11:02:85 
 
-```q
-.z.t
-.z.d
-.z.n
+11i
+2i
+11:02
+58i
+11:02:85 
 ```
-* current time
-* current date
-* current timespan
+```q
+Current Time
+.z.t
+
+Current Date
+.z.d
+
+Current Timespan
+.z.n
+
+Current TimeStamp
+.z.p
+```
 
 <a name="cast_type"></a>
 ### 🔵 2.3 Casting
