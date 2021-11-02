@@ -2967,10 +2967,14 @@ ford    | 100
 rover   | 100
 bmw     | 5 
 ford    | 5
+```
+```q
+/ retrieves all columns from table t
 
 select from t
 
-/ retrieves all columns from table t
+```q
+/ retrieve values from column as a column
 
 select company from t
 
@@ -2981,28 +2985,37 @@ ford
 rover 
 bmw 	 
 ford 
-
-/ only retrieves the company column
 ```
 
 ```q
+/ retrieve values from column as a list
+
+t[`employees]
+100 100 100 5 5
+```
+
+```q
+/ retrieves row where company = ford 
+
 select from t where company = `ford
 
 company | employees
 -------------------
 ford    | 100 
 
-/ retrieves rows where company = ford 
 ```
 
 ```q
+/ retrieves columns values as a row
+
 t [`employees]
 100 100 100 5 5 
 
-/ retrieves column= employee as a row
 ```
 
 ```q
+/ perform operations on entire column
+
 t [`employees] - : 100
 
 company | employees
@@ -3017,19 +3030,22 @@ ford    |-105
 ```
 
 ```q
-t [ 0 1]
+/ retrieve first 2 rows
+
+t [ 0 1] / indexing method
 or
-2#t
+2#t      / take method
 
 company | employees
 --------------------
 ferrari | 0
 ford    | 0 
 
-/ returns first 2 rows
 ```
 
 ```q
+/ returns last 3 rows
+
 -3#t
 
 company | employees
@@ -3038,10 +3054,11 @@ rover   | 0
 bmw     |-105 
 ford    |-105
 
-/ returns last 3 rows
 ```
 
 ```q
+/ randomly selects 2 rows from table
+
 2 ? t
 
 company | employees
@@ -3049,7 +3066,6 @@ company | employees
 rover   | 0
 ford    |-105
 
-/ randomly selects 2 rows from table
 ```
 
 <a name="insert_table"></a>
@@ -3147,6 +3163,36 @@ sym | num
 / will find the column names that match, and add values together
 / column names that dont match will be union joined as a new column
 ```
+```q
+/ partial key match 
+
+t1:([id:`a`b`c] price: 1 2 3; rating: 10 20 30)
+t2:([id:`b`c] price: 10 10 ; rating: 100 100)
+
+t1
+id price rating
+---------------
+a    1     10
+b    2     20
+c    3     30
+
+t2
+id price rating
+---------------
+b   10    100
+c   10    100
+
+t1+t2
+id price rating
+---------------
+a   1     10
+b   12    120
+c   13    130
+
+/ only keys `b`c are matching between the 2 tables
+/ so will only add values in these 2 rows
+/ a will simply return its original value
+```
 
 <a name="joins_table"></a>
 ### 🔵 12.17 Joins on Tables
@@ -3204,6 +3250,32 @@ AAPL	nyse	    20   200
 GOOG	nasdaq	  30   300
 
 / this actually uses each both to join the 2 tables horizontally
+```
+
+<a name="joins_table"></a>
+### 🔵 12.17 Find on Tables
+
+```q
+t: ([] a: 1 2 3; b: 4 5 6; c: 7 8 9)
+
+a b c
+------
+1 4 7
+2 5 8
+3 6 9
+
+t? 3 6 9
+2
+
+/ find these values within the table
+/ shows index position 2
+
+t? (2 5 8; 3 6 9)
+1 2 
+
+/ can find more than 1 list of indices at once
+/ returns list of indices
+
 ```
 
 
