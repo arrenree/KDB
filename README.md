@@ -1465,6 +1465,29 @@ ADSF
 adsf
 ```
 
+<a name="uppercase_ops"></a>
+### 🔵 6.13 Timing and Performance
+```q
+
+n: 1000000
+
+a:n?100f
+b:n?100f
+
+/ a and b are lists of a million floats
+
+\t r1:a+b
+1
+
+/ time took less than 1 millisecond
+
+\t:100 r1:a+b
+120
+
+/ run it 100x
+/ time still only 120 ms
+```
+
 <hr>
 
 <a name="primitive_problemset"></a>
@@ -1582,9 +1605,11 @@ count p where a=`int$a
 ## 🔴 8. Dictionary
 [Top](#top)
 
-* A dictionary is a mapping between a list of keys and a list of values of the same length
-* left of ! = list of keys
-* right of ! = list of values
+```q
+/ A dictionary is a mapping between a list of keys and a list of values of the same length
+/ left of ! = list of keys
+/ right of ! = list of values
+```
 
 <a name="dict_from_list"></a>
 ### 🔵 8.1 Constructing a Dictionary from Lists
@@ -1592,11 +1617,12 @@ count p where a=`int$a
 k:`apple`plum
 v:`green`purple
 d:k!v
+
+key  | value
+--------------
+apple| green
+plum | purple
 ```
-key|value
--|-
-apple|	green
-plum|	purple
 
 <a name="retrieve_dict"></a>
 ### 🔵 8.2 Retrieving Values from Dictionaries
@@ -1605,14 +1631,13 @@ Given dictionary d, 3 ways to retrieve a
 
 ```q
 d:`a`b`c!1 2 3
-```
-key|values
--|-
-a|	1
-b|	2
-c|	3
 
-```q
+key | values
+------------
+a   | 1
+b   | 2
+c   | 3
+
 d[`a]
 d`a
 d@`a
@@ -1621,24 +1646,24 @@ d@`a
 ```
 
 ```q
+/ retrieves all keys in d
+
 key d
 a b c
-
-/ retrieves all keys in d
 ```
 
 ```q
+/ retrieves all values in d
+
 value d
 1 2 3
-
-/ retrieves all values in d
 ```
 
 ```q
+/ Retrieve multiple values
+
 d @ `a`b`a`
 1 2 1 1
-
-/ can retrieve multiple values
 ```
 
 <a name="index_retrieve_dict"></a>
@@ -1646,62 +1671,56 @@ d @ `a`b`a`
 
 ```q
 dc:`c1`c2!(10 * til 5; 1+ til 3)
-```
-key | value
--|-
-c1	|0 10 20 30 40
-c2	|1 2 3
 
-```q
+key| value
+------------------
+c1 | 0 10 20 30 40
+c2 | 1 2 3
+
 dc[`c2]
 1 2 3 
 
-/ retrieves list c2
-```
+/ retrieves values in key c2
 
-```q
 dc[`c2;2]
 3
 
-/ retrieves from list c2, index position 2 (0 1 2)
-```
+/ retrieves from key c2, index position 2 (0 1 2)
 
-```q
 dc[ ; 1]
+
+key| value
+----------
+c1 | 10
+c2 | 2 
 
 / takes index position 1 from values (2nd column)
 ```
-key|value
--|-
-c1	|10
-c2	|2 
 
 <a name="take_dict"></a>
 ### 🔵 8.4 Take
 
 ```q
+/ another form of retrieving from dictionaries
+
 2#d
 
-/ take first 2 entries from d
-```
-
 key | value
--|-
-a | 1
-b |2
+----------
+a   | 1
+b   | 2
 
-```q
+/ take first 2 entries from d
+
 `a`b#d
 
-/ take keys `a and `b and its values from d
-```
-
 key | value
--|-
-a | 1
-b | 2
+-----------
+a   | 1
+b   | 2
 
-```q
+/ take keys `a and `b and retrieve its values from d
+
 d`a`b
 1 2
 
@@ -1719,28 +1738,37 @@ d`a`b
 ### 🔵 8.5 Drop
 
 ```q
+/ drop used to delete key/values in dictionaries
+
 2_d
+
+key | value
+-----------
+C   | 3
 
 / drop first 2 rows from dictionary d
 ```
 
-key | value
--|-
-C | 3
-
-
 ```q
 d: `a`b`c ! 1 2 3
 
+key | value
+----------
+a   | 1
+b   | 2
+c   | 3
+
 `b _ d
 
-/ drop key `b and its value (2)
-```
+/ drop key `b and its value 3 from dict
 
 key | value
--|-
-a | 1
-c | 3
+----------
+a   | 1
+c   | 3
+
+```
+
 
 <a name="upsert_dict"></a>
 ### 🔵 8.6 Upsert
@@ -1748,52 +1776,133 @@ c | 3
 ```q
 d [`e]: 99
 
+key|value
+--------
+a  |1
+b  |2
+c  |3
+e  |99
+
 / upsert = update insert
 / if key exists, will update value
 / if key doesn't exist, will insert new key + value
-```
 
-key|value
--|-
-a|	1
-b|	2
-c|	3
-e|	99
+```
+<a name="upsert_dict"></a>
+### 🔵 8.6 Nested List within Dictionaries
+
+```q
+dict:`alpha`bravo`charlie!((1 2 3);(4 5 6); (7 8 9))
+
+key     | value
+---------------
+alpha	| 1 2 3
+bravo	| 4 5 6
+charlie | 7 8 9
+
+/ adding new row via join
+
+dict,(`delta`echo)!(10 11 12;13 14 15)
+
+/ however, to update the underlying table, need to use join assign ,:
+
+dict,:(`delta`echo)!(10 11 12;13 14 15)
+
+key     | value
+---------------
+alpha	| 1 2 3
+bravo	| 4 5 6
+charlie | 7 8 9
+delta   | 10 11 12
+echo    | 13 14 15
+
+/ amending key/values via indexing
+
+dict[`charlie]: 100 200 300
+
+key     | value
+---------------
+alpha	| 1 2 3
+bravo	| 4 5 6
+charlie | 100 200 300
+delta   | 10 11 12
+echo    | 13 14 15
+
+/ to add a single row (need to use enlist!)
+
+dict,:(enlist `golf)! enlist 10
+
+key     | value
+---------------
+alpha	| 1 2 3
+bravo	| 4 5 6
+charlie | 100 200 300
+delta   | 10 11 12
+echo    | 13 14 15
+golf    | 100
+
+```
+```q
+/ avg + avg each dictionary
+
+dict:`alpha`bravo`charlie!((1 2 3);(4 5 6); (7 8 9))
+
+key     | value
+---------------
+alpha	| 1 2 3
+bravo	| 4 5 6
+charlie | 7 8 9
+
+avg dict
+4 5 6
+
+/ avg nested dictionary = average per COLUMN
+
+avg each dict
+
+key     | value
+---------------
+alpha	| 2
+bravo	| 5
+charlie | 8
+
+/ avg each nested dictionary = average per ROW
+
+```
 
 <a name="multi_key_dict"></a>
 ### 🔵 8.7 Multi Key Dictionaries
 
 ```q
 md: (`a`b;`c`d;`e`f) ! 1 2 3
-```
-* created a dictionary md with 2 keys for every 1 value
-* ; separate the various rows
 
-key| value
--|-
-a b	|1
-c d	|2
-e f	|3
+/ created a dictionary md with 2 keys for every 1 value
+/ ; separate the various rows
+
+key | value
+----------
+a b | 1
+c d | 2
+e f | 3
+```
 
 <a name="repeat_key_dict"></a>
 ### 🔵 8.8 Repeat Keys
 
-You can technically have multiple repeat keys, but this is NOT recommended
-
 ```q
+/ You can technically have multiple repeat keys, but this is NOT recommended
+
 dk: 1 2 3 1 ! `a`b`c`d
 
+key| values
+-----------
+1  | a
+2  | b
+3  | c
+1  | d
+
 / notice key 1 is repeated
-```
 
-key|values
--|-
-1|	a
-2|	b
-3|	c
-1|	d
-
-```q
 dk[1]
 a
 
@@ -1804,11 +1913,13 @@ a
 ### 🔵 8.9 Find Operator ?
 
 ```q
-d?2
-b
+dict: `a`b`c`d!1 5 8 12
 
-/ ? is the find operator
-/ from dictionary d, find key 2, return its value (b)
+dict?12
+`d
+
+/ ? find operator
+/ lookup value 12, returns key
 ```
 
 <a name="dict_opt"></a>
@@ -1821,32 +1932,25 @@ sum d
 
 avg d
 2
-```
 
-```q
 neg d
+key|value
+--------
+a  | -1
+b  | -2
+c  | -3
 
 / turns all values negative
-```
 
-key|value
--|-
-a|	-1
-b|	-2
-c|	-3
-
-```q
 d%100
+key|value
+---------
+a  |0.01
+b  |0.02
+c  |0.03
 
 / divides all values by 100
 ```
-
-key|value
--|-
-a|	0.01
-b|	0.02
-c|	0.03
-
 ```q
 Adding / Joining Dictionaries
 
@@ -1855,12 +1959,15 @@ d2:`a`b`c!1 2 3
 
 d1+d2
 d1,d2
-```
+
 key|value
--|-
-a|	2
-b|	4
-c|	6
+--------
+a  | 2
+b  | 4
+c  | 6
+
+```
+
 
 <hr>
 
@@ -2262,6 +2369,39 @@ key|value
 
 <a name="multi_cond_while_loop"></a>
 ### 🔵 10.11 Multi Condition While Loops
+
+```q
+/ sum all values > 100 using while loop
+
+d: 100?100
+i: 0
+r1: 0
+
+/ d = list of 100 random numbers
+/ i = iterative counter (goes from 0-100)
+/ r1 = result of while loop
+
+while [i<count d; if [d[i]>50;r1+:d[i]]; i+:1]
+
+/ while i is less than the count of the list (d)
+/ if value of list at index i is greater than 100
+/ then add this to the value of the result (r1)
+/ then go onto next iteration (i+1)
+/ remember, WHILE LOOPS -> if first argument is TRUE, execute all arguments that follow
+
+HOWEVER, much faster using vector operations:
+
+r2: sum d where d > 50
+
+/ so use vector operations whenever possible
+/ also a lot more flexible:
+
+max sum d where d>50
+min sum d where d>50
+avg sum d where d>50
+
+```
+
 
 ```q
 a:1
@@ -6256,6 +6396,16 @@ a |b
 3	|6
 
 / each both will stitch the two tables together
+```
+
+```q
+a: 1 1 1
+b: 5 5 5
+
++'[a;b]
+6 6 6
+
+/ this is another syntax to use each both
 ```
 
 <a name="each_monadic"></a>
