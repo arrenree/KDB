@@ -629,71 +629,100 @@ Current TimeStamp
 
 <a name="cast_type"></a>
 ### 🔵 2.3 Casting
-* casting = changes one datatype to another type that's compatible
-* parsing = converting from a string to a native type
-* x $ y 
-* x = target type
-* y = source type
-* Casting y to x
-
 ```q
-Casting strings to sym
-
-/ "a","b","c" are strings
+/ casting = changes one datatype to another type that's compatible
+/ parsing = converting from a string to a native type
+/ x $ y 
+/ x = target type
+/ y = source type
+/ Casting y to x
+```
+```q
+/ casting strings to sym
 
 "S" $ "a","b","c"
 `abc
+
+/ use capital "S" to cast to sym
+/ or can also use `
 ```
 
 ```q
-Converting syms to strings 
-
-/ `abc is a sym
+/ Converting syms to strings 
 
 string `abc
 "abc"
+
+/ sym to string, simply use "string" function
 ```
 
 ```q
+/ casting int to dates
+
 `date$2
-```
 2000-01-03d
-* 2nd day of the millennia
+
+/ 2nd day of the millennia
+```
 
 ```q
+/ casting int to time
+
 `time$2
-```
 00:00:00.002t
-* 2 + 00:00:00.000
+
+/ 2 + 00:00:00.000
+```
 
 ```q
+/ casting int to month
+
 `month$2
-```
 2000.03m
-* KDB time starts at 2000.01.01 
-* 2 + 2000.01.01
+
+/ KDB time starts at 2000.01.01 
+/ 2 + 2000.01.01
+```
 
 ```q
+/ casting int to minute
+
 `minute$2
-```
 00:02
-* takes 2 + 00:00
+
+/ takes 2 + 00:00
+```
 
 ```q
+/ casting int to seconds
+
 `seconds$2
-```
 00:00:02
+```
 
 ```q
+/ casting to booleans
+
 `boolean$9
-```
 1b
-* casting a boolean will always be true (1b), unless its 0
 
-```q
+/ casting a boolean will always be true (1b), unless its 0
+
 `boolean$0
-```
 0b
+```
+```q
+/ converting list of syms to string
+
+string `a`b`c`d`e
+("a";"b";"c";"d";"e")
+
+/ converting list of syms to singular string
+
+raze string `a`b`c`d`e
+"abcde"
+```
+
 
 <a name="enu_cast"></a>
 ### 🔵 2.4 Enumeration
@@ -1138,6 +1167,33 @@ raze string `a`b`c
 / union returns only the distinct elements in both lists
 ```
 
+<a name="raze_intro"></a>
+### 🔵 4.16 Where clause with Lists
+
+```q
+/ if you have 2 lists, you can use indexing to retrieve corresponding values in lists
+
+size: 100 300 50 70
+price: 4 8 6 2
+
+price > 5
+0110b
+
+/ using comparison operator on list returns list of booleans
+
+where price > 5
+1 2
+
+/ where + comparison operator = shows index position 
+
+size where price > 5
+
+/ returns value from 2nd list using index position from original list
+
+avg size where price > 5
+
+/ can perform calc on 2nd list too (avg price)
+```
 
 <hr>
 
