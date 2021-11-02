@@ -580,20 +580,20 @@ table|	|	|98	|([] c1:ab`c; c2:10 20 30) |
 dictionary	|	|	|99	|`a`b`c!!10 20 30 |
 
 <a name="date_type"></a>
-### Date
 
+```q
 Given:
 d: 2011.02.22
 
-```q
 d.year
 d.mm
 d.month
 d.dd
-```
-2011i \
-2i \
+
+2011i
+2i
 22i 
+```
 
 <a name="time_type"></a>
 ### 🔵 2.2 Time
@@ -722,7 +722,11 @@ string `a`b`c`d`e
 raze string `a`b`c`d`e
 "abcde"
 ```
+```q
+-7h
 
+/ a negative type means it's an atom!
+```
 
 <a name="enu_cast"></a>
 ### 🔵 2.4 Enumeration
@@ -2769,7 +2773,7 @@ c|	3.3	|john
 <a name="meta_datatypes_table"></a>
 ### 🔵 12.5 Meta / Data Type Table
 
-Meta returns a table where each row is a column
+Meta returns a table of information on underlying columns
 
 ```q
 ( [] company:(); employees:() )
@@ -2780,21 +2784,22 @@ meta t
 / t = datatype (s = symbol, j = long)
 / f = foreign key
 / a = attributes
-```
-c|t|f|a
--|-|-|-
-company|	|	|
-employees|	|	|
 
-```q
+c        |t|f|a
+---------------
+company  | | | 
+employees| | | 
+
 ( [] company: `symbol$(); employees: `int$())
 
 / changed company type to s (symbol) and employees to i (integer)
+/ if J is capital = nested lists
+
+c        |t|f|a
+---------------
+company  |s| | 
+employees|j| | 
 ```
-c|t|f|a
--|-|-|-
-company|	s	|	|
-employees|	j	|	|
 
 <a name="countrowsimple_table"></a>
 ### 🔵 12.6 Count Row Table
@@ -4063,214 +4068,217 @@ attr lp
 <a name="single_fkey"></a>
 ### 🔵 17.1 Single Foreign Keys
 
-Given:
-
 ```q
 company:([sym:`TS`KX`C`AAPL`GOOG`MS] advice: 6?`HOLD`BUY`SELL; level: 6?100)
-```
+company
+sym   |advice| level
+---------------------
+`TS`  | HOLD | 40
+`KX`  | HOLD | 51
+`C`   | SELL | 55
+`AAPL`|	BUY  | 90
+`GOOG`|	SELL | 73
+`MS`  |	SELL | 90
 
-company table
+/ column sym is keyed
 
-sym | advice | level
--|-|-
-`TS`|HOLD |40
-`KX` |HOLD |51
-`C` | SELL | 55
-`AAPL`|	BUY|	90
-`GOOG`|	SELL|	73
-`MS`|	SELL|	90
-
-```q
 employee:( [] name:`ryan`charlie`arthur`greg; employer:`TS`KX`KX`MS)
-```
 
-employer table
-
-name|employer
--|-
-ryan|TS
-charlie|KX
+employee 
+name   |employer
+-----------------
+ryan   | TS
+charlie| KX
 arthur | KX
-greg | MS
+greg   | MS
 
-```q
 update `company$employer from `employee
+
+/ similar syntax to casting
+/ you limit the employer column to the domain in company table (keyed column)
+/ limits the values in employer column to the domain in the company table (sym column)
+/ the domain table HAS to be keyed
+/ the values in employer column must exist in domain company table
 ```
-* similar to casting, you limit the employer column to the domain in company table (keyed column)
-* limits the **employer** column from **employee table** to the domain (keyed column = **sym**) in the **company table**
-* the domain table HAS to be keyed
-* the values in column employee must exist in domain company table
 
 <a name="check_fkey"></a>
 ### 🔵 17.2 Checking Foreign Keys
 
 ```q
-meta employee
-```
-c|t|f|a
--|-|-|-
-name|	s| |		
-employer|	s|	company| |	
+/ use meta
 
-* c = column
-* f = foreign key
-* confirms the employer column is linked to the company table
+meta employee
+c       |t|f      |a
+----------------------
+name    |s|       |		
+employer|s|company| 	
+
+/ c = column
+/ f = foreign key
+/ confirms the employer column is linked to the company table (last example)
 
 ```q
 fkeys employee
-```
 
-key|value
--|-
+key     |value
+----------------
 employer|company
+
+/ fkeys + table name = what columns are foreign keyed
+```
 
 <a name="upsert_fkey"></a>
 ### 🔵 17.3 Upserting with Foreign Keys
 ```q
 upsert[employee; ( [] name:`james`claire; employer:`RBS`RBS)]
-```
 `cast
-* prev set **employer column** from **employee table** as fkey to **company table** domain (**sym**)
-* error because RBS is NOT a sym in the company table
-* fkey restricts us from adding what's not in the domain  
 
-```q
+/ prev set employer column as fkey to company table domain (**sym**)
+/ error because RBS is NOT a sym in the company table
+/ fkey restricts us from adding what's not in the domain  
+
 insert[`company; ([sym:enlist `RBS] advice:enlist `SELL; level: enlist 20)]
-```
-* need to first add RBS into the company domain (as a keyed sym)
-* remember  need to use enlist when adding single rows
 
-sym|advice|level
--|-|-
-`TS`|HOLD |40
-`KX` |HOLD |51
-`C` | SELL | 55
-`AAPL`|	BUY|	90
-`GOOG`|	SELL|	73
-`MS`|	SELL|	90
-`RBS|SELL |20
+/ need to first add RBS into the company domain (as a keyed sym)
+/ remember  need to use enlist when adding single rows
 
-```q
+company
+sym   |advice| level
+---------------------
+`TS`  | HOLD | 40
+`KX`  | HOLD | 51
+`C`   | SELL | 55
+`AAPL`|	BUY  | 90
+`GOOG`|	SELL | 73
+`MS`  |	SELL | 90
+`RBS` | SELL | 20
+
 upsert[employee; ( [] name:`james`claire; employer:`RBS`RBS)]
-```
 
-name|employer
--|-
-ryan|TS
-charlie|KX
+employee 
+name   |employer
+-----------------
+ryan   | TS
+charlie| KX
 arthur | KX
-greg | MS
-james|RBS
+greg   | MS
+james  | RBS
 claire | RBS
 
-* now you can append james and claire
+/ now you can append james and claire
+```
 
 <a name="retrieve_fkey"></a>
 ### 🔵 17.4 Retrieving Columns via fkey
-company table
-
-sym | advice | level
--|-|-
-`TS`|HOLD |40
-`KX` |HOLD |51
-`C` | SELL | 55
-`AAPL`|	BUY|	90
-`GOOG`|	SELL|	73
-`MS`|	SELL|	90
-
-employer table
-
-name|employer
--|-
-ryan|TS
-charlie|KX
-arthur | KX
-greg | MS
 
 ```q
-update employer.advice, employer.level from employee
-```
-* prev you keyed the employer column to domain of company table (linking the 2 tables)
-* from the employee table, retrieve the value linked from **employer column** to **company table**
-* pulls in **advice** and **level** from the **company table**
+company
+sym   |advice| level
+---------------------
+`TS`  | HOLD | 40
+`KX`  | HOLD | 51
+`C`   | SELL | 55
+`AAPL`|	BUY  | 90
+`GOOG`|	SELL | 73
+`MS`  |	SELL | 90
+`RBS` | SELL | 20
 
-name|employer|advice|level
--|-|-|-
-ryan|	TS	|SELL|	12
-charlie|	KX	|BUY	|10
-arthur|	KX|	BUY|	10
-greg|	MS|	SELL|	90
+employee
+name   |employer
+-----------------
+ryan   | TS
+charlie| KX
+arthur | KX
+greg   | MS
+james  | RBS
+claire | RBS
+
+meta employee
+c       |t|   f   |a
+----------------------
+name    |s|       |		
+employer|s|company| 	
+
+update employer.advice, employer.level from employee
+
+/ prev you keyed the employer column to domain of company table (linking the 2 tables)
+/ from the employee table, retrieve the value (advice column) linked from employer column to company table
+/ pulls in advice and level from the company table
+
+name   |employer|advice|level
+---------------------------
+ryan   |TS	|SELL  |12
+charlie|KX      |BUY   |10
+arthur |KX      |BUY   |10
+greg   |MS      |SELL  |90
+```
 
 <a name="multi_fkey"></a>
 ### 🔵 17.5 Multiple Foreign Keys
 ```q
 office: ([sym:`TS`KX`C; loc:`LDN`NY`LDN] employees:10+3?1000)
-```
-office
 
-sym|loc|employees
--|-|-
-`TS`|	`LDN`|	875
-`KX`|	`NY`|	354
-`C`	|`LDN`|	1007
+sym |loc  |employees
+-------------------
+`TS`|`LDN`|875
+`KX`|`NY` |354
+`C` |`LDN`|1007
 
-```q
+/ sym and loc columns are keyed
+
 employee: ([] name:`ryan`charlie`arthur; employer:`TS`KX`KX; city:`LDN`NY`NY)
-```
+
 employee
+name   |employer|city
+-------------------
+ryan   |TS      |LDN
+charlie|KX      |NY
+arthur |KX      |NY
 
-name|employer|city
--|-|-
-ryan|	TS|	LDN
-charlie|	KX|	NY
-arthur|	KX|	NY
-
-```q
 exec `office$flip (employer;city) from employee
-```
 0 1 1
 
-* since the office table has 2 keyed columns, you have to "cast" 2 columns as fkey
-* ignore the flip syntax - youre settingn fkey by linking columns **employer** and **city** from the employee table to the domain of the **company table** (keyed columns)
-* ryan, look for TS and LDN in office table, found on row 0
-* charlie, look for KX and NY in office table, found on row 1
-* arthur, look for KX and NY in office table, found on row 1
+/ since the office table has 2 keyed columns, you have to "cast" 2 columns as fkey
+/ ignore the flip syntax 
+/ setting fkey by linking columns employer and city to the domain of company table (keyed columns)
+/ ryan    -> look for TS and LDN in office table, found on row 0
+/ charlie -> look for KX and NY in office table, found on row 1
+/ arthur  -> look for KX and NY in office table, found on row 1
+```
 
 ```q
 update empOffice:`office$flip(employer;city) from `employee
-```
-name|employer|city|empOffice
--|-|-|-
-ryan|	TS|	LDN|	0
-charlie|	KX|	NY|	1
-arthur|	KX|	NY|	1
 
-* adds new column **empOffice**, which retrieves linked values from office table
-* sets column **empOffice** as the foreign key
+employee
+name   |employer|city|empOffice
+-----------------------------
+ryan   |TS      |LDN |	0
+charlie|KX      |NY  |	1
+arthur |KX      |NY  |	1
 
-```q
+/ adds new column empOffice, and sets fkey to domain of office table
+
 meta employee
-```
-c|t|f|a
--|-|-|-
-name|	s|	|	
-employer|	s	|	|
-city|	s|	|	|
-empOffice|	j|	office|	|
+c        |t|  f   | a
+----------------------
+name     |s|	  |	
+employer |s|	  |
+city     |s|	  |
+empOffice|j|office|
 
-* meta shows us empOffice has an foreign key referencing the office table
+/ meta shows us empOffice has an foreign key referencing the office table
 
-```q
 update empOffice.sym, empOffice.loc from employee
-```
-name|employer|city|empOffice|sym|loc
--|-|-|-|-|-
-ryan	|TS|	LDN|	0	TS|	LDN
-charlie|	KX|	NY	|1	KX|	NY
-arthur|	KX|	NY	|1|	KX|	NY
 
-* employee table doesnt have columns for sym or loc
-* but since you set the empOffice as foreign key, it pulls in the values from the company table
+name   |employer|city|empOffice| sym| loc
+---------------------------------------------------
+ryan   |   TS   |LDN |	 0     | TS | LDN
+charlie|   KX   |NY  |   1     | KX | NY
+arthur |   KX   |NY  |   1     | KX | NY
+
+/ employee table doesnt have columns for sym or loc
+/ but since you set the empOffice as foreign key, it pulls in the values from the company table
+```
 
 <hr>
 
