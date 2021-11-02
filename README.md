@@ -2701,30 +2701,32 @@ til 1000 = implicit variable (runs through 0...999)
 ## 🔴 12. Tables
 [Top](#top)
 
-* A table is a flipped dictionary.
-* Vectors of data are organized by columns. 
-* Tables are encased by parathesis ( ) and contain brackets [ ] which assigns the key.
+```q
+/ a table is a flipped dictionary.
+/ vectors of data are organized by columns. 
+/ tables are encased by parathesis ( ) and contain brackets [ ] which assigns the key.
+```
 
 <a name="dict_to_table"></a>
 ### 🔵 12.1 Flipping Dictionary to Table
 
 ```q
 d: `company`employees`! (`ford`bmw; 300 100)
-```
-key|Value
--|-
-company	|`ford`bmw
-employees|	300 100
 
-```q
+key      |  value
+---------------------
+company	 | `ford`bmw
+employees| 300 100
+
 flip d
+company | employees
+-------------------
+ford    | 300
+bmw	| 100
 
 / when you flip a dictionary, you get a table
+
 ```
-company | employees
--|-
-ford |	300
-bmw	| 100
 
 <a name="simple_table"></a>
 ### 🔵 12.2 Simple Table
@@ -2732,14 +2734,15 @@ bmw	| 100
 ```q
 ( [] company: `ford`bmw; employees: 300 100)
 
+company | employees
+-------------------
+ford    | 300
+bmw	| 100
+
 / have to define a table within parathesis ( )
 / tables must have [] which are for key columns
 / semi colon ; separates next column
 ```
-company | employees
--|-
-ford |	300
-bmw	| 100
 
 <a name="single_row_table"></a>
 ### 🔵 12.3 Single Row Table
@@ -2747,11 +2750,12 @@ bmw	| 100
 ```q
 ( [] company: enlist `ford; employees: enlist 300)
 
+company | employees
+--------------------
+ford    | 300
+
 / have to use enlist for atoms and single row tables
 ```
-company | employees
--|-
-ford |	300
 
 <a name="mixed_table"></a>
 ### 🔵 12.4 Mixed Table
@@ -2759,24 +2763,23 @@ ford |	300
 ```q
 ( [] syms:`a`b`c; floats: 1.1 2.2 3.3; strings: ("bob"; "jim"; "john"))
 
+syms|floats|strings
+-------------------
+a   | 1.1 | bob
+b   | 2.2 | jim
+c   | 3.3 | john
+
 / syms have to start with backtick
 / strings have to enclose within (" ")
-
 ```
-syms|floats|strings
--|-|-
-a|	1.1 |	bob
-b|	2.2	|jim
-c|	3.3	|john
-
 
 <a name="meta_datatypes_table"></a>
 ### 🔵 12.5 Meta / Data Type Table
 
-Meta returns a table of information on underlying columns
-
 ```q
-( [] company:(); employees:() )
+/ Meta returns a table of information on underlying columns
+
+t: ( [] company:(); employees:() )
 meta t
 
 / create empty table with no types
@@ -2804,18 +2807,17 @@ employees|j| |
 <a name="countrowsimple_table"></a>
 ### 🔵 12.6 Count Row Table
 
+```q
 company | employees
--|-
-ford |	300
+--------------------
+ford    | 300
 bmw	| 100
 
-```q
 count t
 2
 
 / counts number of rows in table
 ```
-
 ```q
 cols t
 `company`employee
@@ -2829,13 +2831,13 @@ cols t
 ```q
 `a`b xcol t
 
+a   | b
+---------
+ford| 300
+bmw | 100
+
 / renamed first 2 columns from company/employee to a/b
 ```
-
-a | b
--|-
-ford |	300
-bmw	| 100
 
 <a name="add_column_table"></a>
 ### 🔵 12.8 Add Column
@@ -2843,13 +2845,14 @@ bmw	| 100
 ```q
 select company, employees, newval: 101 from t
 
+company | employees | newval
+----------------------------
+ford    |   300     | 101
+bmw	|   100     | 101
+
 / select will retrieve columns as values
 / if you select a column that doesnt exist, it will add it (newval)
 ```
-company | employees | newval
--|-|-
-ford |	300 | 101
-bmw	| 100 | 101
 
 <a name="sort_column_table"></a>
 ### 🔵 12.9 Sort Column Table (xasc)
@@ -2857,46 +2860,47 @@ bmw	| 100 | 101
 ```q
 `employees xasc t
 
+company | employees | newval
+----------------------------
+bmw	|    100    | 101
+ford    |    300    | 101
+
 / will sort ascending by employees
 ```
-company | employees | newval
--|-|-
-bmw	| 100 | 101
-ford |	300 | 101
 
 <a name="union_table"></a>
 ### 🔵 12.10 Union Table
-
-Table t
-
-company | employees
--|-
-ferrari| 100
-ford |	100 
-rover| 100
-
-Table u
-
-company | employees
--|-
-ferrari| 100
-bmw |	5 
-ford| 5
-
 ```q
+table t
+
+company | employees
+-------------------
+ferrari | 100
+ford    | 100 
+rover   |  100
+
+table u
+
+company | employees
+--------------------
+ferrari | 100
+bmw     | 5 
+ford    | 5
+
 t union u
+
+company | employees
+-------------------
+ferrari | 100
+ford    | 100 
+rover   | 100
+bmw     | 5 
+ford    | 5
 
 / returns values that are same (ferrari 100). does NOT dupe same values.
 / any values that do NOT equal, adds as new row
 
 ```
-company | employees
--|-
-ferrari| 100
-ford | 100 
-rover| 100
-bmw |	5 
-ford| 5
 
 <a name="except_table"></a>
 ### 🔵 12.11 Except Table
@@ -2904,254 +2908,245 @@ ford| 5
 ```q
 t except u
 
+company | employees
+-------------------
+ford    | 100
+rover   | 100 
+
 / from table t, check table u for any key + value matches, and remove
 / ferrari 100 appears in both tables, hence removed
 / then returns remaining rows in table t
 / in table u, bmw + ford aren't matches, so ignored
 ```
-company | employees
--|-
-ford| 100
-rover | 100 
 
 <a name="inter_table"></a>
 ### 🔵 12.12 Inter Table
 
 ```q
 t inter u
+company | employees
+-------------------
+ferrari | 100
 
 / only returns rows from both table t and u that match
 ```
-company | employees
--|-
-ferrari| 100
 
 <a name="distinct_table"></a>
 ### 🔵 12.13 Distinct Table
 
 ```q
 ([] a: 1 1 2; b: 1 1 3)
-```
-a|b
--|-
-1|	1
-1	|1
-2	|3
 
-```q
+a|b
+---
+1|1
+1|1
+2|3
+
 distinct ([] a: 1 1 2; b: 1 1 3)
+
+a|b
+----
+1|1
+2|3
 
 / will return distinct values per row
 ```
-a|b
--|-
-1|	1
-2	|3
 
 
 <a name="retrieve_table"></a>
 ### 🔵 12.14 Retrieve From Table
 
-Table t:
+```q
+table t:
 
 company | employees
--|-
-ferrari| 100
-ford | 100 
-rover| 100
-bmw |	5 
-ford| 5
+-------------------
+ferrari | 100
+ford    | 100 
+rover   | 100
+bmw     | 5 
+ford    | 5
 
-```q
 select from t
 
 / retrieves all columns from table t
-```
-company | employees
--|-
-ferrari| 100
-ford | 100 
-rover| 100
-bmw |	5 
-ford| 5
 
-```q
 select company from t
+
+company 
+--------
+ferrari 
+ford   
+rover 
+bmw 	 
+ford 
 
 / only retrieves the company column
 ```
 
-company | 
--|
-ferrari| 
-ford |  
-rover| 
-bmw |	 
-ford| 
-
 ```q
 select from t where company = `ford
+
+company | employees
+-------------------
+ford    | 100 
 
 / retrieves rows where company = ford 
 ```
 
-company | employees
--|-
-ford | 100 
-
 ```q
 t [`employees]
+100 100 100 5 5 
 
 / retrieves column= employee as a row
 ```
-100 100 100 5 5 
 
 ```q
 t [`employees] - : 100
 
+company | employees
+-------------------
+ferrari | 0
+ford    | 0 
+rover   | 0
+bmw     |-105 
+ford    |-105
+
 / -100 from every value in column employee
 ```
-company | employees
--|-
-ferrari| 0
-ford | 0 
-rover| 0
-bmw |	-105 
-ford| -105
 
 ```q
 t [ 0 1]
 or
 2#t
 
+company | employees
+--------------------
+ferrari | 0
+ford    | 0 
+
 / returns first 2 rows
 ```
-company | employees
--|-
-ferrari| 0
-ford | 0 
-
 
 ```q
 -3#t
 
+company | employees
+-------------------
+rover   | 0
+bmw     |-105 
+ford    |-105
+
 / returns last 3 rows
 ```
-
-company | employees
--|-
-rover| 0
-bmw |	-105 
-ford| -105
 
 ```q
 2 ? t
 
+company | employees
+-------------------
+rover   | 0
+ford    |-105
+
 / randomly selects 2 rows from table
 ```
-
-company | employees
--|-
-rover| 0
-ford| -105
 
 <a name="insert_table"></a>
 ### 🔵 12.15 Insert Table
 
 ```q
 t: ( [] company: (); employees: () )
+company|employees
 
 / create empty table
 ```
-company|employees
--|-
 
 ```q
 insert [`t; (`Ferrari; 8)]
+
+company|employees
+-----------------
+Ferrari| 8
 
 / backtick t to update underlying table
 / first argument is table name(t), second argument are the values to be inserted
 / semi colon separate columns for the values
 ```
-company|employees
--|-
-Ferrari | 8
 
 ```q
 insert [`t; (Ferrari`bmw; 9 7)]
 
+company|employees
+-----------------
+Ferrari| 8
+Ferrari| 9
+bmw    | 7
+
 / insert will append to the table each time (ferrari repeated)
 ```
-company|employees
--|-
-Ferrari | 8
-Ferrari | 9
-bmw | 7
 
 ```q
 x: ( [] company: `Subaru`Hyundai; employees: 55 56)
-```
+
 company|employees
--|-
+-----------------
 Subaru | 55
-Hyundai | 56
+Hyundai| 56
+```
 
 ```q
 `t insert x
-```
+
 company|employees
--|-
-Ferrari | 8
-Ferrari | 9
-bmw | 7
+-----------------
+Ferrari| 8
+Ferrari| 9
+bmw    | 7
 Subaru | 8
-Hyundai | 56
+Hyundai| 56
 
-* table x inserted into table t
+/ table x inserted into table t
 
-alternatively:
-```q
+/ alternatively:
+
 t:t,x
 ```
 
 <a name="operations_table"></a>
 ### 🔵 12.16 Operations on Tables
 
-With KEYED tables, you can use arithmetic between tables
-
 ```q
+/ with KEYED tables, you can use arithmetic between tables
+
 t1: ([sym: `a`b`c] num: 1 2 3)
 t2: ([sym: `a`b`c] num: 1 1 1)
 t1+t2
 
+sym | num
+---------
+a   | 2
+b   | 3
+c   | 4
+
 / both tables have to be keyed
 / column names have to match
-```
 
-sym | num
--|-
-a | 2
-b | 3
-c | 4
-
-
-```q
 / if UNKEYED, can only do math on tables with numeric fields
 
 t1: ([] sym: 1 2 3; num: 1 2 3)
 t2: ([] sym: 1 1 1; num: 1 1 1)
 t1+t2
 
+sym | num
+---------
+2   | 2
+3   | 3
+4   | 4
+
 / will find the column names that match, and add values together
 / column names that dont match will be union joined as a new column
 ```
-
-sym | num
--|-
-2 | 2
-3 | 3
-4 | 4
-
 
 <a name="joins_table"></a>
 ### 🔵 12.17 Joins on Tables
