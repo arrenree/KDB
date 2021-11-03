@@ -2133,9 +2133,6 @@ peter|	56.1
 ## 🔴 10. Functions
 [Top](#top)
 
-Functions are encased in { }
-
-
 <a name="define_func"></a>
 ### 🔵 10.1 Defining & Calling Functions
 ```q
@@ -2155,6 +2152,104 @@ add [3;5]
 / multi argument function
 / [a;b] = defines first, second argument
 / a+b = statement
+```
+```q
+/ the answer returned is the LAST expression evaluated in function
+
+f:{[arg1;arg2;arg3] t:arg1*arg2*arg3; t*2}
+t[1;2;3]
+12
+
+/ 1*2*3 = 6
+/ 6*2 = 12
+```
+```q
+/ can supress the function by adding ; to end 
+
+f:{[arg1;arg2;arg3] t:arg1*arg2*arg3; t*2;}
+t[1;2;3]
+-
+
+/ nothing returned
+```
+```q
+/ can force an output by adding semi colon :
+
+f:{[arg1;arg2;arg3] t:arg1*arg2*arg3; :t*2; t+3}
+t[1;2;3]
+12
+
+/ semi colon in front of 2nd expression so it will force that output
+/ colon halts everything after 
+
+/ built in plus operator
+
++[1;2]
+3
+
+```
+
+### 🔵 10.2 Types of Functions
+
+```q
+/ niladic (accept no arguments)
+
+f:{[] 1+2+3}
+f[]
+6
+
+/ monadic (accepts 1 argument)
+
+f:{[arg1] arg1+10}
+f[2]
+12
+
+/ implicit (up to 3 arguments)
+
+f:{x+10}
+f[2]
+12
+
+/ don't need to declare argument; x will be first parameter passed through function
+
+/ diadic (accepts 2 arguments)
+
+f:{[a;b] a*b}
+f[2;4]
+8
+
+/ alternatively can be implicit:
+
+f:{x*y}
+f[2;4]
+8
+
+/ triadic (accepts 3 arguments)
+
+f:{x*y*z}
+
+/ multivalent (must define parameters)
+
+f:{x*y*z*a}
+f[1;2;3;4]
+`rank
+
+/ this doesnt work. you have to define argument if more than 3
+
+f:{[x;y;z;a] x*y*z*a}
+f[1;2;3;4]
+24
+
+/ now this works
+```
+```q
+/ max amount of arguments is 8!
+/ can get around by using dictionary as argument
+
+d:(10?" ")! 1+til 10
+f:{[d] (+/)d}
+f[d]
+55
 ```
 
 <a name="anon_function"></a>
@@ -2242,6 +2337,28 @@ g 1 2 3
 
 / creates a projection of the original raise function
 ```
+```q
+f:{x*y}
+f[4;5]
+
+/ let's assume y will always stay as 5 and only x will change
+
+g:f[;5]
+g[3]
+15
+
+/ set y = 5
+/ now when you call g[3], x=3 while y stays the same
+/ g becomes a nomaic parameter
+
+g
+{x*y}[;5]
+
+/ if you call g, you'll see it contains original expression
+/ and the set parameters are shown in [ ]
+```
+
+
 
 <a name="iftrue_state"></a>
 ### 🔵 10.6 If Statements
@@ -2337,9 +2454,9 @@ f:{avg x xexp 1000?2}
 
 <a name="while_loop"></a>
 ### 🔵 10.10 While Loops
-
-* while will execute a statement x number of times until statement is no longer true
-
+```q
+/ while will execute a statement x number of times until statement is no longer true
+```
 ```q
 a:1
 while[a<3; show a; a:a+1]
@@ -2358,18 +2475,18 @@ a:1
 b:2
 while[(a<10); a:a+1; b:b+1; show enlist b,a]
 
+key|value
+----------
+3  | 2
+4  | 3
+5  | 4
+6  | 5
+
 / a = 1; a becomes 1+1(2)
 / b = 2; b becomes 2+1(3)
 / show enlist shows b and a in a clean list
 / stop running this loop when first condition becomes false
 ```
-
-key|value
--|-
-3|2
-4|3
-5|4
-6|5
 
 <a name="multi_cond_while_loop"></a>
 ### 🔵 10.11 Multi Condition While Loops
@@ -2406,41 +2523,108 @@ avg sum d where d>50
 
 ```
 
-
 ```q
 a:1
 b:2
 while[(a<10) and (b<3); a:a+1; b:b+1; show enlist b,a]
+
+/ if you have 2 conditions, must use ( ) as KDB reads right to left
+/ 2 < 3, yes. 1< 10, yes
+/ so a = 1+1 = 2 and b=2+1 = 3
+/ shows 3 2
+/ 3 is not < 3, so false. stops running
 ```
-* if you have 2 conditions, must use ( ) as KDB reads right to left
-* 2 < 3, yes. 1< 10, yes
-* so a = 1+1 = 2 and b=2+1 = 3
-* shows 3 2
-* 3 is not < 3, so false. stops running
 
 ```q
 isprime:{if[x<2; 0b]; a:2; while[a<x; if[(x mod a)=0;0b]; a+:1]; 1b}
+
+/ if x = 1
+/ x(1) < (2) (TRUE) so returns 0b (not prime)\
+
+/ if x = 4
+/ x(4)< 2 (FALSE), skip 0b statement, moves onto a:2
+/ a(2) < x(4)? (TRUE), x mod a = 4 mod 2 = 0 (no remainders if you divide 4 by 2). (TRUE), so returns 0b (not prime)\
+
+/ if x = 7
+/ x(7) < 2 (FALSE), skip 0b
+/ a(2) < x(7) (TRUE), x mod a = 7 mod 2 = 1 (FALSE), so returns 1b (TRUE)
 ```
-* if x = 1
-* x(1) < (2) (TRUE) so returns 0b (not prime)\
-
-* if x = 4
-* x(4)< 2 (FALSE), skip 0b statement, moves onto a:2
-* a(2) < x(4)? (TRUE), x mod a = 4 mod 2 = 0 (no remainders if you divide 4 by 2). (TRUE), so returns 0b (not prime)\
-
-* if x = 7
-* x(7) < 2 (FALSE), skip 0b
-* a(2) < x(7) (TRUE), x mod a = 7 mod 2 = 1 (FALSE), so returns 1b (TRUE)
 
 ```q
 findprime: { [n] r:(); a:1; while [a<n; if[isprime[a];r,:a]; a:a+1];r}
 findprime 10 
-```
+
 2 3 5 7
-* n = single argument
-* r () = empty list
-* a starts from 1, if a (1) < n (10) TRUE, append a to list r
-* go through every value of a, and add to list r
+/ n = single argument
+/ r () = empty list
+/ a starts from 1, if a (1) < n (10) TRUE, append a to list r
+/ go through every value of a, and add to list r
+```
+
+### 🔵 10.12 Function within a Function LAMBDA 
+
+```q
+
+f:{x*x}
+g:{10+f[x]}
+g[2]
+14
+
+/ 2 becomes x, 10 + 4 = 14
+
+/ can define a function within a function inline
+
+z:{f:{x*x};f[x] + 10}
+z[2]
+14
+
+/ but doesn't need to be defined
+
+{{x*x}[x] + 10}
+
+/ this is called a lambda
+/ lambda = a pair of curly brackets enclosing optional argument expressions separated by semicolons
+
+{x+y} [3;4]
+7
+
+/ you can write same operation without defining the function f 
+/ write expression + parameters in [ ] 
+
+/ flexible in syntax
+
+{x+y} [3;] 4
+7
+
+{x+y} [;4] 3
+7
+```
+```q
+/ create a function that converts sym `welcome to a string and replaces me with ME
+
+{ssr[string x;y;z]}[;"me";"ME"] `welcome
+"welcoME"
+
+/ this function converts all syms to strings 
+/ then ssr string search replace the "me" with capital "ME"
+
+/ do the same with list of syms
+
+{ssr[string x;y;z]}[;"me";"ME"] each `welcome`home`mermaid
+"welcoME"
+"hoME"
+"MErmaid"
+
+/ need the adverb EACH to iterate through each sym
+
+/ can also be done by defining function
+
+f:{ssr[string x;y;z]}
+f[;"me";"ME"] each `welcome`home`mermaid
+"welcoME"
+"hoME"
+"MErmaid"
+```
 
 <hr>
 
