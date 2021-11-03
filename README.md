@@ -241,6 +241,9 @@
 5. [Using Functions to Save - no sym](#part_functions)
 6. [Using Functions to Save - sym](#part_functionssym)
 
+## 34. [Debugging](#debugging)
+
+
 <hr>
 
 <a name="kdbintro_header"></a>
@@ -8724,6 +8727,47 @@ select max price from trade where date = 2021.01.01
 / selects max price
 / so very efficient query
 ```
+
+<a name="debugging"></a>
+## 🔴 33. Debugging
+[Top](#top)
+
+```q
+/ if you see q)) that means you're in the debug mode
+/ q))) means you are in an error trap wtihin an error trap
+/ a single backslash \ lets us enter k mode. to exit, do another backslash \
+
+f:{x*x}
+g:{f[x]*y+10}
+g[`a;2]
+/ error
+
+/ where is error?
+.z.s / returns definition of current function
+{x*x}
+
+` / takes us 1 level higher to g
+
+{f[x]*y+10
+:3
+36
+
+/ colon (also called signal) forces line to be evaluated whichever value you give it
+/ and rest of func to go on
+/ forces x*x to = 3
+/ 3 * 2 + 12 = 36 (right to left) 
+/ helps to see if any further errors in your function
+```
+
+```q
+/ use ON! to print
+/ use control c to terminate a running process
+
+
+
+
+
+
 
 
 
