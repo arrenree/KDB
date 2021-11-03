@@ -289,6 +289,35 @@ b
 ### 🔵 1.4 Loading Scripts
 ```q
 \l scriptname.q
+
+/ can force output to consol via "show"
+/ or can also use '0N!'
+
+/ 
+can comment multiple lines
+and finish with this
+\
+```
+```q
+/ creating script: function whitespace matters!
+
+f:{[a;b;c]
+   n:a*b;
+   c+n}
+f[1;2;3]
+
+/ notice the indentation
+```
+```q
+/ .z.x holds data in string form
+
+\l script.q
+.z.x
+
+"sample"
+"things"
+"show"
+"up"
 ```
 
 <a name="float_intro"></a>
@@ -2382,7 +2411,10 @@ if[10>3; a:11; show a*10; show "hello"]
 if[10; show "true"]
 "true"
 
+/ integers default to TRUE (1b)
+/ 0 default to FALSE (0b)
 / since 10 is an int, and int will default to 1b (true)
+
 ```
 
 ```q
@@ -2413,6 +2445,28 @@ $[100>1; [show "message"; `a];`b]
 
 <a name="add_cond_branch"></a>
 ### 🔵 10.8 Adding Conditional Branch Pair
+```q
+
+/ $[condition1; expr1;[cond2;expr2; ..];...;falseexpr
+
+/ if condition is true, evaluate all the following expressions
+/ finishes with condition to be executed if all conditions are false
+
+/ if true condition encountered, no further condition evaluated
+
+a:5
+$[a<2; 1; a<4; 2; a<6; 3; a<8; 4; 20]
+3
+
+/ once 5 < 6; returns 3, then stops evaluating rest of function
+
+/ multiple expressions
+
+$[a<2; [b:10; c:11]; [b:98; c:99]]
+
+/ if cond true, then evaluate first expression
+/ otherwlse evaluate last condition
+```
 
 ```q
 {$[x < 0; `negative; x=0; `zero; `positive]}0
