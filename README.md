@@ -108,9 +108,10 @@
 12. [Inter Table](#inter_table)
 13. [Distinct Table](#distinct_table)
 14. [Retrieve From Table](#retrieve_table)
-15. [Insert Table](#insert_table)
-16. [Operations on Tables](#operations_table)
-17. [Joins](#joins_table)
+15. [Insert Rows Table](#insert_table)
+16. [Upsert Rows Table](#upsert_table)
+17. [Operations on Tables](#operations_table)
+18. [Joins](#joins_table)
 
 ## 13. [Tables Problem Set](#tables_problem_set)
 
@@ -292,7 +293,15 @@ b
 ### 🔵 1.4 Loading Scripts
 ```q
 \l scriptname.q
+```
+```q
+/ to show all tables
 
+tables []
+
+```
+
+```q
 / can force output to consol via "show"
 / or can also use '0N!'
 
@@ -3310,7 +3319,54 @@ ford    |-105
 ```
 
 <a name="insert_table"></a>
-### 🔵 12.15 Insert Table
+### 🔵 12.15 Insert Rows Table
+
+```q
+/ create empty table 
+
+cars:([] brand:`$();model:`$();purchasedate:`date$())
+
+/ insert `bmw, 318; 2021.01.01
+
+`cars insert (`bmw;`318;2021.01.01)
+
+brand model date
+----------------------
+bmw   318   2021-01-01
+
+/ have to backtick table (`cars) to insert, otherwise will fail
+/ have to insert correct datatype. `318 is a sym
+```
+
+```q
+/ insert multiple
+
+`cars insert (`audi`ford;`a5`fiesta;2021.01.02 2021.01.03)
+
+brand model  date
+----------------------
+bmw   318    2021-01-01
+audi  a5     2021-01-02
+ford  fiesta 2021-01-03
+
+/ insert table into table
+
+`cars insert cars
+`cars ,:cars
+
+/ insert table with deleted column
+
+`cars insert delete model from cars
+
+brand model  date
+----------------------
+bmw   318    2021-01-01
+audi  a5     2021-01-02
+ford  fiesta 2021-01-03
+bmw	     2021-01-01
+audi	     2021-01-02
+ford	     2021-01-03
+```
 
 ```q
 t: ( [] company: (); employees: () )
@@ -3369,6 +3425,54 @@ Hyundai| 56
 
 t:t,x
 ```
+<a name="upsert_table"></a>
+### 🔵 12.16 Upsert Rows Tables
+```q
+t:([fruit:`apple`banana] price:10 20; quantity: 100 50)
+
+fruit  price quantity
+--------------------
+apple  10    100
+banana 20    200
+
+`t upsert(`apple;100;800)
+
+fruit  price quantity
+--------------------
+apple  100   800
+banana 20    200
+
+/ updates apple
+
+/ you cannot upsert multiple rows
+
+`t upsert (`apple`orange;11 23; 100 200)
+/error
+
+/ instead you have to upsert a dictionary
+
+`t upsert ([]fruit:`apple`orange; price: 11 23; quantity:100 200)
+
+fruit  price quantity
+--------------------
+apple	11   100
+banana	20   200
+orange	23   200
+
+/ when upserting into tables, column order doesnt matter
+/ can also miss columns
+
+`t upsert ([]price: 20 30; fruit:`pear`guava)
+
+fruit  price quantity
+--------------------
+apple	11   100
+banana	20   200
+orange	23   00
+pear	20	
+guava	30	
+```
+
 
 <a name="operations_table"></a>
 ### 🔵 12.16 Operations on Tables
@@ -4654,8 +4758,6 @@ date|time|sym|price|size|cond|bookId | owner|name
 ## 🔴 19. qSQL
 [Top](#top)
 
-**4 Types of Queries**
-
 ```q
 select
 select a by b from t where c
@@ -4671,9 +4773,9 @@ delete a by b from t where c
 ```
 ```q
 Evaluated in the following order:
-1. from
-2. where
-3. by
+1. from 
+2. where (filter data)
+3. by (group data)
 4. select
 ```
 
@@ -4681,8 +4783,6 @@ Evaluated in the following order:
 ### 🔵 19.1) Select
 
 ```q
-select a by b from t where c
-
 / result of a select is a table
 ```
 
@@ -4708,6 +4808,52 @@ t:([] sym:`a`b`c`d; price: 1 2 3 4)
 / Given a table, select the high, low, open, and close price by sym
 
 select high: max price, low: min price, open: first price, close: last price by sym from trade
+```
+```q
+
+fruit   grocer  price   quantity
+--------------------------------
+apple	mark	1	10
+orange	mark	2	20
+pear	allen	3	30
+banana	tom	4	40
+
+
+select [>grocer] from sales
+
+fruit   grocer  price   quantity
+--------------------------------
+banana	tom	4	40
+apple	mark	1	10
+orange	mark	2	20
+pear	allen	3	30
+
+/ order our table in descending according to grocer
+
+fruit   grocer  price   quantity
+--------------------------------
+banana	tom	4	40
+apple	mark	1	10
+orange	mark	2	20
+pear	allen	3	30
+```
+```q
+select fruit, price from sales where fruit in `banana`pear
+
+fruit   pear
+-----------
+pear	3
+banana	4
+
+/ where statement use in for syms
+
+/ only return 1 row for select
+
+select [1;]fruit, price from sales where fruit in `banana`pear
+
+fruit   pear
+-----------
+pear	3
 ```
 
 
@@ -4793,10 +4939,10 @@ x | sym | price
 <a name="qsqlselectmaxmin_template"></a>
 ### 🔵 19.4) Select using [ ]
 
-* select [] can be used to get the first n or last n records of a table
-* select [n m] can be used to get records starting from n and upto count m from n
-
 ```q
+/ select [] can be used to get the first n or last n records of a table
+/ select [n m] can be used to get records starting from n and upto count m from n
+
 select [4] from trade
 
 / selects the first 4 records
@@ -4817,39 +4963,39 @@ select [1 4] from trade
 <a name="select_from_where"></a>
 ### 🔵 19.5) Where
 
-Where clause operates left to right, so put most restrictive clause first
 
 ```q
+/ where clause operates left to right, so put most restrictive clause first
+
 select from trade where date=20121.05.29, sym=`A
 
 / where colname = xxx
 / use commas for multiple where expressions
 / put most restrictive clause first, starting from left (saves time)
+
+date      | time        | sym |price| size | cond
+--------------------------------------------------
+2021-05-29| 09:30:02.758|  A |100.35| 50300| B
+2021-05-29| 09:30:17.997|  A |57.81 | 65600| C
+2021-05-29| 09:30:21.507|  A |97.85 | 51800| B
 ```
-
-date | time | sym |price | size | cond
--|-|-|-|-|-
-2021-05-29|	09:30:02.758|	A|	100.35 |	50300|	B
-2021-05-29|	09:30:17.997|	A |	57.81 |	65600	|C
-2021-05-29|	09:30:21.507|	A	|97.85 |	51800|	B
-
 ```q
 select price from trade where date=2021.05.29, sym=`A
+
+price
+-----
+100.3
+57.8
+97.8
 ```
-
-price|
--|
-100.3 |
-57.8 |
-97.8 |
-
 ```q
 select max price from trade where date=2021.05.29, sym=`A
+
+price
+------
+109.99
 ```
 
-price |
--|
-109.99|
 
 ```q
 count select from trade where cond="A"
@@ -4859,15 +5005,15 @@ count select from trade where cond="A"
 ```q
 select by sym from trade where date=.z.d
 
+sym |  date    |   time     |price|size |cond
+----------------------------------------------
+A   |2021-06-02|17:29:57.306|87.54|49100|B
+AA  |2021-06-02|17:29:58.789|68.09|88100|A
+AAPL|2021-06-02|17:29:58.262|76.18|22500|A
+
 / by sym = will set sym as the key and agg all dates with the same sym
 / since select + blank , KDB will auto select last entry in column
 ```
-
-sym|date|time|price|size|cond
--|-|-|-|-|-|
-`A`	|2021-06-02	|17:29:57.306	|87.54 |	49100 |	B
-`AA`|	2021-06-02|	17:29:58.789 |	68.09 |	88100	|A
-`AAPL`|	2021-06-02|	17:29:58.262 |	76.18	|22500	|A
 
 ### Where clause from 2 different Tables
 
@@ -4879,6 +5025,81 @@ select from t1 where date=2021.10.21,([]sym;exch) in t2
 
 / this will filter date = 2021.10.21
 / and where the sym + exch columns appear in t2
+```
+```q
+/ retrieve IBM from cond A, CSCO from A or B, MSFT from C
+/ first, check the meta of the trade table
+
+c    |t|f|a
+------------
+date |d| |s
+time |t| |		
+sym  |s| |		
+price|f| | 		
+size |i| |		
+cond |c| |		
+
+/ notice sym datatype is sym and cond datatype is char
+
+/ create new table, toget with the target parameters
+
+toget:([] sym:`IBM`CSCO`CSCO`MSFT; cond:"AABC")
+
+sym   cond
+----------
+IBM    A
+CSCO   A
+CSCO   B
+MSFT   C
+
+/ then write a select statement using WHERE to retrieve from 2 tables
+
+select from trade where date=2021.10.30,([]sym;cond) in toget
+
+date       sym  price size cond
+-------------------------------
+2021-10-30 MSFT	60.66 48700 C
+2021-10-30 IBM	59.00 28300 A
+2021-10-30 MSFT	54.57 23700 C
+2021-10-30 IBM	89.19 86600 A
+2021-10-30 IBM	84.13 46600 A
+
+/ first filters by date
+/ then filters by the sym + cond columns in toget table
+
+```
+### Where Clause Ordering
+
+```q
+/ be careful about how you order the where filters
+/ can change your output
+
+trade:([] price: 50 60 70; size: 300 200 100)
+
+price   size
+------------
+50	300
+60	200
+70	100
+
+/ find largest price and size > 200
+
+select from trade where size > 200, price = max price
+
+price   size
+------------
+50	300
+
+/ however, this is not correct as 50 is NOT the max price
+
+select from trade where price = max price, size > 200
+
+price   size
+------------
+
+
+/ this is correct. 
+/ no max price (70) that is greater than 200 (300)
 ```
 
 
@@ -4969,9 +5190,6 @@ sym| dir| size
 AAPL|0 |311
 CSCO |0 |2191
 GOOG |-1 | 394
-
-
-
 
 
 <a name="select_count"></a>
@@ -5159,11 +5377,13 @@ select avg price by sym, 240 xbar time.minute from trade
 <a name="exec"></a>
 ### 🔵 19.12) Exec
 
-* Exec is a more general form of select
-* Exec doesn't return a table
-* Exec from one column returns a LIST
-* Exec from more than one column returns a DICTIONARY
-* One diff between select and exec is the column lists do not have to be rectangular to return a result
+```q
+/ exec is a more general form of select
+/ while select always returns a table, exec returns are more flexible
+/ exec from one column returns a LIST
+/ exec from more than one column returns a DICTIONARY
+/ one diff between select and exec is the column lists do not have to be rectangular to return a result
+```
 
 ```q
 a: ([] c1: 1 2 3; c2: `a`b`c)
@@ -5201,12 +5421,14 @@ exec price from trade where date=.z.d, sym=`AAPL
 select price from trade where date=.z.d, sym=`AAPL
 
 / select = single column returned
+
+price
+------
+62
+59
+13
+
 ```
-price|
--|
-62|
-59|
-13|
 
 ```q
 exec first price from trade where date=.z.d, sym=`AAPL
@@ -5220,22 +5442,25 @@ AAPL | 62 59 13
 
 ```q
 exec price by sym from trade where date=.z.d
-```
-sym| price
--|-
-`A` | 108 77 88
-`AA`| 33 45 23
+
+sym   | price
+----------------
+`A`   | 108 77 88
+`AA`  | 33 45 23
 `AAPL`| 34 56 23
+```
 
 ```q
 exec first price by sym, cond from trade where date=.z.d, sym in `KX`AAPL
+
+sym    |cond | price
+------------------
+`AAPL` |     | 95
+`AAPL` | `A` | 43
+`KX`   | `C` | 32
+
 ```
 
-sym | cond | price
--|-|-
-`AAPL` |` `| 95
-`AAPL` | `A` | 43
-`KX` | `C` | 32
 
 ```q
 a: ([] c1: 1 2 3 1 2; c2: `a`b`c`a`b)
@@ -5254,24 +5479,22 @@ c2 | `a`b`c
 ### Select vs Exec
 ```q
 cnc: ([] city:`toronto`london`ny`vancouver; country:`canada`england`usa`canada)
+
+city     | country
+-------------------
+toronto  | canada
+london   | england
+ny       | usa
+vancouver| canada
 ```
-
-city | country
--|-
-toronto|	canada
-london	|england
-ny|	usa
-vancouver|	canada
-
 ```q
 exec city, distinct country from cnc
+
+key    | value
+-----------------------------------
+city   | toronto london ny vancouver
+country| canada england usa
 ```
-
-key|value
--|-
-city|	toronto london ny vancouver
-country|	canada england usa
-
 ```q
 select city, distinct country from cnc
 
@@ -5280,18 +5503,34 @@ select city, distinct country from cnc
 
 <a name="update_statement"></a>
 ### 🔵 19.13) Update
-
-* updates a pre-existing column
-* if column doesnt exist, gets added to end of column list
-* original table unaffected unless the data is persisted by using backtick
-
+```q
+/ updates a pre-existing column
+/ if column doesnt exist, gets added to end of column list
+/ original table unaffected unless the data is persisted by using backtick
+```
 ```q
 update price: 10.0 from trade
 
 / this will update all prices to 10
 ```
 ```q
+/ to update a single where condition:
+
+update price:10.0 from trade where sym=`C
+
+date       time         sym  price    size  cond
+------------------------------------------------
+2021.10.30 09:30:02.553 C    10       63500 B   
+
+/ to update multiple where conditions:
+
 update price:10.0 from trade where sym in `AAPL`GOOG
+
+date       time         sym  price    size  cond
+------------------------------------------------
+2021.10.30 09:30:02.553 C    10       63500 B   
+2021.10.30 09:30:02.701 MSFT 10       1700  B   
+2021.10.30 09:30:02.743 RBS  10       80700 C  
 
 / this will update prices to 10 for AAPL and GOOG 
 / the where clause updates only the filtered records
@@ -5311,134 +5550,140 @@ tt:100?trade
 
 / randomly selects 100 rows
 ```
-date|time|sym|price|size | cond
--|-|-|-|-|-
-2021.01.01 | 15:10:01| BAC | 70| 422| B
-2021.03.01 | 15:09:01| JPM | 74| 412| C
 
 ```q
+date       |  time   | sym |price|size| cond
+---------------------------------------------
+2021.01.01 | 15:10:01| BAC | 70  |422| B
+2021.03.01 | 15:09:01| JPM | 74  |412| C
+
 update cond: "D" from tt
+
+date       |  time   | sym |price|size| cond
+---------------------------------------------
+2021.01.01 | 15:10:01| BAC | 70  |422 | D
+2021.03.01 | 15:09:01| JPM | 74  |412 | D
 
 / updates cond to "D"
 ```
-date|time|sym|price|size | cond
--|-|-|-|-|-
-2021.01.01 | 15:10:01| BAC | 70| 422| D
-2021.03.01 | 15:09:01| JPM | 74| 412| D
-2021.03.01 | 15:09:01| UBS | 41| 312| D
 
 ```q
 update size%100 from tt
 
+date       |  time   | sym |price|size| cond
+---------------------------------------------
+2021.01.01 | 15:10:01| BAC | 70  |42.2| D
+2021.03.01 | 15:09:01| JPM | 74  |41.2| D
+2021.03.01 | 15:09:01| UBS | 41  |31.2| D
+
+
 / can perform function on entire column. size divided by 100
 ```
-date|time|sym|price|size | cond
--|-|-|-|-|-
-2021.01.01 | 15:10:01| BAC | 70| 42.2| D
-2021.03.01 | 15:09:01| JPM | 74| 41.2| D
-2021.03.01 | 15:09:01| UBS | 41| 31.2| D
 
 ```q
 update advice:`sell from tt
+
+date       |  time   | sym |price|size|cond|advice
+---------------------------------------------------
+2021.01.01 | 15:10:01| BAC |  70 |42.2|D   | sell
+2021.03.01 | 15:09:01| JPM |  74 |41.2|D   | sell
+2021.03.01 | 15:09:01| UBS |  41 |31.2|D   | sell
+
 
 / if you update a column that doesnt exist, it will add the column
 / new column added called advice and populates with sell
 / notice it has to be backtick sell
 ```
 
-date|time|sym|price|size | cond| advice
--|-|-|-|-|-|-
-2021.01.01 | 15:10:01| BAC | 70| 42.2| D | sell
-2021.03.01 | 15:09:01| JPM | 74| 41.2| D | sell
-2021.03.01 | 15:09:01| UBS | 41| 31.2| D | sell
-
 ```q
 update advice: `buy from tt where price < 70
+
+date       |  time   | sym |price|size|cond|advice
+---------------------------------------------------
+2021.01.01 | 15:10:01| BAC |  70 |42.2|  D | 
+2021.03.01 | 15:09:01| JPM |  74 |41.2|  D | 
+2021.03.01 | 15:09:01| UBS |  41 |31.2|  D | buy
 
 / if price less than 70, advice becomes buy
 / if not, then null value returned
 ```
-date|time|sym|price|size | cond| advice
--|-|-|-|-|-|-
-2021.01.01 | 15:10:01| BAC | 70| 42.2| D | 
-2021.03.01 | 15:09:01| JPM | 74| 41.2| D | 
-2021.03.01 | 15:09:01| UBS | 41| 31.2| D | buy
 
 ```q
 update maxprice: max price by sym from tt
 
+date       |   time  | sym |price|size|cond|maxprice
+----------------------------------------------------
+2021.01.01 | 15:10:01| BAC |  70 |42.2|  D | 104
+2021.03.01 | 15:09:01| JPM |  74 |41.2|  D | 102
+2021.03.01 | 15:09:01| UBS |  41 |31.2|  D | 91
+
 / since maxprice doesnt exist, adds new column to end
 ```
 
-date|time|sym|price|size | cond| maxprice
--|-|-|-|-|-|-
-2021.01.01 | 15:10:01| BAC | 70| 42.2| D | 104
-2021.03.01 | 15:09:01| JPM | 74| 41.2| D | 102
-2021.03.01 | 15:09:01| UBS | 41| 31.2| D | 91
-
 <a name="delete_columns"></a>
 ### 🔵 19.14) Delete Columns
-
-Cannot have by or where clause
-
-Given table tt
-
-date|time|sym|price|size | cond| maxprice
--|-|-|-|-|-|-
-2021.01.01 | 15:10:01| BAC | 70| 42.2| D | 104
-2021.03.01 | 15:09:01| JPM | 74| 41.2| D | 102
-2021.03.01 | 15:09:01| UBS | 41| 31.2| D | 91
-
 ```q
+/ cannot have BY or WHERE clause
+
+date       |   time  | sym |price|size|cond|maxprice
+----------------------------------------------------
+2021.01.01 | 15:10:01| BAC |  70 |42.2|  D | 104
+2021.03.01 | 15:09:01| JPM |  74 |41.2|  D | 102
+2021.03.01 | 15:09:01| UBS |  41 |31.2|  D | 91
+
 delete maxprice from tt
+
+date       |   time  | sym |price|size|cond
+--------------------------------------------
+2021.01.01 | 15:10:01| BAC |  70 |42.2| D 
+2021.03.01 | 15:09:01| JPM |  74 |41.2| D 
+2021.03.01 | 15:09:01| UBS |  41 |31.2| D 
 
 / removes maxprice column
 ```
-date|time|sym|price|size | cond
--|-|-|-|-|-
-2021.01.01 | 15:10:01| BAC | 70| 42.2| D
-2021.03.01 | 15:09:01| JPM | 74| 41.2| D
-2021.03.01 | 15:09:01| UBS | 41| 31.2| D
-
 ```q
 delete date, time from tt
 
+sym |price|size|cond
+--------------------
+BAC |  70 |42.2| D 
+JPM |  74 |41.2| D 
+UBS |  41 |31.2| D 
+
 / deletes multiple columns from the table
 ```
-sym|price|size | cond
--|-|-|-
-BAC | 70| 42.2| D
-JPM | 74| 41.2| D
-UBS | 41| 31.2| D
+```q
+/ if you try to delete rows + columns together, doesn't work
+
+delete price from trade where sym=`BAC
+error
+```
 
 <a name="delete_rows"></a>
 ### 🔵 19.15) Delete Rows
-Given table tt
-
-date|time|sym|price|size | cond| maxprice
--|-|-|-|-|-|-
-2021.01.01 | 15:10:01| BAC | 70| 42.2| A | 104
-2021.03.01 | 15:09:01| JPM | 74| 41.2| B | 102
-2021.03.01 | 15:09:01| UBS | 41| 31.2| C | 91
 
 ```q
+date       |  time   | sym |price|size| cond| maxprice
+------------------------------------------------------
+2021.01.01 | 15:10:01| BAC |  70 |42.2|  A  | 104
+2021.03.01 | 15:09:01| JPM |  74 |41.2|  B  | 102
+2021.03.01 | 15:09:01| UBS |  41 |31.2|  C  | 91
+
 delete from tt where cond="A"
+
+date       |  time   | sym |price|size| cond| maxprice
+------------------------------------------------------
+2021.03.01 | 15:09:01| JPM |  74 |41.2|  B  | 102
+2021.03.01 | 15:09:01| UBS |  41 |31.2|  C  | 91
 
 / since you are adding a WHERE clause, delete will remove the entire row 
 / WHERE cond = A
 ```
-date|time|sym|price|size | cond| maxprice
--|-|-|-|-|-|-
-2021.03.01 | 15:09:01| JPM | 74| 41.2| B | 102
-2021.03.01 | 15:09:01| UBS | 41| 31.2| C | 91
-
 ```q
 delete from tt
 
 / deletes all rows
 ```
-date|time|sym|price|size | cond| maxprice
--|-|-|-|-|-|-
 
 <a name="sort_asc_desc"></a>
 ### 🔵 19.16) Sort Ascending / Descending 
@@ -6658,25 +6903,25 @@ EACH BOTH - 2 dictionaries
 d1
 key | value
 ----------
- p  |	 1
- o  |	 2
- i  |	 3
+ p  |  1
+ o  |  2
+ i  |  3
 
 d2
 key | value
 ---------
- p  |	 4
- o  |	 5
- k  |	 6
+ p  |  4
+ o  |  5
+ k  |  6
 
 d1,d2 / join
 
 key | value
 ---------
- p	 |  4
- o	 |  5
- i	 |  3
- k	 |  6
+ p  |  4
+ o  |  5
+ i  |  3
+ k  |  6
 
 / If you simply JOIN dictionaries, the d2 will override anything existing keys in d1 (p, o)
 / acts like an UPSERT
@@ -6685,9 +6930,9 @@ d1,'d2 / each both
 
 key| value
 ---------
- p |	1 4
- o |	2 5
- i |	3 
+ p | 1 4
+ o | 2 5
+ i | 3 
  k | 6
 
 / EACH BOTH will join the values together
@@ -6705,11 +6950,11 @@ t1, t2
 
 t1, 't2
 
-a |b
-----
-1	|4
-2	|5
-3	|6
+a | b
+------
+1 | 4
+2 | 5
+3 | 6
 
 / each both will stitch the two tables together
 ```
