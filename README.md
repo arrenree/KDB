@@ -8500,6 +8500,33 @@ f[`sym`cond] / this also works
 / use notation empty list join x as this allows x to be a single column name
 / or a list of col names
 ```
+### Functional Form Example 2
+
+```q
+select tot:sum size by sym from trade where sym in `AAPL`GOOG
+
+sym   tot
+-------------------
+AAPL | -1791519396
+GOOG | 659934504
+
+parse "select tot:sum size by sym from trade where sym in `AAPL`GOOG"
+("?";`trade;,,("in";`sym;,`AAPL`GOOG);,`sym!,`sym;,`tot!,("sum";`size))
+
+/ ,  indicate atoms which need to be turned into enlist
+/ converting that into functional form
+
+/ syntax ?[table name;where;grouping;aggregation]
+
+?[trade;enlist(in;`sym;enlist `AAPL`GOOG);(enlist`sym)!enlist `sym;(enlist `tot)!enlist(sum;`size)]
+
+
+sym   tot
+-------------------
+AAPL | -1791519396
+GOOG | 659934504
+```
+
 ### Functional Exec
 
 ```q
