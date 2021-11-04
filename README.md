@@ -5121,76 +5121,130 @@ select price, i by sym from trade
 ```q
 select first price, first time by date from trade where sym=`AAPL
 
-/ select = return column of values
-/ by date = sets date as the key column
-```
+date        |price|time
+-------------------------------
+`2021-05-29`|78.6 |09:30:03.025
+`2021-05-30`|60.8 |09:30:02.686
+`2021-05-31`|55.1 |09:30:18.274
 
-date|price|time
--|-|-
-`2021-05-29`|	78.6 |	09:30:03.025
-`2021-05-30`|	60.8 |	09:30:02.686
-`2021-05-31`|	55.1 | 09:30:18.274
+/ select = return column of values
+/ by date = groups date as the key column
+```
 
 ```q
 select open:first price, high:max price, low:min price, close:last price by date from trade where sym=`AAPL
 
+date        |open |high  |low |close
+------------------------------------
+`2021-05-29`|78.66|109.91|50.5|68.01
+`2021-05-30`|60.88|109.98|50.0|0.49
+
 / open: renames the column
 ```
 
-date|open|high|low|close
--|-|-|-|-
-`2021-05-29`|	78.66|	109.91 |	50.5 |	68.01
-`2021-05-30`|	60.88	|109.98	| 50.0	| 90.49
-
 ```q
 / lets say you want to check if the latest value was an uptick, downtick, or unch
-/ can make use of the signum function
+/ can make use of the deltas + signum function
 
-select from trade / shows all columns
+select from trade
 update dir: signum deltas price from trade
 
+sym| price|size |cond|dir
+--------------------------
+C  |  59  |18400|C   | 1  
+F  |  104 |62600|    | 1  
+IBM|  73  |77500|B   |-1 
+A  |  63  |73000|B   |-1 
+
 / this will add a new column, dir, which will be +1, 0, or -1
-/ deltas will calculate the difference between subsequence elements
+/ deltas will calculate the change between subsequence elements
 / signum will tell you if the element is positive, negative, or 0
+/ for example:
+
+deltas 3 2 2 1 5
+3 -1 0 -1 4
+
+signum deltas prices
+1 -1 0 -1 1
 ```
 
-sym |  price|    size|  cond |dir
--|-|-|-|-
-C|    59| 18400| C|    1  
-F|    104| 62600|   |   1  
-IBM|  73| 77500| B  |  -1 
-A|   63| 73000| B   | -1 
-
 ```q
-/ now lets say you want to group it by sym and see total size traded by direction (uptick, downtick, etc)
+/ create function for signum deltas
+
+tickdirection:{signum delta x}
+
+/ should start from 0, indicating no movement for first element
+
+tickdirection:{signum deltas [first x;x]}
+
+/ use dyadic form each prior adverb
 
 tickdir:{0i,1 _signum deltas x}
 
-/ create function tickdir which will start the dir at 0
+/ apparently this syntax works too ?
+
+update dir: tickdirection price from trade
+
+sym| price|size |cond|dir
+--------------------------
+C  |  59  |18400|C   | 1  
+F  |  104 |62600|    | 1  
+IBM|  73  |77500|B   |-1 
+A  |  63  |73000|B   |-1 
+
+/ same result as above
+```
+```q
+/ now lets say you want to group it by sym and see total size traded by direction (uptick, downtick, etc)
 
 select sum size by sym, dir from update dir:tickdir price by sym from trades
 
-/ this syntax is a bit funny, since you have 2 froms 
-/ you would THINK you could do this:
+sym|dir|size
+-------------------
+ A |-1 |1258345400
+ A | 0 |7100
+ A | 1 |1252317500
+
+/ anything past the first from = table you created above
+/ group by sym and dir (which you previously calculated)
+/ but it looks funny as it has 2 froms. Can try to clean up
+
+/ you cannot simply do this:
 
 select sum size by sym, dir:signum deltas price by sym from trades
 
-/ but you CAN'T, as tickdir is calculated on the price column as a whole
+/ error, as tickdir is calculated on the price column as a whole
+/ you cannot group by a column calculation on entire column
 / instead of splititng on sym first
+
 / so you have to use an fby instead
 
 select sum size by sym, dir:(tickdir; price) fby sym from trades
 
+sym|dir|size
+-------------------
+ A |-1 |1258345400
+ A | 0 |7100
+ A | 1 |1252317500
+ 
 / this will now work and returns same table as above
+/ uses function tickdir as aggregator for signums from price column
 / the fby aggregates the tickdir from price column by sym
 ```
+```q
+/ find total size of trades where size > 10 tick moving average
+/ 10 tick moving average requires a price calculation 
+/ so you can't can't by a column (price) that is doing calculations
+/ instead need to use fby
 
-sym| dir| size
--|-|-
-AAPL|0 |311
-CSCO |0 |2191
-GOOG |-1 | 394
+select sum size by sym, price > (mavg[10];price) fby sym from trade
 
+ sym  |sym1|size
+-------------------
+ A    | -1 |1258345400
+ AAPL |  0 |1237295400
+ MSFT |  1 |1252317500
+```
 
 <a name="select_count"></a>
 ### 🔵 19.7) Select Count 
@@ -5286,35 +5340,65 @@ date|time|sym|price|size|cond
 
 <a name="xbar_function"></a>
 ### 🔵 19.11) Xbar Function
+```q
+/ grouping for temporal data buckets (time)
+
+x xbar time.minute / x mins buckets
+x xbar time.hh / x hour buckets
+x bar time.ss / x second buckets
+
+20 xbar time.ss / same thing
+0d00:00:20 xbar time / same thing
+```
 
 ```q
+/ grouping for other data buckets (price)
+/ apply xbar grouping to price column
+
+x xbar price
+x xbar cond
+x xbar source
+
+select sum size, cnt:count i by sym, 1 xbar price from trades
+
+sym|price|  size  |cnt
+----------------------
+ A |50.0 |44191500|838
+ A |51.0 |42318700|842
+ A |52.0 |41432200|832
+
+/ groups the data by sym and 1 dollar price buckets
+/ cnt = tallies virtual column i; how many trades were executed by sym for that price bucket
+```
+
+```q
+/ find the max price and total size of trades during 5 min window
+
 select max price, sum size by sym, 5 xbar time.minute from trades
 
-/ set xbar as 5 minute time buckets
-/ select max price during 5 mins, total size during 5 mins
-```
-sym|minute|price|size
--|-|-|-
+sym  |minute | price|size
+-------------------------
 AAPL | 08:00 | 27.4 | 100
 AAPL | 08:05 | 27.9 | 200
 AAPL | 08:10 | 28.2 | 300
 
-```q
-select sum size, num: count i by sym, 1 xbar price from trades
+/ set xbar as 5 minute time buckets
+/ grouped sym, then 5 min time buckets
+/ sym + minute are keyed (since by)
+```
 
-/ keyed by sym, price (xbar to 1)
-/ num = how many trades were executed by sym for that price bucket
 ```
 ```q
 select max price by sym, 45 xbar time.minute from trade
 
+sym |minute | price
+----------------------
+ A  |09:00  | 109.94
+ A  |09:45  | 109.99
+ A  |10:30  | 109.96
+
 / group by sym, set xbar as 45 minute time buckets
 ```
-sym | minute | price
--|-|-
-A|	09:00|	109.94
-A|	09:45|	109.99
-A|	10:30|	109.96
 
 ```q
 / notice how in the above example, the time bucket starts at 9:00
@@ -5322,39 +5406,69 @@ A|	10:30|	109.96
 
 select max price by sym, 09:30 + 45 xbar time.minute - 09:30 from trade
 
-/ by adding 9:30 and subtracting 9:30 from xbar, you can set the time bucket
+sym|minute |price
+------------------
+ A | 09:30 |109.94
+ A | 10:15 |109.99
+ A | 10:45 |109.96
+
+/ by adding 9:30 and subtracting 9:30 from xbar, you can shift the time bucket
+/ to include your desired time
+
+/ logic here:
+/ the 45 xbar time.minute = groups into 45 min buckets
+/ subtracting your time 9:30 = you shift the list to include your desired time
+/ adding 9:30 = reset to center around your desired time
 ```
 
-sym | minute | price
--|-|-
-A|	09:30|	109.94
-A|	10:15|	109.99
-A|	10:45|	109.96
-
 ```q
-/ to clean this up, you can even write the xbar shift as a function
+/ to clean this up, you can write the xbar shift as a function
 
-timeshift:{[start;minbar;time] start+xbar (`minute$times)-start}
+timeshift:{[start;minbar;time] start + minbar xbar(`minute$time) - start}
+
+/ timeshift is a func that takes 3 arguments
+/ start = start time
+/ minbar = timing you want to bucket by
+/ time = times (col)
+
+/ cast time to minutes
+
 select max price by sym, time: timeshift[09:30;45;time] from trade
+
+sym|minute |price
+------------------
+ A | 09:30 |109.94
+ A | 10:15 |109.99
+ A | 10:45 |109.96
 
 / and this will give you the same exact result
 / 9:30 = time you want to start
 / 45 = time bucket
 / time = column to bucket by
+
+/ or you could retrieve total trades and size by sym, grouped by 45 mins
+
+select sum size, cnt: count i by sym, time: timeshift[09:30;45;time] from trade
+
+sym|minute|   size  |cnt
+-------------------------
+ A |09:30 |242733500|4800
+ A |10:15 |223808400|4497
+ A |11:00 |247590700|4898
 ```
 
 ```q
 select count i, max price by date, xbar [15*60*1000;time] from trade where sym=`RBS
 
+   date   |    time    | x |price
+----------------------------------
+2021-05-30|11:40:02.743|100|97.113
+2021-05-30|11:44:03.025|123|98.66 
+
 / retrieve number of trades (count) and max price, keyed by date and time 
 / 15 mins x 60 sec x 1000 ms to get to milliseconds
 / xbar rounds its 2nd argument to nearest multiple of first argument (so rounds time to 15 mins)
 ```
-
-date|time|x|price
--|-|-|-
-`2021-05-30`|	`11:40:02.743` |	100 |	97.113
-`2021-05-30`|	`11:44:03.025` |	123 |	98.66 
 
 ```q
 7 xbar 10 20 30 40 50
@@ -5768,11 +5882,15 @@ date| sym| time | price | size | cond
 <a name="fby_sql"></a>
 ### 🔵 19.18) Filter by fby
 
-* fby aggregates values from one list based on group defined in another
-* (aggr;d) fby g
-* aggr = aggregate function = max, min, sums, etc.
-* d = column name
-* g = another column name
+```q
+/ fby aggregates values from one list based on group defined in another
+/ (aggr;d) fby g
+/ aggr = aggregate function = max, min, sums, etc.
+/ d = column name
+/ g = another column name
+```
+
+### Example fby aggregations
 
 ```q
 (sum;price) fby sym
@@ -5783,11 +5901,13 @@ date| sym| time | price | size | cond
 (max;price) fby sym
 (avg;price) fby sym
 ```
+### Functions on fby
 
 ```q
-price = (last;price) fby sym
+price = (max;price) fby sym
 price < (last;price) fby sym
-price > (last;price) fby sym
+price > (avgs;price) fby sym
+price > (mavg[10];price) fby sym / moving avg 10 of price by sym
 ```
 
 ### fby Example 1
@@ -5797,51 +5917,80 @@ city:`NY`NY`LA`SF`LA`SF`NY
 temp:32 31 75 69 70 68 12
 
 (min;temp) fby city
-/ returns
-/ 12 12 70 68 12
-```
-so this calculates the min temp for every city (12 for NYC)
+12 12 70 68 12
 
+/ so this calculates the min temp for every city (12 for NYC)
+
+```
 
 ### fby Example 2
-
-Given the following table, find the max price per symbol
-
-time | sym | src | price | size
--|-|-|-|-
-2019-03-11 |	GOOG |	L|	36.01|	1427
-2019-03-11 |	GOOG |	O|	36.01|	708
-2019-03-11 |	MSFT |	N|	35.5|	7810
-2019-03-11 |	MSFT |	O|	31.1|	1100
-
 ```q
+/ find the max price per symbol
+
+time       |sym  |src|price | size
+-----------------------------------
+2019-03-11 |GOOG | L |36.01 | 1427
+2019-03-11 |GOOG | O |36.01 | 708
+2019-03-11 |MSFT | N |35.5  | 7810
+2019-03-11 |MSFT | O |31.1  | 1100
+
 select from t where price=(max;price) fby sym
-```
-time | sym | src | price | size
--|-|-|-|-
-2019-03-11 |	GOOG |	L|	36.01|	1427
-2019-03-11 |	GOOG |	O|	36.01|	708
-2019-03-11 |	MSFT |	N|	35.5|	7810
 
-* this is not correct, since there are still 2 GOOG (since both same "max" price)
-* you can add another fby filter for time
+time       |sym  |src| price | size
+-----------------------------------
+2019-03-11 |GOOG | L | 36.01 | 1427
+2019-03-11 |GOOG | O | 36.01 | 708
+2019-03-11 |MSFT | N | 35.5  | 7810
 
-```q
+/ this is not correct, since there are still 2 GOOG (since both same "max" price)
+/ you can add another fby filter for time
+
 select from t where price=(max;price) fby sym, time=(max;time) fby sym
-```
-time | sym | src | price | size
--|-|-|-|-
-2019-03-11T09:00:04.123000	GOOG	O	36.01	708
-2019-03-11T09:00:08.123000	MSFT	N	35.5	7810
 
-* in this case, you filtered max price by sym, and max time by sym
+time      |sym  |src| price | size
+-----------------------------------
+2019-03-11|GOOG	| O | 36.01 | 708
+2019-03-11|MSFT | N | 35.01 | 7810
+
+/ in this case, you filtered max price by sym, and max time by sym
+```
+### fby Example 3
+```q
+/ find the max price on this date
+
+select from trade where date=2021.10.31, price=max price
+
+/ filter by date, then the max price from this date
+```
+```q
+/ find max price by sym on this date
+
+select from trade where date=2021.10.31, price=(max;price) fby sym
+
+/ filter by date, then find max price by sym
+/ groups the aggregation by sym
+```
+```q
+/ find max price by sym and cond on this date
+
+select from trade where date=2021.10.31, price=(max;price) fby ([]sym;cond)
+
+/ aggregate by more than one field using a table
+/ filter by date, then max price by sym and cond
+```
+
+### fby Example 4: VWAP
 
 ```q
-update num: (sums;num) fby sym from`sym`time xasc timeline
-```
-* aggregate running sums by sym
-* backtick sym, time xasc timeline sorts the timeline table ascending first by sym, then by time
+/ compare each price to its vwap price
 
+select from trade where date=2021.10.31, price>({x[`size] wavg x`price}; ([]size;price)) fby sym
+
+/ vwap = volume weighted avg price, so need to use wavg function
+/ syntax = x wavg y
+/ for every x (row), find the wavg for each size/price
+/ fby sym
+```
 
 <a name="xgroup_sql"></a>
 ### 🔵 19.19) xgroup
