@@ -153,8 +153,8 @@
 2. [Adding a new column using Select](#selectadd_template)
 3. [Virtual Column i](#qsqlvirtuali_template)
 4. [Select using [ ] ](#qsqlselectmaxmin_template)
-5. [Select from where](#select_from_where)
-6. [Select by](#select_by)
+5. [Where Clause](#select_from_where)
+6. [By Clause](#select_by)
 7. [Select count](#select_count)
 8. [Using operations and functions](#using_ops_functions)
 9. [In function](#in_function)
@@ -4996,7 +4996,6 @@ price
 109.99
 ```
 
-
 ```q
 count select from trade where cond="A"
 211597
@@ -5101,19 +5100,55 @@ price   size
 / this is correct. 
 / no max price (70) that is greater than 200 (300)
 ```
+```q
+/ extract all the following results:
+/ gender - male and grade - A
+/ gender - female and grade - B
+/ gender - female and grade - A
 
+results:([]name:`John`Paul`Rachel`Jane`Emma;gender:"MMFFF";grade:"ABBAC")
+
+name  |gender|grade
+--------------------
+John  |   M  | 	A
+Paul  |   M  |	B
+Rachel|   F  |	B
+Jane  |   F  |	A
+Emma  |   F  | 	C
+
+/ individually this would be the syntax for each query
+
+select from results where gender="M", grade="A"
+select from results where gender="F", grade="B"
+select from results where gender="F", grade="A"
+
+/ however, can use a table search function
+/ usually it goes: where col_name in value (where gender = "A")
+/ so you can go where (table of col names) in (table of values)
+
+select from results where ([]gender;grade) in ([] gender:"MFF";grade:"ABA")
+
+name  |gender|grade
+--------------------
+John  |   M  | 	A
+Rachel|   F  |	B
+Jane  |   F  |	A
+```
 
 ### Sample Where Clauses
 
 ```q
 select from trade where size>300, price>100
 select from trade where sym in `AAPL`GOOG
+select from trade where grade = "ABC"
 select from trade where price within (200:300)
 select from trade where (price>100) and size>300
 select from trade where (price>100) or size> 300
 select i, sym, price from trade where i>5
 select price, i by sym from trade
 ```
+
+
 
 <a name="select_by"></a>
 ### 🔵 19.6) By
