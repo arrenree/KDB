@@ -668,6 +668,59 @@ Current TimeStamp
 .z.p
 ```
 
+```q
+/ Timestamp Examples
+
+depth
+time                       sym  price
+-------------------------------------
+2021-11-07T08:04:21.425000 YHOO 33.99
+2021-11-07T08:14:59.215000 ORCL 35.16
+2021-11-07T08:21:30.944000 NOK  42.01
+
+meta depth
+
+/ time column is datatype p = timestamp
+
+c    |t|f|a
+------------
+time |p| |		
+sym  |s| |g
+price| |f|		
+
+/ extract the timestamp column
+
+select time from depth
+
+time
+--------------------------
+2021-11-07T08:04:21.425000
+2021-11-07T08:14:59.215000
+2021-11-07T08:21:30.944000
+
+/ extract the date from timestamp
+
+select `date$time from depth
+
+time
+----------
+2021-11-07
+2021-11-07
+2021-11-07
+
+/ extract the time from timestamp
+
+select time.time from depth
+select `time$time from depth
+
+time
+------------
+08:04:21.425
+08:14:59.215
+08:21:30.944
+```
+
+
 <a name="cast_type"></a>
 ### 🔵 2.3 Casting
 ```q
