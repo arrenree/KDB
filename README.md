@@ -3048,7 +3048,7 @@ bmw	| 100
 ```
 
 <a name="single_row_table"></a>
-### 🔵 12.3 Single Row Table
+### 🔵 12.3 Single Row Table (enlist)
 
 ```q
 ( [] company: enlist `ford; employees: enlist 300)
@@ -3121,6 +3121,9 @@ count t
 
 / counts number of rows in table
 ```
+<a name="countrowsimple_table"></a>
+### 🔵 12.6 View Columns in Table (cols)
+
 ```q
 cols t
 `company`employee
@@ -3129,18 +3132,47 @@ cols t
 ```
 
 <a name="rename_column_table"></a>
-### 🔵 12.7 Rename Column Table xcol
+### 🔵 12.7 Rename Column Table (xcol)
 
 ```q
+company | employee
+------------------
+ford    |   300
+bmw     |   100
+
 `a`b xcol t
 
-a   | b
+ a  | b
 ---------
 ford| 300
 bmw | 100
 
-/ renamed first 2 columns from company/employee to a/b
+/ renames first 2 columns from company/employee to a/b
+/ xcol will only change col names from left to right
+
 ```
+<a name="rename_column_table"></a>
+### 🔵 12.7 Reorder Column Table (xcols)
+```q
+
+company | employee
+------------------
+ford    |   300
+bmw     |   100
+
+`employees`company xcol t
+
+
+employee | company
+------------------
+300      |  ford 
+100      |  bmw  
+
+/ reorders columns
+/ doesn't have to be complete list of columns
+/ just moves it to left of table
+```
+
 
 <a name="add_column_table"></a>
 ### 🔵 12.8 Add Column
@@ -3158,9 +3190,11 @@ bmw	|   100     | 101
 ```
 
 <a name="sort_column_table"></a>
-### 🔵 12.9 Sort Column Table (xasc)
+### 🔵 12.9 Sort Column Table (xasc/xdesc)
 
 ```q
+/ sort by 1 column
+
 `employees xasc t
 
 company | employees | newval
@@ -3169,6 +3203,20 @@ bmw	|    100    | 101
 ford    |    300    | 101
 
 / will sort ascending by employees
+/ or xdesc for descending
+```
+```q
+/ sort by 2 columns
+
+`company`employees xasc t
+
+company | employees | newval
+----------------------------
+bmw	|    100    | 101
+ford    |    300    | 101
+
+/ will sort by company first, then employees
+
 ```
 
 <a name="union_table"></a>
@@ -3942,15 +3990,15 @@ MS|	Fin|	100
 ```q
 ( [id: `a`b`c`e] name:`jane`jim`kim`john; employer:`citi`citi`ms`ts; age: 11 22 33 44)
 
+id |name|employer| age
+----------------------
+`a`|jane|  citi  | 11
+`b`|jim |  citi  | 22
+`c`|kim |    ms  | 13
+`e`|john|    ts  | 15
+
 / the [ ] square bracket holds the key columns
 ```
-
-id|name|employer|age
--|-|-|-
-`a`|	jane|	citi|	11
-`b`|	jim|	citi|	22
-`c`|	kim|	ms|	13
-`e`|	john|	ts|	15
 
 <a name="multi_keyed_table"></a>
 ### 🔵 14.2 Multi Keyed Table
@@ -3958,116 +4006,126 @@ id|name|employer|age
 ```q
 kt: ( [id:`a`b`c`d; name:`jane`jim`kim`john] employer:`citi`citi`ms`ts; age: 11 22 33 44)
 
+id | name |employer| age
+----------------------
+`a`|`jane`|  citi  | 11
+`b`|`jim` |  citi  | 22
+`c`|`kim` |   ms   | 13
+`e`|`john`|   ts   | 15
+
 / columns id and name are both keyed columns
 ```
-
-id|name|employer|age
--|-|-|-
-`a`|	`jane`|	citi|	11
-`b`|	`jim`|	citi|	22
-`c`|	`kim`|	ms|	13
-`e`|	`john`|	ts|	15
 
 <a name="retrieving_keysvalues"></a>
 ### 🔵 14.3 Retrieving Keys/Values
 
 ```q
+/ retrieve keys
+
 key kt
 
-/ retrieves key columns
+id| name
+---------
+a | jane
+b | jim
+c | kim
+d | john
 ```
-
-id|name
--|-
-a	|jane
-b	|jim
-c	|kim
-d	|john
 
 ```q
+/ retrieve values
+
 value kt
-```
 
 employer|age
--|-
-citi|	11
-citi|	22
-ms|	33
-ts|	44
+------------
+citi    | 11
+citi    | 22
+ms      | 33
+ts      | 44
+
+```
 
 <a name="changing_keys"></a>
 ### 🔵 14.4 Changing Keys
-
-Table kt
-
-id|name|employer|age
--|-|-|-
-`a`|	jane|	citi|	11
-`b`|	jim|	citi|	22
-`c`|	kim|	ms|	13
-`e`|	john|	ts|	15
+```q
+table kt
+id |name|employer| age
+----------------------
+`a`|jane|  citi  | 11
+`b`|jim |  citi  | 22
+`c`|kim |    ms  | 13
+`e`|john|    ts  | 15
 
 / only id column is keyed for now
 
-```q
 `id`name xkey `kt
+
+id | name |employer| age
+----------------------
+`a`|`jane`|  citi  | 11
+`b`|`jim` |  citi  | 22
+`c`|`kim` |   ms   | 13
+`e`|`john`|   ts   | 15
 
 / changed key columns to both id and name
 / use backtick kt to change underlying table
 ```
-
-id|name|employer|age
--|-|-|-
-`a`|	`jane`|	citi|	11
-`b`|	`jim`|	citi|	22
-`c`|	`kim`|	ms|	13
-`e`|	`john`|	ts|	15
-
 <a name="adding_keys"></a>
 ### 🔵 14.5 Adding Keys
 
 ```q
 1!kt
+/ or
+`id xkey kt
+
+id |name|employer| age
+----------------------
+`a`|jane|  citi  | 11
+`b`|jim |  citi  | 22
+`c`|kim |    ms  | 13
+`e`|john|    ts  | 15
 
 / adds first column as a key
 ```
-id|name|employer|age
--|-|-|-
-`a`|	jane|	citi|	11
-`b`|	jim|	citi|	22
-`c`|	kim|	ms|	13
-`e`|	john|	ts|	15
 
 <a name="removing_keys"></a>
 ### 🔵 14.6 Removing Keys
 
 ```q
 () xkey `kt
-or
+/ or
 0!kt
-```
 
-id|name|employer|age
--|-|-|-
-a|	jane|	citi|	11
-b|	jim|	citi|	22
-c|	kim|	ms|	13
-e|	john|	ts|	15
+id |name|employer| age
+----------------------
+a  |jane|  citi  | 11
+b  |jim |  citi  | 22
+c  |kim |    ms  | 13
+e  |john|    ts  | 15
+
+```
 
 <a name="upsert_keys"></a>
 ### 🔵 14.7 Upserting Keys
 
-Given
 ```q
 nd: ( [id:`e`f] name:`dan`kate; employer:`walmart`walmart; age:200 200)
-```
-id|name|employer|age
--|-|-|-
-`e`|	dan|	walmart|	200
-`f`|	kate|	walmart|	200
 
-```q
+id |name|employer|age
+----------------------
+`e`|dan | walmart|200
+`f`|kate| walmart|200
+
 upsert[`kt;nd]
+
+id |name|employer|age
+----------------------
+`a`|jane|citi    |11
+`b`|jim |citi    |22
+`c`|kim |ms      |13
+`e`|dan |walmart |200
+`f`|kate|walmart |200
 
 / if key exists and matches, updates value
 / if new key, adds new row
@@ -4075,122 +4133,106 @@ upsert[`kt;nd]
 / must make sure underlying keyed columns match, otherwise error. (1 keyed col vs 2 keyed col)
 ```
 
-id|name|employer|age
--|-|-|-
-`a`|	jane|	citi|	11
-`b`|	jim|	citi|	22
-`c`|	kim|	ms|	13
-`e`|	dan|	walmart|	200
-`f`|	kate|	walmart|	200
-
 ```q
-upsert [`kt; ( [id:`f`g] name:`ron`allen)]
+upsert [`kt; ( [id:`f`g] name:`ron`tom)]
+
+id |name|employer|age
+----------------------
+`a`|jane|citi    |11
+`b`|jim |citi    |22
+`c`|kim |ms      |13
+`e`|dan |walmart |200
+`f`|ron |walmart |200
+'g'|tom |        |
 
 / f was updated to ron, and since no employer or age info, pulled from existing kt table (kate's old row)
 / g is new key, so adds new row. since no info, returns null
 ```
 
-id|name|employer|age
--|-|-|-
-`a`|	jane|	citi|	11
-`b`|	jim|	citi|	22
-`c`|	kim|	ms|	13
-`e`|	dan|	walmart|	200
-`f`|	ron|	walmart|	200
-`g`|	allen|	|	
-
 <a name="upsert_multi_rowkeys"></a>
 ### 🔵 14.8 Upserting Multi Rows/Keys
 
-Given:
 ```q
 et: ([employer:`kx`ms`ms; loc:`NY`NY`HK] size: 10 20 30; area: 1 2 3)
-```
-employer|loc|size|area
--|-|-|-
-`kx`|	`NY`|	10|	1
-`ms`|	`NY`|	20|	2
-`ms`|	`HK`|	30|	3
 
-```q
+employer|loc |size|area
+-----------------------
+`kx`    |`NY`| 10 | 1
+`ms`    |`NY`| 20 | 2
+`ms`    |`HK`| 30 | 3
+
 upsert [et; ([employer:`kx`ms; loc:`NY`SG] size: 9 10)]
+
+employer|loc |size|area
+-----------------------
+`kx`    |`NY`|9   |1
+`ms`    |`NY`|20  |2
+`ms`    |`HK`|30  |3
+`ms`    |`SG`|10  |	
 
 / updated kx, NY to 9 (overrides prev value)
 / since there was no ms, SG, adds new row 
 ```
 
-employer|loc|size|area
--|-|-|-
-`kx`|	`NY`|	9|	1
-`ms`|	`NY`|	20|	2
-`ms`|	`HK`|	30|	3
-`ms`|	`SG`|	10|	
-
 <a name="retrieve_value_keys"></a>
 ### 🔵 14.9 Retrieving Values from Keyed Table
 
-Given:
-
-id|name|employer|age
--|-|-|-
-`a`|	jane|	citi|	11
-`b`|	jim|	citi|	22
-`c`|	kim|	ms|	33
-`d`|	john|	ts|	44
-`e`|	dan|	walmart|	200
-
 ```q
+id |name|employer|age
+----------------------
+`a`|jane|citi    | 11
+`b`|jim |citi    | 22
+`c`|kim |ms      | 33
+`d`|john|ts      | 44
+`e`|dan |walmart | 200
+
 kt ( [] id:`a`b)
-```
+
 name|employer|age
--|-|-
-jane|	citi|	11
-jim|	citi|	22
+-----------------
+jane| citi   |11
+jim | citi   |22
 
-* retrieves rows based on the values in column id (a and b)
+/ retrieves rows based on the values in column id (a and b)
+
 or
-```q
+
 ( [] id:`a`b) # kt
+
+id|name |employer|age
+---------------------
+`a`|jane| citi   |11
+`b`|jim | citi   |22
+
+/ uses the #take function to lookup values in column id
+/ notice it also returns the key column (id)
 ```
-id|name|employer|age
--|-|-|-
-`a`|	jane|	citi|	11
-`b`|	jim|	citi|	22
-
-* uses the #take function to lookup values in column id
-* notice it also returns the key column (id)
-
-Given:
-
-Table et
-
-employer|loc|size|area
--|-|-|-
-`kx`|	`NY`|	10|	1
-`ms`|	`NY`|	20|	2
-`ms`|	`HK`|	30|	3
-
 ```q
+Table et
+employer|loc |size|area
+-----------------------
+`kx`    |`NY`| 10 | 1
+`ms`    |`NY`| 20 | 2
+`ms`    |`HK`| 30 | 3
+
 et`ms`HK
-```
-key|value
--|-
+
+key |value
+---------
 size|30
 area|3
 
-* will lookup the keys ms and HK and return the values
+/ will lookup the keys ms and HK and return the values
 
-```q
 et(`ms`HK; `kx`NY)
-```
 
 size|area 
--|-
-30|3
-10|1
+---------
+ 30 | 3
+ 10 | 1
 
-* looks up values for both ms+HK (returns 30 and 3) and kx+NY (returns 10 and 1)
-
+/ looks up values for both ms+HK (returns 30 and 3) and kx+NY (returns 10 and 1)
+```
 <hr>
 
 <a name="keyed_table_problem_set"></a>
