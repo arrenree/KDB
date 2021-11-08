@@ -3574,7 +3574,6 @@ pear	20
 guava	30	
 ```
 
-
 <a name="operations_table"></a>
 ### 🔵 12.16 Operations on Tables
 
@@ -3651,23 +3650,23 @@ c   13    130
 t1
 sym  side price size
 ---------------------
-IBM	  buy	  10 	 100
-AAPL	sell	  20	  200
+IBM  buy   10 	 100
+AAPL sell  20    200
 
 t2
 sym  side price size
 ---------------------
-GOOG	 buy	   30 	 300
-MSFT	sell	   40	  400
+GOOG buy   30 	 300
+MSFT sell  40	 400
 
 t1,t2
 
 sym  side price size
 ---------------------
-IBM 	 buy	  10 	 100
-AAPL	sell	  20	  200
-GOOG	 buy	  30 	 300
-MSFT	sell	  40	  400
+IBM  buy   10 	 100
+AAPL sell  20	 200
+GOOG buy   30 	 300
+MSFT sell  40	 400
 ```
 ```q
 / horizontal rows joins tables with same number of rows
@@ -3683,20 +3682,31 @@ GOOG	nasdaq
 t2
 price size
 ----------
-10	   100
-20	   200
-30	   300
+10    100
+20    200
+30    300
 
 t1,'t2
 
 sym  ex     price size
 ----------------------
-IBM	 nyse 	   10   100
-AAPL	nyse	    20   200
-GOOG	nasdaq	  30   300
+IBM  nyse    10   100
+AAPL nyse    20   200
+GOOG nasdaq  30   300
 
 / this actually uses each both to join the 2 tables horizontally
 ```
+```q
+/ you can also do this"
+
+t1: 5#trade
+/ t1 = first 5 rows of trade table
+
+t1,-5#trade
+
+/ combining first 5 rows with last 5 rows 
+```
+
 
 <a name="joins_table"></a>
 ### 🔵 12.17 Find on Tables
@@ -4020,7 +4030,7 @@ id | name |employer| age
 ### 🔵 14.3 Retrieving Keys/Values
 
 ```q
-/ retrieve keys
+/ retrieve keys from table
 
 key kt
 
@@ -4030,6 +4040,17 @@ a | jane
 b | jim
 c | kim
 d | john
+
+/ key will return the entire column of keyed results
+```
+```q
+/ retrieve only the column names that are keyed
+
+keys kt
+
+`id`name
+
+/ KEYS will only return the column names that are keyed!
 ```
 
 ```q
@@ -4047,7 +4068,7 @@ ts      | 44
 ```
 
 <a name="changing_keys"></a>
-### 🔵 14.4 Changing Keys
+### 🔵 14.4 Changing Keys (xkey)
 ```q
 table kt
 id |name|employer| age
@@ -4072,7 +4093,7 @@ id | name |employer| age
 / use backtick kt to change underlying table
 ```
 <a name="adding_keys"></a>
-### 🔵 14.5 Adding Keys
+### 🔵 14.5 Adding Keys (xkey)
 
 ```q
 1!kt
@@ -4090,7 +4111,7 @@ id |name|employer| age
 ```
 
 <a name="removing_keys"></a>
-### 🔵 14.6 Removing Keys
+### 🔵 14.6 Removing Keys (xkey)
 
 ```q
 () xkey `kt
@@ -4233,7 +4254,32 @@ size|area
 
 / looks up values for both ms+HK (returns 30 and 3) and kx+NY (returns 10 and 1)
 ```
+<a name="retrieve_value_keys"></a>
+### 🔵 14.10 xgroup/ungroup Tables
+
+```q
+/ can group table by particular column using xgroup
+/ similar to "by" statement in qSQL
+
+`sym`date`time xgroup trade
+
+sym  date       time        | price    size  cond
+----------------------------| -------------------
+C    2021.11.04 09:30:02.553| 107.2018 63500 ,"B"
+MSFT 2021.11.04 09:30:02.701| 96.87488 1700  ,"B"
+RBS  2021.11.04 09:30:02.743| 97.11338 80700 ,"C"
+
+/ equilvalent of saying: 
+
+select price, size, cond by sym, date, time from trade
+
+/ flatten this data out again using ungroup
+
+ungroup select price, size, cond by sym, date, time from trade
+```
+
 <hr>
+
 
 <a name="keyed_table_problem_set"></a>
 ## 🔴 15. Keyed Tables Problem Set
@@ -6152,6 +6198,7 @@ ungroup select time by sym from trade
 / boolean list indicating if consecutive pairs are different
 / true 1b = if consecutive elements are different
 / false ob = consecutive elements are the same
+/ will always return TRUE for first element
 
 differ 1 1 1 2 2 3
 100101b
@@ -6302,17 +6349,17 @@ table t:
 
 t         bidPrices            bidSizes
 ------------------------------------------------
-05:15:43	 7.83 8.20 9.84 6.93	 57 0 72 50 62 51
-00:59:05	 0.97 7.44 9.33 2.93	 97 99 27 31
-01:19:44  2.88 5.63 4.98 5.56	 47 57 31 15 68 49
+05:15:43  7.83 8.20 9.84 6.93  57 0 72 50 62 51
+00:59:05  0.97 7.44 9.33 2.93  97 99 27 31
+01:19:44  2.88 5.63 4.98 5.56  47 57 31 15 68 49
 
 update bidIndex:({idesc x} each bidPrices) from t
 
 t         bidPrices            bidSizes           bidIndex
 ----------------------------------------------------------
-05:15:43	 7.83 8.20 9.84 6.93	 57 0 72 50 62      2 1 0 4 
-00:59:05	 0.97 7.44 9.33 2.93	 97 99 27 31        2 1 4 0
-01:19:44  2.88 5.63 4.98 5.56	 47 57 31 15 68 49  1 4 3 0
+05:15:43  7.83 8.20 9.84 6.93  57 0 72 50 62      2 1 0 4 
+00:59:05  0.97 7.44 9.33 2.93  97 99 27 31        2 1 4 0
+01:19:44  2.88 5.63 4.98 5.56  47 57 31 15 68 49  1 4 3 0
 
 / from col bidPrices, shows index position of descending values
 / 2nd index position = 3rd value = 9.84 largest
@@ -6321,9 +6368,9 @@ update bidIndex:({first idesc x} each bidPrices) from t
 
 t         bidPrices            bidSizes           bidIndex
 ----------------------------------------------------------
-05:15:43	 7.83 8.20 9.84 6.93	 57 0 72 50 62      2 
-00:59:05	 0.97 7.44 9.33 2.93	 97 99 27 31        2
-01:19:44  2.88 5.63 4.98 5.56	 47 57 31 15 68 49  1
+05:15:43  7.83 8.20 9.84 6.93  57 0 72 50 62      2 
+00:59:05  0.97 7.44 9.33 2.93  97 99 27 31        2
+01:19:44  2.88 5.63 4.98 5.56  47 57 31 15 68 49  1
 
 / adding first = only retrieves first value 
 / largest bid since ordered by idesc
@@ -6332,9 +6379,9 @@ update bestBid:bidPrices@'bidIndex from update bidIndex:({first idesc x} each bi
 
 t         bidPrices            bidSizes     bidIndex   bestBid
 --------------------------------------------------------------
-05:15:43	 7.83 8.20 9.84 6.93	 0 72 50 62   2          9.84 
-00:59:05	 0.97 7.44 9.33 2.93	 23 99 27 31  2          9.33
-01:19:44  2.88 5.63 4.98 5.56	 57 31 15 49  1          5.63
+05:15:43  7.83 8.20 9.84 6.93  0 72 50 62    2          9.84 
+00:59:05  0.97 7.44 9.33 2.93  23 99 27 31   2          9.33
+01:19:44  2.88 5.63 4.98 5.56  57 31 15 49   1          5.63
 
 / bestbid = looks at bidIndex col, retrieves index position 2 from bidPrice col = 9.8
 / everything after from is what we calculated above as the bidIndex col
@@ -6343,9 +6390,9 @@ update bestBidSize:bidSizes@'bidIndex from update bidIndex:({first idesc x} each
 
 t         bidPrices            bidSizes     bidIndex   bestBidSize
 ------------------------------------------------------------------
-05:15:43	 7.83 8.20 9.84 6.93	 0 72 50 62   2          50 
-00:59:05	 0.97 7.44 9.33 2.93	 23 99 27 31  2          27
-01:19:44  2.88 5.63 4.98 5.56	 57 31 15 49  1          31
+05:15:43  7.83 8.20 9.84 6.93  0 72 50 62    2          50 
+00:59:05  0.97 7.44 9.33 2.93  23 99 27 31   2          27
+01:19:44  2.88 5.63 4.98 5.56  57 31 15 49   1          31
 
 / bestBidSize = looks at bidIndex col, retrieves index position 2 from bidSizes col = 50
 
@@ -6355,9 +6402,9 @@ update bestBid:bidPrices@'bidIndex, bestBidSize:bidSizes@'bidIndex from update b
 
 t         bidPrices            bidSizes     bidIndex   bestBid  bestBidSize
 ---------------------------------------------------------------------------
-05:15:43	 7.83 8.20 9.84 6.93	 0 72 50 62   2          9.84      50
-00:59:05	 0.97 7.44 9.33 2.93	 23 99 27 31  2          9.33      27
-01:19:44  2.88 5.63 4.98 5.56	 57 31 15 49  1          5.63      31
+05:15:43  7.83 8.20 9.84 6.93  0 72 50 62    2          9.84       50
+00:59:05  0.97 7.44 9.33 2.93  23 99 27 31   2          9.33       27
+01:19:44  2.88 5.63 4.98 5.56  57 31 15 49   1          5.63       31
 
 / useful to use index position to retrieve value in another column
 / lookup colum @`source column
@@ -6397,23 +6444,23 @@ t:([] val: 8?20; name: (8?`MSFT`ORCL`CSCO))
 
 val name
 --------
-12	 MSFT
-8	  ORCL
-13	 CSCO
-16	 MSFT
-15	 ORCL
-16	 CSCO
-2	  MSFT
-4	  ORCL
+12  MSFT
+8   ORCL
+13  CSCO
+16  MSFT
+15  ORCL
+16  CSCO
+2   MSFT
+4   ORCL
 
 select Min: min val, Max:max val, Count: count i by bucket: 4 xrank val from t
 
 bucket Min Max Count
 --------------------
-0	      2	   4	    2
-1	      8	  12	    2
-2	     13	  15	    2
-3	     16	  16	    2
+0      2   4    2
+1      8  12    2
+2     13  15    2
+3     16  16    2
 
 ```
 
