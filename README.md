@@ -7349,102 +7349,114 @@ time    |sym|price|size| ftime  |fsym| bid | qtime    | qsym
 
 <a name="uniontime_join"></a>
 ### 🔵23.2 Union Time Join
-
-* union join combines all entries from both tables, then can sort by time
-
 ```q
+/ union join combines all entries from both tables, then can sort by time
+
 q uj t
-```
-time|sym|bid|price|size
--|-|-|-|-
-08:00:00.000|	a|	1|	| |	
-09:00:00.000|	b|	9|	| |
-10:00:00.000|	a|	4| | |
-07:00:00.000|	a|		|0.9|	100
-08:30:00.000|	a|		|1.5|	200
-09:59:00.000|	b|		|1.9|	300
 
-```q
+time        |sym|bid|price|size
+--------------------------------
+08:00:00.000| a | 1 |	  |   	
+09:00:00.000| b | 9 |	  |
+10:00:00.000| a | 4 |     |
+07:00:00.000| a |   | 0.9 | 100
+08:30:00.000| a |   | 1.5 | 200
+09:59:00.000| b |   | 1.9 | 300
+
 `time xasc q uj t
-```
-time|sym|bid|price|size
--|-|-|-|-
-07:00:00.000|	a|		|0.9|	100
-08:00:00.000|	a|	1|		|
-08:30:00.000|	a|		|1.5|	200
-09:00:00.000|	b|	9|		|
-09:59:00.000|	b|		|1.9|	300
-10:00:00.000|	a|	4|		|
 
+time        |sym|bid|price|size
+--------------------------------
+07:00:00.000| a |   | 0.9| 100
+08:00:00.000| a | 1 |	 |
+08:30:00.000| a |   | 1.5| 200
+09:00:00.000| b | 9 |  	 |
+09:59:00.000| b |   | 1.9| 300
+10:00:00.000| a | 4 |	 |
+```
 
 <a name="windowtime_join"></a>
 ### 🔵 23.3 Window Time Join
 
 ```q
+
+/ wj[windows;cols;tab1;(tab2;(agg;col_1);(agg;col_1))]
+/ window = usually 2 lists of times
+/ cols = list of columns to match on
+/ tab1 = table to join onto
+/ tab2 = table with list of cols to join on and aggregation functions
+```
+```q
 / wj allows you to specify the window + aggregation function used to join
 / wj aggregate values within an interval - whereas AJ would join most recent value,
 / a wj would join an aggregation of the available quotes in a given time interval
-/ for example, 15 mins before trade occurred.
+/ for example, 15 mins before trade occurred
 
 table t:
-time         sym price
+time        |sym| price
 ----------------------
-09:00:00.000|	a |	10.0
-09:04:00.000|	a	| 11.0
-09:12:00.000|	a	| 12.0
-09:13:00.000|	a	| 13.0
+09:00:00.000| a | 10.0
+09:04:00.000| a	| 11.0
+09:12:00.000| a	| 12.0
+09:13:00.000| a	| 13.0
 
 table q:
-time         sym  bid
+time        |sym| bid
 ----------------------
-09:00:00.000|	a |	10.0
-09:01:00.000|	a	| 10.0
-09:02:00.000|	a |	11.0
-09:03:00.000|	a |	13.0
-09:04:00.000|	a |	13.0
-09:05:00.000|	b |	14.0
-09:06:00.000|	b |	14.0
-09:07:00.000|	b |	15.0
-09:08:00.000|	a |	15.0
-09:09:00.000|	a |	17.0
-09:10:00.000|	a |	17.0
-09:11:00.000|	a |	18.0
-09:12:00.000|	a |	18.0
+09:00:00.000| a | 10.0
+09:01:00.000| a	| 10.0
+09:02:00.000| a | 11.0
+09:03:00.000| a | 13.0
+09:04:00.000| a | 13.0
+09:05:00.000| b | 14.0
+09:06:00.000| b | 14.0
+09:07:00.000| b | 15.0
+09:08:00.000| a | 15.0
+09:09:00.000| a | 17.0
+09:10:00.000| a | 17.0
+09:11:00.000| a | 18.0
+09:12:00.000| a | 18.0
 
 / from table t, produce a time interval 2 mins +\- for each row of time
 
 windows:flip t.time +\: -00:02 00:02t
+
 08:58:00.000 09:02:00.000 09:10:00.000 09:11:00.000
 09:02:00.000 09:06:00.000 09:14:00.000 09:15:00.000
 
 wj[windows;`sym`time;t;(q;(::;`bid))]
 
-time         sym price  bid
+time        |sym| price|  bid
 ---------------------------------
-09:00:00.000|	a |	10.0|	10 10 11f
-09:04:00.000|	a |	11.0|	11 13 13f
-09:12:00.000|	a |	12.0|	17 18 18f
-09:13:00.000|	a |	13.0|	18 18f
+09:00:00.000| a | 10.0 | 10 10 11f
+09:04:00.000| a | 11.0 | 11 13 13f
+09:12:00.000| a | 12.0 | 17 18 18f
+09:13:00.000| a | 13.0 | 18 18f
 
 / wj will output same number of rows as original table t
 / windows - time interval pairs you created
 / columns you want to match on (sym, time) within source table t
-/ start new list, look up values from table q (lookup table)
+/ table q = lookup table
 / :: = return all values from the bid column
-/ 1st row, looks up in table q, any syms (a) from 8:58 to 9:02, and returns the bid
-/ 2nd row, looks up in table q any syms (a) from 9:02 to 9:06, and returns the bid 
+/ 1st row, from table t, 09:00 for sym a, look up in table q, matched sym (a), from 8:58 to 9:02, and returns any bids
+/ 2nd row, from table t, 09:04 for sym a, look up in table q, matched sym (a), from 9:02 to 9:06, and returns any bids 
 
 wj[windows;`sym`time;t;(q;(::;`bid); (avg;`bid); (count;`bid))]
 
 / can perform functions! 
+/ so after returning all the bids ::
+/ next column = retrieve avg bids 
+/ next column = retrieve count of bids
+/ notice how the column name doesnt change though
 
-time        sym   bid   bid
-----------------------------------
-09:00:00.000|	a |	10.0|	10 10 11f	3
-09:04:00.000|	a |	11.0|	11 11 13f	3
-09:12:00.000|	a |	12.0|	17 17 17f	3
-09:13:00.000|	a |	13.0|	17 17f	2
-
+time        |sym|price|    bid    |bid | bid
+---------------------------------------------
+09:00:00.000| a |10.0 | 10 10 11f |10.3| 3
+09:04:00.000| a |11.0 | 11 11 13f |11.6| 3
+09:12:00.000| a |12.0 | 17 17 17f |17.0| 3
+09:13:00.000| a |13.0 | 17 17f	  |17.0| 2
+```
+```q
 wj vs wj1
 / wj pulls in prevailing values not within time window
 / wj1 strictly excludes values outside the interval (for ex, if time interval was 10:00 - 10:15)
