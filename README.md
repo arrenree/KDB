@@ -7473,13 +7473,15 @@ over x / y
 ```
 
 <a name="eachboth_adverbs"></a>
-### 🔵 24.1 Each Both ,'
+### 🔵 24.1 Each Both
 
 ```q
 / joins corresponding elements from two vectors of the same length
+```
 
-EACH BOTH - 2 lists
+### EACH BOTH - 2 lists
 
+```q
 1 2 3 ,' 10 20 30
 1 10
 2 20
@@ -7488,9 +7490,9 @@ EACH BOTH - 2 lists
 / concatenates the first elements of L and to first element of K
 / lists must be same length
 ```
-```q
-EACH BOTH - 2 dictionaries 
 
+### EACH BOTH - 2 dictionaries 
+```q
 d1
 key | value
 ----------
@@ -7505,7 +7507,8 @@ key | value
  o  |  5
  k  |  6
 
-d1,d2 / join
+d1,d2 
+/ simple join
 
 key | value
 ---------
@@ -7514,10 +7517,13 @@ key | value
  i  |  3
  k  |  6
 
-/ If you simply JOIN dictionaries, the d2 will override anything existing keys in d1 (p, o)
+/ if you simply join dictionaries, the d2 will override anything existing keys in d1 (p, o)
 / acts like an UPSERT
+```
+```q
 
-d1,'d2 / each both
+d1,'d2 
+/ each both
 
 key| value
 ---------
@@ -7529,13 +7535,15 @@ key| value
 / EACH BOTH will join the values together
 / retains the keys, and combines the values together
 ```
-```q
-EACH BOTH - Tables
 
+### EACH BOTH - Tables
+
+```q
 t1: ([] a: 1 2 3)
 t2: ([] b: 4 5 6)
 
 t1, t2
+`mismatch
 
 / can't simply join; mismatch (because rows have different columns names)
 
@@ -7566,6 +7574,8 @@ b: 5 5 5
 each modifies a monadic function to make it operate one level deeper
 
 ```q
+/ each useful for nested lists
+
 j: ("race fast, safe car."; 0 1 2; `a`b`c)
 "race fast, safe car." 
 0 1 2
@@ -7579,7 +7589,6 @@ a b c
 
 / so this reverses the mixed list at the top most level
 ```
-
 ```q
 reverse each j
 ".rac efas , tsaf ecar"
@@ -7591,14 +7600,16 @@ c b a
 
 <a name="eachright_eachleft"></a>
 ### 🔵 24.3 Each Right / Each Left
-* similar to concatenate
-* x,\: each left; will join left item (x) to each item on left
-* x,/: each right; will join left item (x) to each item on right
-
+```q
+/ similar to concatenate
+/ x,\: each left; will join left item (x) to each item on left
+/ x,/: each right; will join left item (x) to each item on right
+```
 ### Each Left
 
 ```q
-x,\:
+x,\:y 
+
 / The top of the \ points LEFT
 / Adds EACH element of LEFT (x) to ENTIRE y 
 
@@ -7613,9 +7624,10 @@ x,\:y
 
 ### Each Right
 ```q
-x,/:
+x,/:y
+
 / The top of the / points RIGHT
-/ Adds each element of y to the entirety of x
+/ Adds EACH element of y to the ENTIRE x
 
 x: 1 2 3
 y: `a`b`c
