@@ -6650,27 +6650,30 @@ a: update avgPrice: avg price by date from select from trade where sym=`A
 ### 🔵 21.1 qSQL Left Join
 
 ```q
-/ t1 lj t2 (t2 must be keyed)
-/ for each row in **source table**, find corresponding values in **lookup table** (keyed)
+/ x lj y 
+
+/ x = source table
+/ y = lookup table (t2 must be keyed)
+
+/ for each row in source table, find match on keyed columns in lookup table
+/ adds new columns to the end of original table
+/ will always have same number of rows as original table
 / no match = nulls
 / column names must match and 2nd table must be keyed
-/ will always return same number of rows as **source** table
 
-trade table:
+trade table
 x date        time         sym     price    size  
 -------------------------------------------------
 1|2021.06.03| 09:30:02.553| C    | 107.20 | 63500
 2|2021.06.03| 09:30:02.701| MSFT | 96.87  | 1700
 3|2021.06.03| 09:30:02.743| RBS  | 97.11  | 80700
 
-stock table:
+stock table (keyed)
 x `sym`   sector employees
 -------------------------
 1|`C`    |Tech  | 862      
 2|`MSFT` |Tech  | 765      
 3|`RBS`  |Tech  | 377      
-
-/ sym is keyed
 
 trade lj stock
 
@@ -6680,9 +6683,8 @@ x date        time         sym    price     size cond  sector  employees
 2|2021.06.03| 09:30:02.701| MSFT| 96.87488| 1700 | B |  Tech  | 765      
 3|2021.06.03| 09:30:02.743| RBS | 97.11338| 80700| C |  Tech  | 377      
 
-/ sym is keyed from stock table
-/ takes trade table, for each sym, pulls in sector and employees columns
-/ will always be same number of rows as source table (5)
+/ match on C, MSFT, RBS, adds on new columns sector + employees
+/ will always be same number of rows as source table (3)
 / here the tables are joined on `sym as the key
 ```
 
@@ -6690,6 +6692,8 @@ x date        time         sym    price     size cond  sector  employees
 ### 🔵 21.2 qSQL Plus Join 
 
 ```q
+/ x pj y
+
 / where key column names match across 2 tables, numeric values are added 
 / other columns on left argument remain unchanged
 
