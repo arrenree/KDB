@@ -7260,7 +7260,7 @@ dt         |  sym   | title                   | price
 [Top](#top)
 
 <a name="asof_join"></a>
-### 🔵 23.1 Asof Time Join
+### 🔵 23.1 As of Join
 
 ```q
 / used to find last value from one table, that matches the source table (prevailing quote)
@@ -7271,41 +7271,43 @@ aj [`col_1`col_2; soure_table; lookup_table]
 
 / syntax = aj [column; source table; lookup table]
 / last item of columns will be less than or equal join
+/ one of the columns is usually time, since you want to pull in prevailing price
 ```
 ```q
-/ Asof Time Join Case Study
+/ As of Time Join Case Study
+
 / Find the latest bid for list of syms in table t
 
 t: ( [] time: 07:00 08:30 09:59t; sym:`a`a`b; price: 0.9 1.5 1.9; size:100 200 300)
 q: ( [] time: 08:00 09:00 10:00t; sym:`a`b`a; bid: 1 9 4)
 
 table t:
-time     sym price size
+time    |sym|price| size
 -------------------------
-07:00:00|	a |	0.9|	100
-08:30:00|	a |	1.5|	200
-09:59:00|	b |	1.9|	300
+07:00:00| a | 0.9 | 100
+08:30:00| a | 1.5 | 200
+09:59:00| b | 1.9 | 300
 
 table q:
-time     sym bid
+time     |sym | bid
 -----------------
-08:00:00|	a |	1
-09:00:00|	b |	9
-10:00:00|	a |	4
+08:00:00|  a  |	1
+09:00:00|  b  |	9
+10:00:00|  a  |	4
 
 aj [`sym`time; t;q]
 
-/ syntax = aj [column; source table; lookup table]
-/ columns = sym, time
+/ syntax = aj [`columns; source table; `columns lookup table]
+/ from columns `sym`time from table t, lookup table q and return table q columns 
 / t = source table
 / q = lookup table
 / column names must match
 
-time     sym price size  bid
-----------------------------
-07:00:00| a |	0.9 |	100 |	
-08:30:00| a |	1.5 |	200	|1
-09:59:00| b |	1.9 |	300	|9
+time    |sym|price| size| bid
+-----------------------------
+07:00:00| a | 0.9 | 100 |
+08:30:00| a | 1.5 | 200 | 1
+09:59:00| b | 1.9 | 300 | 9
 
 / from t, look through each sym, then time (less than or equal to)
 / from t, first row = a. lookup a in q, but no time less than or equal to 7:00am. so bid = null
@@ -7314,36 +7316,33 @@ time     sym price size  bid
 ```
 
 ```q
-fq: update qtime:time, qsym: sym from q
+fq: update qtime:time, qsym:sym from q
 ft: update ftime:time, fsym:sym from t
 
 / create new table fq with columns qtime and qsym
 / create new table ft with columns ftime and fsym
 
-table fq:
-time     sym bid qtime     qsym
---------------------------------
-08:00:00|	a |	1 |	08:00:00|	a
-09:00:00|	b |	9 |	09:00:00|	b
-10:00:00|	a |	4 |	10:00:00|	a
-
 table ft:
-time     sym  bid  size  ftime      fsym
--------------------------------------------
-07:00:00|	a |	0.9 |	100 |	07:00:00 |	a
-08:30:00| a |	1.5 |	200 |	08:30:00 |	a
-09:59:00| b |	1.9 |	300 |	09:59:00 |	b
+time    |sym| bid | size| ftime   | fsym
+-----------------------------------------
+07:00:00| a | 0.9 | 100 |07:00:00 | a
+08:30:00| a | 1.5 | 200 |08:30:00 | a
+09:59:00| b | 1.9 | 300 |09:59:00 | b
+
+table fq:
+time    |sym| bid|  qtime | qsym
+--------------------------------
+08:00:00| a |  1 |08:00:00| a
+09:00:00| b |  9 |09:00:00| b
+10:00:00| a |  4 |10:00:00| a
 
 aj [`sym`time;ft;fq]
 
-/ ft = source table
-/ fq = lookup table
-
-time     sym price size  ftime   fsym bid  qtime     qsym
----------------------------------------------------------
-07:00:00|	a |	0.9 |	100|	07:00:00|	a	|	 	|          |
-08:30:00|	a |	1.5	| 200|	08:30:00|	a	| 1	| 08:00:00 |	a
-09:59:00|	b |	1.9	| 300|	09:59:00|	b |	9	| 09:00:00 |	b
+time    |sym|price|size| ftime  |fsym| bid | qtime    | qsym
+------------------------------------------------------------
+07:00:00| a | 0.9 | 100|07:00:00| a  |     |          |
+08:30:00| a | 1.5 | 200|08:30:00| a  |  1  | 08:00:00 |	a
+09:59:00| b | 1.9 | 300|09:59:00| b  |  9  | 09:00:00 |	b
 
 / aj0 is the same as aj, but uses the lookup tables time column
 ```
