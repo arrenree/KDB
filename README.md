@@ -4356,10 +4356,10 @@ upsert [p; ([book:`C`D; ticker:`C`MS]size:400 500)]
 Attributes describe how the underlying data in lists are structured
 This speeds up queries and optimizes memory usage
 
-1. Sorted 's# - items in ascending order
-2. Unique 'u# - each element is unique
-3. Grouped 'g# - mapping from distinct item to each index is maintained
-4. Parted 'p# - items are contiguous
+1. Sorted 's# - items in ascending order (binary search)
+2. Unique 'u# - each element is unique (no dupes)
+3. Grouped 'g# - dict maps each occurence to position in array
+4. Parted 'p# - stores same items together; dict maps first occurence
 ```
 
 <a name="set_attribute_creation"></a>
@@ -4402,17 +4402,17 @@ table t:
 
 time     name val
 ------------------
-08:00:00 |joe|	10
-08:30:00 |jim|	20
-09:10:00 |bob|	30
+08:00:00 |joe| 10
+08:30:00 |jim| 20
+09:10:00 |bob| 30
 
 meta t
 
-c     t f a
+c    |t|f|a
 -----------
-time |t|	|
-name |s|	|	
-val	 |j|	|	
+time |t| |
+name |s| |	
+val  |j| |	
 
 / t = type = time, sym, int
 / f = foreign keys (none)
@@ -4425,9 +4425,9 @@ update `s#time from `t
 
 c     t f a
 -----------
-time |t|	|s
-name |s|	| 	
-val	 |j|	|
+time |t| |s
+name |s| | 	
+val  |j| |
 
 / attributes for time now has s (sorted) applied
 ```
@@ -4470,7 +4470,7 @@ k: til 1000000
 <a name="sort_attribute"></a>
 ### 🔵 16.5 Sorted Attribute
 ```q
-/ sorted attribute applied to list or column to specify data is sorted in ascending order
+/ sorted attribute applied to list or column sorted in ascending order
 / requires elements to be sorted ascending, otherwise error
 / `s# attribute only maintained on sorted append, lost on other modification
 / allows binary search instead of linear (fully scanning), so much faster
@@ -4502,7 +4502,7 @@ list,:3
 
 attr list
 `
-
+ 
 / sort attribute LOST because 3 is not ascending to existing list
 / cannot apply sort attribute because underlying list is NOT ascending
 ```
@@ -4549,10 +4549,31 @@ attr lu
 ```q
 'g#listname
 
+/ creates an index of each location in the list of each element
 / groups same identifiers together for faster searches
 / no searching, no requirement on order or content
-/ uses additional memory
+/ however, requires significcant memory overhead
+
+`a`b`c`a`a`a`b`b`b`c`b`a
+
+`a | 0 3 4 5 11
+`b | 1 6 7 8 10
+`c | 2 9
 ```
+
+```q
+a:`g#`a`a`b`a`d`c`c
+
+group a
+
+key | value
+------------
+a   | 0 1 3
+b   | ,2
+d   | ,4
+c   | 5 6
+```
+
 ```q
 lg: 1 3 2 3 2 1 2 3
 @ [`.;`lg;`g#]
@@ -4571,9 +4592,9 @@ group lg
 
 key|value
 --------
-1  |	0 5
-3  |	1 3 7
-2  |	2 4 6
+1  | 0 5
+3  | 1 3 7
+2  | 2 4 6
 
 / stores lookup table from values to indices where they occur
 ```
@@ -4584,7 +4605,7 @@ key|value
 / parted attribute marks a list of having same value occuring in sequential blocks
 / breakpoints of elements stored - no more searching, contiguous reads
 / lost on any modification
-/ mainly used for on disk queries
+/ mainly used for on-disk queries
 ```
 ```q
 lp:`p#`a`a`a`b`b`b`c`c`c
@@ -7746,19 +7767,11 @@ key |  value
 ```
 
 <a name="eachprevious_adverb"></a>
-### 🔵 24.6 Each Previous / Prior
+### 🔵 24.6 Each Previous / Each Prior
 
 ```q
-{x+y}': [1 2 3 4 7]
-0N 3 5 7 11
+/ each prior = perform operation on element with its prior element
 
-/ O + 1 = ON
-/ 1 + 2 = 3
-/ 2 + 3 = 5
-/ 3 + 4 = 7
-```
-
-```q
 10 + ': 1 2 3 4 7
 11 3 5 7 11
 
@@ -7777,7 +7790,30 @@ key |  value
 deltas 1 2 3 4
 1 1 1 1 
 ```
+```q
+{x,y}':[10 12 14 13 15]
+10
+12 10
+14 12
+13 14
+15 13
 
+{x,y}':[0;10 12 14 13 15]
+10 0
+12 10
+14 12
+13 14
+15 13
+```
+```q
+{x+y}': [1 2 3 4 7]
+0N 3 5 7 11
+
+/ O + 1 = ON
+/ 1 + 2 = 3
+/ 2 + 3 = 5
+/ 3 + 4 = 7
+```
 
 <hr>
 
@@ -7788,74 +7824,82 @@ deltas 1 2 3 4
 ## 🔵 25.1 Given: ("cow"; "fox";"badger") use EACH RIGHT to prepend "the" before each item##
 
 ```q
+/ each right = add x to each element of y
+
+"the" ,/: ("cow";"fox";"badger")
+
+/ or
+
 strs: ("cow";"fox";"badger")
 "the" ,/: strs
-```
-"the cow" \
-"the fox" \
-"the badger"
 
-* x / y = add x to the left of y
+"the cow" 
+"the fox" 
+"the badger"
+```
 
 <hr>
 
 ## 🔵 25.2 Use EACH LEFT to add "jumped" to strs ##
 
 ```q
+/ each left = add y to each element of x
+
 strs,\: " jumped"
-```
-"cow jumped" \
-"fox jumped" \
+
+"cow jumped" 
+"fox jumped" 
 "badger jumped"
 
-* the \: (top points left, so each left). 
-
+```
 <hr>
 
 ## 🔵 25.3 Given the nested list: dd: (1 5 10; 200 30 40; 20 23 24), find the max of each list ##
 
 ```q
 dd: (1 5 10; 200 30 40; 20 23 24)
+
 max each dd
-```
 10 200 24
 
+/ use each to calc max on each individual nested list
+```
 <hr>
 
 ## 🔵 25.4 Using EACH PRIOR, create a function that calculates the moving sum with window size of 2 ##
 
 ```q
+/ each prior = perform action on each element with its prior element
+
 L: 20 30 4 6 1 2
 +': [L]
 20 50 34 10 7 3
 
-alternatively:
+/ alternatively:
 
-```q
 2 msum L
-```
- or 
+
+/ or 
  
- ```q
- {x+y}': [L]
+{x+y}': [L]
  
 ```
 
 <hr>
 
 ## 🔵 25.5 Use EACH BOTH to join the lists to give (5 8; 7 3; 9 4) ##
-
-numbers: 5 7 9 \
+```q
+numbers: 5 7 9
 powers: 8 3 4
 
-```q
 numbers, 'powers
-```
+
 key| value
--|-
-5| 8
-7| 3
-9| 4
+----------
+ 5 | 8
+ 7 | 3
+ 9 | 4
+```
 
 <hr>
 
@@ -7863,49 +7907,58 @@ key| value
 
 ```q
 numbers xexp' powers
-```
+
 390625 343 6561f
+```
 
 <hr>
 
 ## 🔵 25.7 A bank account pays 5% interest a year. Write a function that takes the current balance and returns the new balance after one year. Then use scan\ with that function to display the interest every year, up to 7 years in the future ##
 
-assume starting balance of 100
-
 ```q
+/ assume starting balance of 100
+
 {x * 1.05} 100
-```
 105
 
-```q
 {x * 1.05} \ [7; 100.]
-```
-105 \
-110.25\
-115.7625
 
-* use monadic version of scan that takes 2 arguments
-* first argument = how many times to run
-* second argument = starting value for function
+105 
+110.25
+115.7625
+...
+140.71
+
+/ use monadic version of scan that takes 2 arguments
+/ first argument = how many times to run
+/ second argument = starting value for function
+```
 
 <hr>
 
 ## 🔵 25.8 Create a function, fib, that takes a fibonnaci sequence as its argument and returns the sequence complete with the next entry ##
 
 ```q
-fib: {x, sum -2#x}
+/ the fib seq = 1 + prior 
+/ 1 1 2 3 5 8 ...
+
+fib: {sum -2#x}
 fib 1 1
+
+1 1 2
+
+/ take last 2 elements of argument and sum it
 ```
-1 2 3
 
 <hr>
 
-## 🔵 25.9 Use the over function to create a function fibn to generate a fib sequence n numbers long where n is the functions argument ##
+## 🔵 25.9 Use the over function to create a function, fibn, to generate a fib sequence n numbers long where n is the functions argument ##
 
 ```q
 fibn: {x fib/ 1 1}
 fibn 5
 1 1 2 3 5 8 13
+
 ```
 
 <hr>
