@@ -238,6 +238,16 @@
 ## 31. [Debugging](#debugging)
 
 ## 32. [@ and . Operator](#atanddot_operator)
+1. [Square Bracket Notation](#squarebracket_at)
+2. [@ Operator](#operator_at)
+3. [. Operator](#operator_dot)
+4. [Amending List Items using @](#amending_at)
+5. [Amending List Items using .](#amending_dot)
+6. [Advance use @ Index](#advanced_at)
+7. [Using . index with database tables](#advanced_at)
+8. [. Zero Dimensional Amend](#zero_dot)
+9. [@ Apply](#at_apply)
+10. [. Apply](#dot_apply)
 
 
 <hr>
@@ -9069,7 +9079,6 @@ list1[index]
 @[list1;index]
 3
 ```
-. Operator
 
 <a name="operator_dot"></a>
 ### 🔵 30.3 . Operator
@@ -9224,14 +9233,82 @@ msft|  9.8  | 6
 / use tablelookup, return all values for column size
 .[t;(([] sym:`msft`ibm); `size)]
 6 3
+```
+
+<a name="zero_dot"></a>
+### 🔵 30.8 zero dimensional amend (dot operator)
+
+```q
+/ .index allows us to amend entire object at once by passing in empty set of indices
+/ if performed on list, lets us amend each list element
+
+a: 10
+.[a;();+;1]
+11
+
+list: (1 2;3 4 5;6 7 8 9)
+1 2
+3 4 5
+6 7 8 9
+
+.[list; ();+;10]
+11 12
+13 14 15
+16 17 18 19
+```
+
+<a name="at_apply"></a>
+### 🔵 30.9 @ Apply
+```q
+/ @ is used when function takes single argument
+/ . is used when function takes multiple arguments
+
+f:{2*x}
+
+f[2]
+4
+
+/ @ apply method
+
+@[f;2]
+4
+```
+```q
+l: (1 2 3; 4 5; 6 7 8 9)
 
 
+flip l
+error
 
+/ you can't flip since nested list are different lengths
+/ instead create empty lists of max length, then flip it
 
+flip `a`b`c!@[max[c]#0N;;:;]'[til each c: count each l;l]
 
+a| b | c
+---------
+1| 4 | 6
+2| 5 | 7
+3|   | 8
+ |   | 9
 
+/ turn the nested list into a dictionary, then flip it
 
+```
 
+<a name="dot_apply"></a>
+### 🔵 30.10 . Apply
+```q
+g:{x+y}
+
+g[4;5]
+9
+
+/ . notation
+
+.[g;(4;5)]
+9
+```
 
 
 [Top](#top)
