@@ -208,16 +208,14 @@
 5. [Importing CSV Files](#csv_import)
 6. [Saving to Binary Files](#binaryfile_export)
 
-## 27. [Random Questions](#random_questions)
+## 27. [Functional Form](#functional_form)
 
-## 28. [Functional Form](#functional_form)
-
-## 29. [Flat Tables](#flat_tables)
+## 28. [Flat Tables](#flat_tables)
 1. [Saving Flat Tables](#flat_tables)
 2. [Renaming Flat Tables when Saving](#rename_flatfiles)
 3. [Loading Flat Files](#loading_flatfiles)
 
-## 30. [Splayed Database Tables](#splayed_tables)
+## 29. [Splayed Database Tables](#splayed_tables)
 1. [Get Function - TS](#splay_getfuncTS)
 2. [Enumerating Syms - TS](#splay_enusymTS)
 3. [Saving Splayed Tables - AQ](#splay_savingAQ)
@@ -229,7 +227,7 @@
 9. [Sorting Splayed Tables](#splay_sortAQ)
 10. [Enumerating Syms for Splayed Tables](#splay_enusymAQ)
 
-## 31. [Partitioned Database Tables](#partitioned_db)
+## 30. [Partitioned Database Tables](#partitioned_db)
 1. [Saving Partitioned Tables](#savingpartition)
 2. [Index Querying](#part_index)
 3. [Fill Missing Tables](#part_fillmissing)
@@ -237,7 +235,9 @@
 5. [Using Functions to Save - no sym](#part_functions)
 6. [Using Functions to Save - sym](#part_functionssym)
 
-## 32. [Debugging](#debugging)
+## 31. [Debugging](#debugging)
+
+## 32. [@ and . Operator](#atanddot_operator)
 
 
 <hr>
@@ -9027,6 +9027,205 @@ g[`a;2]
 / use ON! to print
 / use control c to terminate a running process
 ```
+
+
+<a name="atanddot_operator"></a>
+## 🔴 32. @ and . Operator
+[Top](#top)
+
+<a name="squarebracket_at"></a>
+### 🔵 32.1 Square Bracket Notation
+
+```q
+/ @ and . build on the functionality provided by the square bracket notation [ ]
+
+/ if x is a data strructure, x[y] = index
+x: 1 2 3 4 5
+y: 3
+x [y]
+4
+
+/ if x is a function, x[y] = apply
+
+x:{(x*2) + 5}
+y:3
+x[y]
+11
+```
+<a name="operator_at"></a>
+### 🔵 30.2 @ Operator
+
+```q
+/ @ is used for single dimensional lists
+
+list1: 1 6 3 8 5 4
+index: 2
+
+list1[index]
+3
+
+/ is the same as
+
+@[list1;index]
+3
+```
+. Operator
+
+<a name="operator_dot"></a>
+### 🔵 30.3 . Operator
+
+```q
+/ . is used for nested lists
+
+list2: (1 4 3; 2 6 7; 8 5 9)
+row: 1
+column: 2
+
+list2[row][column]
+7
+
+/ is the same as
+
+.[list2;1 2]
+7
+```
+```q
+list: (8 4 2; 9 3 1; 5 7 6)
+
+/ think of a nested list like a matrix
+
+8 4 2
+9 3 1
+5 7 6
+
+list[1 2;2 1] 
+1 3
+6 7
+
+/ [1;2] row 1, index position 2 = 1
+/ [1;1] row 1, index position 1 = 3
+/ [2;2] row 2, index position 2 = 6
+/ [2;1] row 2, index position 1 = 7
+
+/ dot notation
+
+.[list; (1 2; 2 1)]
+1 3
+6 7
+
+```
+
+<a name="amending_at"></a>
+### 🔵 30.4 Amending List Items using @
+```q
+/ amending using square bracket colon method [ ]:
+
+list: "abcde"
+list[3]: "D"
+"abcDe"
+
+/ using @ index instead:
+
+@[list;3;:;"D]
+"abcDe"
+
+/ 1st argument = list name
+/ 2nd argument = which index position
+/ 3rd argument = : means whatever is here
+/ 4th argument = replace with this
+```
+```q
+/ mathematical operators can also be used:
+
+list: 2 5 7 3 5 2
+@ [`list;4;+;5] 
+2 5 7 3 10 2
+
+/ at index position 4, add 5
+```
+```q
+/ can update more than one list item at a time
+
+list: 1 6 3 5 2
+@[list; 0 1; + 5]
+6 11 3 5 2 
+
+/ add 5 to the item at indexes 0 and 1
+```
+```q
+/ can be used with non dyadic operators
+
+list: "abcde"
+@[list;4;upper] 
+"abcdE"
+
+/ upper is a monadic function
+```
+
+<a name="amending_dot"></a>
+### 🔵 30.5 Amending List Items using .
+
+```q
+/ add 5 to each item in rows 1 and 2 and columns 1 and 2
+
+list: (8 4 2; 9 3 1; 5 7 6)
+8 4 2
+9 3 1
+5 7 6
+
+.[list;(1 2;1 2); +; 5]
+8 4 2
+9 8 6
+5 12 11
+
+/ [1; 1] = 3 + 5 = 8
+/ [1; 2] = 1 + 5 = 6
+
+/ so 2nd row first element (9) doesn't change
+```
+
+<a name="advanced_at"></a>
+### 🔵 30.6 Advanced use @ index
+
+```q
+/ l is a mixed list of syms and ints
+/ m is a mapping of syms to ints
+
+
+1: (`a; 1; 2; `b; 5; 9)
+m: `a`b!100 200
+
+@[l; where 011= type each 1;m]
+100 1 2 200 5 9
+```
+
+<a name="advanced_at"></a>
+### 🔵 30.7 Using . index with database tables
+
+```q
+/ can index into simple table using . operator
+/ we can look up price for 1 key
+/ if keys are not unique, will return first instance of the price for that key
+/ to lookup price for multiple keys, build table to pass into expression
+
+t: ([sym:`ibm`msft] price:1.2 9.8; size: 3 6)
+
+sym | price | size
+------------------
+ibm |  1.2  | 3
+msft|  9.8  | 6
+
+/ retrieve value using .index 
+/ can skip column names when looking up one key
+
+.[t;(`ibm;`price)]
+1.2
+
+/ use tablelookup, return all values for column size
+.[t;(([] sym:`msft`ibm); `size)]
+6 3
+
+
 
 
 
