@@ -825,21 +825,24 @@ raze string `a`b`c`d`e
 suits:`hearts`clubs`spades`diamonds
 l: `hearts`clubs`diamonds
 el: `suits$l
+
+/ enumerate all symbols in list l under same domain as suits
+/ will enforce/restrict their type as same domain 
 ```
-* enumerate all symbols in list l under same domain as suits
-* will enforce/restrict their type as same domain 
 
 ```q
 el,:`apple
-```
 cast
-* if you try adding a value that is NOT within that domain (apple), you will get a cast error
+
+/ if you try adding a value that is NOT within that domain (apple), you will get a cast error
+```
 
 ```q
 el[0]:`pear
-```
 cast
-* also cannot update value if not in the existing domain
+
+/ also cannot update value if not in the existing domain
+```
 
 <hr>
 
@@ -850,8 +853,10 @@ cast
 **🔵 3.1 What is the syntax to add to a list**
 ```q
 el, : apple
+
+/ use the ,: operator
 ```
-* listname + , + :
+
 
 <hr>
 
@@ -867,21 +872,24 @@ el, : apple
 **🔵 3.3 Given strings "2001.02.02" and "2003.08.09", parse the strings into KDB dates**
 ```q
 "D"$("2001.02.02";"2003.08.09")
+
+/ these are strings which you are trying to parse into the date datatype
+/ have to use upper case when parsing
 ```
-* these are strings which you are trying to parse into the date datatype
-* have to use upper case when parsing
+
 
 <hr>
 
 **🔵 3.4 Given the mixed list L: ("100.1";"hello";"10"), convert elements to float, char, and int**
 ```q
 "F*I"$("100.1";"hello";"10")
-```
 100.1
 "hello" 
 10i
-* have to use capital F and I
-* the astrik is used for strings
+
+/ have to use capital F and I
+/ the astrik is used for strings
+```
 
 <hr>
 
@@ -894,10 +902,11 @@ s: `symbol$()
 **Append integer 3 to list s**
 ```q
 s ,: 3
-```
 type 
-* error because 3 is an int and the list is enumerated as syms
 
+/ error because 3 is an int and the list is enumerated as syms
+
+```
 **Append symbol ooo to list s**
 ```q
 s,:`ooo
@@ -909,16 +918,24 @@ s,:`ooo
 ```q
 s: `symbol$()
 t: `s$`p`q`r
+
+/ t is now an enumeration which only contain domain s (symbols)
 ```
-* t is now an enumeration which only contain domain s (symbols)
 
 **🔵 3.7 Insert new value u into t**
 
 ```q
 s,:`u
+error
+
+/ since t is restricted to domain s, need to first add u into s before adding to t
+
 t,:`u
+`p`q`r`u
+
+/ now it works
+
 ```
-* since t is restricted to domain s, need to first add u into s before adding to t
 
 <hr>
 
