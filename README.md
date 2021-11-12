@@ -1020,32 +1020,42 @@ list to list
 
 1 2 3, 4 5 6
 1 2 3 4 5 6
+
+a: 1 2 3
+a,:4
+1 2 3 4
+
+/ uses join assign function
 ```
 
 <a name="retrieve_list"></a>
-### 🔵 4.6 Retrieving from Lists
-L: 10 20 30
+### 🔵 4.6 Retrieving from Lists using Indexing
 
 ```q
+L: 10 20 30
+
 L[0]
 L[1 2]
 L 1 2 3
-```
-10 \
-10 20 \
-10 20 30 \
 
-* retrieval uses 0 indexing logic (count starts with 0)
-* notice you DONT use colons : when retrieving from lists
+10
+10 20
+10 20 30
+
+/ retrieval uses 0 indexing logic (count starts with 0)
+/ notice you DONT use colons : when retrieving from lists
+```
 
 <a name="update_list"></a>
 ### 🔵 4.7 Update List Values
-L: 10 20 30
 ```q
+L: 10 20 30
+
 L[0 1 2] : 40 50 60
-```
 40 50 60
-* notice you use colon : to update values
+
+/ notice you use colon : to update values
+```
 
 <a name="nest_list"></a>
 ### 🔵 4.8 Nested Lists
@@ -1107,7 +1117,7 @@ m[ ; 1]
 
 
 <a name="sublist_list"></a>
-### 🔵 4.10 Sublist
+### 🔵 4.10 Retrieving from list using Sublist
 
 ```q
 2 sublist 1 2 3 4 5
@@ -1142,6 +1152,8 @@ m[ ; 1]
 ### 🔵 4.11 Find in List
 
 ```q
+/ ? find will return the index position
+
 1 2 3 4 5 ? 3
 2
 
@@ -1324,12 +1336,12 @@ avg size where price > 5
 **🔵 5.1 What is the difference between 3 ? 10 and 3 ? 10 20 30**
 
 ```q
+/ atom ? atom
 3 ? 10
 
 / returns 3 random numbers from 0-10
-```
 
-```q
+/ atom ? list
 3 ? 10 20 30
 10 10 30
 
