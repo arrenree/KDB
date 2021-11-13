@@ -3274,16 +3274,16 @@ ford    |    300    | 101
 <a name="union_table"></a>
 ### 🔵 12.10 Union Table
 ```q
-table t
+/ table union merges 2 tables together, but does NOT dupe values!
 
+table t
 company | employees
 -------------------
 ferrari | 100
 ford    | 100 
-rover   |  100
+rover   | 100
 
 table u
-
 company | employees
 --------------------
 ferrari | 100
@@ -3300,8 +3300,10 @@ rover   | 100
 bmw     | 5 
 ford    | 5
 
-/ returns values that are same (ferrari 100). does NOT dupe same values.
+/ returns values that are same (ferrari 100) 
+/ does NOT dupe same values
 / any values that do NOT equal, adds as new row
+/ ford = 100 and 5. so new tables contains both values
 
 ```
 
@@ -3309,6 +3311,9 @@ ford    | 5
 ### 🔵 12.11 Except Table
 
 ```q
+/ except table = only returns values NOT found in both
+/ think of it as opposite of inner join
+
 t except u
 
 company | employees
@@ -3326,6 +3331,9 @@ rover   | 100
 ### 🔵 12.12 Inter Table
 
 ```q
+/ inter table = think of it as inner join
+/ only returns key/values that matches in both tables
+
 t inter u
 company | employees
 -------------------
@@ -3355,7 +3363,6 @@ a|b
 
 / will return distinct values per row
 ```
-
 
 <a name="retrieve_table"></a>
 ### 🔵 12.14 Retrieve From Table
@@ -3419,17 +3426,24 @@ t [`employees]
 ```q
 / perform operations on entire column
 
-t [`employees] - : 100
+trade
+date      | time        | sym |price   |size |cond
+--------------------------------------------------
+2021.11.09| 09:30:02.553| C   |107.2|63500|B   
+2021.11.09| 09:30:02.701| MSFT|96.87|1700 |B   
+2021.11.09| 09:30:02.743| RBS |97.11|80700|C   
+2021.11.09| 09:30:02.758| A   |100.3|50300|B   
 
-company | employees
--------------------
-ferrari | 0
-ford    | 0 
-rover   | 0
-bmw     |-105 
-ford    |-105
+select sym, price, newprice:trade[`price]+100 from trade
 
-/ -100 from every value in column employee
+sym | price| newprice
+---------------------
+C   | 107.2| 207.2
+MSFT| 96.87| 196.87
+RBS | 97.11| 197.11
+A   | 100.3| 200.3  
+
+/ adds 100 to each value in column price
 ```
 
 ```q
