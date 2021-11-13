@@ -2097,9 +2097,7 @@ key|value
 a  | 2
 b  | 4
 c  | 6
-
 ```
-
 
 <hr>
 
@@ -2110,150 +2108,170 @@ c  | 6
 **🔵 1. Given the below dictionary, find the type, the keys, and its values**
 ```q
 d:`p`q`r`s!10 20 40 100
-```
+
 key|value
--|-
-p|	10
-q|	20
-r|	40
-s|	100
+---------
+p  | 10
+q  | 20
+r  | 40
+s  | 100
 
-```q
 type d
-key d
-value d
-```
-99h \
-p q r s \
-10 20 40 100 \
+99h
 
-<hr>
+key d
+p q r s
+
+value d
+10 20 40 100
+```
 
 **🔵 2. Add new entry u 200 to list d**
 ```q
 d[`u]: 200
-```
-* upsert. will update if key exists, if not, will append it
 
 key|value
--|-
-p|	10
-q|	20
-r|	40
-s|	100
-u| 200
+---------
+p  | 10
+q  | 20
+r  | 40
+s  | 100
+u  | 200
 
-<hr>
+/ upsert. will update if key exists, if not, will append it
+```
 
 **🔵 3. Change value of p to 2**
 ```q
 d[`p]:2
+
+key|value
+---------
+p  | 2
+q  | 20
+r  | 40
+s  | 100
+u  | 200
 ```
-<hr>
 
 **🔵 4. Create dictionary d2, only containing values of p q r from dictionary d**
 ```q
 d2:`p`q`r#d
-```
-* take p q r from dictionary d
 
-<hr>
+key|value
+---------
+p  | 2
+q  | 20
+r  | 40
+
+/ use # take function to take values of p q r from dictionary d
+```
 
 **🔵 5. Add common elements in d2 and d, only return common keys and values**
 ```q
-(key[d] inter key[d2]) # d+d2
-```
-* inter returns values occuring in both lists
-* take the common keys in dictionary d and d2 and show its values
+d+d2
 
 key|value
--|-
-p|	20
-q|	40
-r|	80
+---------
+p  | 4
+q  | 40
+r  | 80
+s  | 100
+u  | 200
 
-<hr>
+/ adds all values together where there is a match in keys
+
+d inter d2
+2 20 40
+
+/ dict inter dict will return values occuring in both dicts
+
+key[d] inter k[d2]
+`p`q`r
+
+/ have to use key[dict_name] inter key[dict2_name] to return keys in both dict
+
+(key[d] inter key[d2]) # d + d2
+
+key|value
+---------
+p  | 4
+q  | 40
+r  | 80
+
+/ combining together, you take the keys occuring in both dict from d1 + d2
+/ and show its values
+```
 
 **🔵 6. Given the 2 dictionaries below, find those who are greater than 1.7m in height**
 ```q
 dheight:`john`mark`luke`paul`ian`peter!1.5 1.6 1.7 1.8 1.9 1.4
 dweight:`john`mark`luke`paul`ian`peter!81 72 88 91 55 110
-```
-dheight
 
-key|value
--|-
-john|	1.5
-mark|	1.6
-luke|	1.7
-paul|	1.8
-ian|	1.9
-peter|	1.4
+dheight
+key  | value
+------------
+john | 1.5
+mark | 1.6
+luke | 1.7
+paul | 1.8
+ian  | 1.9
+peter| 1.4
 
 dweight
+key  | value
+------------
+john | 81
+mark | 72
+luke | 88
+paul | 91
+ian  | 55
+peter| 110
 
-key|value
--|-
-john|	81
-mark|	72
-luke|	88
-paul|	91
-ian|	55
-peter|	110
-
-```q
 dheight > 1.7
-```
-key|value
--|-
-john|	0b
-mark|	0b
-luke|	0b
-paul|	1b
-ian|	1b
-peter|	0b
 
-* dictionary + condition = examines values as booleans, returns as true/false
+key  |value
+-----------
+john | 0b
+mark | 0b
+luke | 0b
+paul | 1b
+ian  | 1b
+peter| 0b
 
-```q
+/ dictionary + condition = examines values as booleans, returns as true/false
+
 where dheight > 1.7
-```
-* where = returns the keys
-
 paul ian
 
-<hr>
+/ where = returns the keys
+```
 
 **🔵 7. Find the average height of people who weight over 90**
 ```q
 where dweight > 90
-```
 paul peter
 
-```q
 dheight where dweight > 90
-```
 1.8 1.4
 
-```q
 avg dheight where dweight > 90
-```
 1.6
-
-<hr>
+```
 
 **🔵 8. Find the body mass index (weight) / (height x height)**
 ```q
 dweight%dheight*dheight
+
+key  | value
+------------
+john | 36.0
+mark | 28.1
+luke | 30.4
+paul | 28.0
+ian  | 15.2
+peter| 56.1
 ```
-key|value
--|-
-john|	36.0
-mark|	28.1
-luke|	30.4
-paul|	28.0
-ian|	15.2
-peter|	56.1
 
 <hr>
 
