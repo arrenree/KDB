@@ -3212,7 +3212,7 @@ company | employee
 ford    |   300
 bmw     |   100
 
-`employees`company xcol t
+`employees`company xcols t
 
 
 employee | company
