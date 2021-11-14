@@ -3311,8 +3311,7 @@ ford    | 5
 ### 🔵 12.11 Except Table
 
 ```q
-/ except table = only returns values NOT found in both
-/ think of it as opposite of inner join
+/ except table = only returns values found in LEFT table NOT found in RIGHT table
 
 t except u
 
@@ -3741,9 +3740,9 @@ MSFT sell  40	 400
 t1
 sym  ex
 ----------
-IBM	 nyse
-AAPL	nyse
-GOOG	nasdaq
+IBM  nyse
+AAPL nyse
+GOOG nasdaq
 
 t2
 price size
@@ -3797,9 +3796,7 @@ t? (2 5 8; 3 6 9)
 
 / can find more than 1 list of indices at once
 / returns list of indices
-
 ```
-
 
 <hr>
 
@@ -3811,220 +3808,200 @@ t? (2 5 8; 3 6 9)
 
 ```q
 stock: ( [] sym: `MS`C`AAPL; sector:`Financial`Financial`Tech; employees: 100 100 100)
+
+sym |sector    |employees
+-------------------------
+MS  |Financial |100
+C   |Financial |100
+AAPL|Tech      |100
 ```
-sym|sector|employees
--|-|-
-MS	|Financial|	100
-C	|Financial	|100
-AAPL|	Tech	|100
 
 **🔵 13.1 Extract the employees numbers (without the header)**
 
 ```q
 stock [ ; `employees]
+100 100 100
 ```
-
 ```q
 stock[`employees]
 ```
-
 ```q
 stock.employees
 ```
-
 ```q
 stock`employees
 ```
-100
 
-<hr>
-
-**🔵 13.2 Key the first column in stock table (above)**
+**🔵 13.2 Key the first column in stock table above**
 
 ```q
 1!stock
 ```
 
-sym|sector|employees
--|-|-
-MS	|Financial|	100
-C	|Financial	|100
-AAPL|	Tech	|100
-
-* you can't tell cuz of formatting, but sym is now keyed
-
-<hr>
-
 **🔵 13.3 Display only the first and second rows of the stock table**
 
 ```q
 2#stock
+
+sym |sector    |employees
+-------------------------
+MS  |Financial |100
+C   |Financial |100
 ```
 or
 
 ```q
 stock [0 1]
 ```
-sym|sector|employees
--|-|-
-MS	|Financial|	100
-C	|Financial	|100
-
-<hr>
 
 **🔵 13.4 Select the last row of stock table as a dictionary**
 
 ```q
 last stock
-```
-key |value
--|-
-sym |`AAPL
-sector | `Tech
+
+key       | value
+-----------------
+sym       | AAPL
+sector    | Tech
 employees | 100
 
-<hr>
+/ last will retrieve the last row from table stock
+/ and return it as a dictionary
+
+```
 
 **🔵 13.5 Insert GOOG in the tech sector with 100 employees**
 
 ```q
 insert [`stock; ([] sym: enlist `GOOG; sector: enlist `tech; employees: enlist 100)]
+
+sym |sector    |employees
+-------------------------
+MS  |Financial |100
+C   |Financial |100
+AAPL|Tech      |100
+GOOG|Tech      |100
+
+/ syntax is insert + [table name; table with corresponding columns]
+/ must use enlist when adding single row!!
 ```
-sym|sector|employees
--|-|-
-MS	|Financial|	100
-C	|Financial	|100
-AAPL|	Tech	|100
-GOOG | Tech | 100
-
-* syntax is insert + [table name; table with corresponding columns]
-* must use enlist when adding single row!!
-
-<hr>
 
 **🔵 13.6 Given:**
 
 ```q
 boss: ( [] name:`bob`bill`belinda; height: 188 186 174)
 employees: ( [] name:`jim`jane`john; height: 180 160 170)
-```
+
 boss:
-name|height
--|-
-bob|	188
-bill |	186
-belinda |174
+name    | height
+----------------
+bob     | 188
+bill    | 186
+belinda | 174
 
 employees:
-
-name|height
--|-
-jim|	180
-jane|	160
-john|	170
+name| height
+-----------
+jim | 180
+jane| 160
+john| 170
+```
 
 **🔵 13.6 Find the average height of the bosses, the employees, and both the bosses and employees**
 
 ```q
 avg boss `height
-```
 182.667
 
-```q
 avg employees `height
-```
 170f
 
-```q
 avg (employees, boss) `height
-```
 176.33
 
-* joins the 2 tables together
-* calculate the average height from joined table
-
-<hr>
+/ joins the 2 tables together
+/ calculate the average height from joined table
+```
 
 **🔵 13.7 Find the 2 tallest employees**
 ```q
 2#`height xdesc employees
+
+name | height
+-------------
+jim  | 180
+john | 170
+
+/ take 2 from employees table, sorted descending by height
 ```
-name|height
--|-
-jim	|180
-john|	170
-
-* take 2 from employees table, sorted descending by height
-
-<hr>
 
 **🔵 13.8 Given the 2 tables:**
 
 ```q
 stock: ( [sym:`MS`C`AAPL] sector:`Fin`Fin`Tech; employees: 100 100 100)
 trade: ( [] dt: 2021.01.01+til 5; sym:`C`C`MS`C`AAPL; price: 10 20 30 40 50; size: 100 200 300 400 500)
-```
+
 stock:
-sym|sector|employees
--|-|-
-MS|	Fin|	100
-C	|Fin	|100
-AAPL	|Tech|	100
+sym  |sector| employees
+-----------------------
+MS   |Fin   | 100
+C    |Fin   | 100
+AAPL |Tech  | 100
 
 trade:
-dt|sym|price|size
--|-|-|-
-2021-01-01|	C	|10	|100
-2021-01-02|	C	|20	|200
-2021-01-03|	MS|	30|	300
-2021-01-04|	C	|40	|400
-2021-01-05|	AAPL	|50|	500
+dt        |sym  |price| size
+----------------------------
+2021-01-01|C	|10   | 100
+2021-01-02|C	|20   | 200
+2021-01-03|MS   |30   | 300
+2021-01-04|C	|40   | 400
+2021-01-05|AAPL	|50   | 500
 
-**8. Insert the following rows into trade table**
-dt|sym|price|size
--|-|-|-
-2021-11-01|	JPM	|1	|100
-2021-11-02|	UBS	|2	|200
+```
 
+**🔵 13.8 Insert the following rows into trade table**
 ```q
+dt        |sym  |price| size
+----------------------------
+2021-11-01|JPM	|1    | 100
+2021-11-02|UBS	|2    | 200
+
 `trade insert( [] dt:2021.11.01+1 ; sym:`JPM`UBS; price:1 2; size: 100 200) 
-```
-or
-```q
+
+/ or
+
 insert [`trade; ([] dt:2021.11.01+1 ; sym:`JPM`UBS; price:1 2; size: 100 200)]
+
+dt        |sym  |price| size
+----------------------------
+2021-01-01|C	|10   | 100
+2021-01-02|C	|20   | 200
+2021-01-03|MS   |30   |	300
+2021-01-04|C	|40   | 400
+2021-01-05|AAPL	|50   |	500
+2021-11-01|JPM	|1    | 100
+2021-11-02|UBS	|2    | 200
+
+/ have to use backtick table in order to amend the underly table
 ```
-dt|sym|price|size
--|-|-|-
-2021-01-01|	C	|10	|100
-2021-01-02|	C	|20	|200
-2021-01-03|	MS|	30|	300
-2021-01-04|	C	|40	|400
-2021-01-05|	AAPL	|50|	500
-2021-11-01|	JPM	|1	|100
-2021-11-02|	UBS	|2	|200
-
-* have to use backtick table in order to amend the underly table
-
-<hr>
 
 **🔵 13.9 Insert the following record into stock**
-sym|sector|employees
--|-|-
-FB|	Tech|	100
-
 ```q
-`stock insert [`FB; `Tech; 100]
-```
 sym|sector|employees
--|-|-
-MS|	Fin|	100
-C	|Fin	|100
-AAPL	|Tech|	100
-FB | Tech | 100
+--------------------
+FB |Tech  | 100
 
-* table name + insert (value1, value 2, value 3)
+`stock insert [`FB; `Tech; 100]
 
-<hr>
+sym  |sector|employees
+---------------------
+MS   |Fin   | 100
+C    |Fin   | 100
+AAPL |Tech  | 100
+FB   |Tech  | 100
+
+/ table name + insert (value1, value 2, value 3)
+```
 
 **🔵 13.10 In the stock table, change the number of employees for C to 300**
 
@@ -4034,27 +4011,26 @@ stock upsert (`C;`Fin;300)
 or
 ```q
 stock upsert ([sym: enlist`C] employees: enlist 300)
-```
+
 sym|sector|employees
--|-|-
-C	|Fin	|300
+--------------------
+C  |Fin   |300
 
-* have to use enlist to create a vector for an atom
-
-**11. Sort the stock table by sym**
+/ have to use enlist to create a vector for an atom
+```
+**🔵 13.11 Sort the stock table by sym**
 
 ```q
 `sym xasc `stock
+
+sym |sector| employees
+--------------------
+AAPL|Tech  | 100
+C   |Fin   | 100
+MS  |Fin   | 100
+
+/ `column name + xasc + `table name
 ```
-sym|sector|employees
--|-|-
-AAPL|	Tech|	100
-C	|Fin|	100
-MS|	Fin|	100
-
-* `column name + xasc + `table name
-
-<hr>
 
 <a name="keyed_tables"></a>
 ## 🔴 14. Keyed Tables
