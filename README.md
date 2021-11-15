@@ -2804,254 +2804,234 @@ f[;"me";"ME"] each `welcome`home`mermaid
 ## 🔴 11. Functions Problem Set
 [Top](#top)
 
-**🔵 11.1 Create a function volc that accepts 2 arguments (r and h), that returns the volume of the given volc [2;3]** \
-vol of cone = 1/3 * pi * r^2 * h \
-pi = -4 * atan -1**
+**🔵 11.1 Create a function volc that accepts 2 arguments (r and h), that returns the volume of the given volc [2;3]**
 
 ```q
+/ vol of cone = 1/3 * pi * r^2 * h
+/ pi = -4 * atan -1
+
 volc: {[r;h] pi:-4*atan -1; pi*r*r*h%3}
 volc[2;3]
-```
 12.57
-* define arguments [r;h] first
-* define variable pi
-* must have space after atan and before -1
-* no space for volc[2;3]
 
-<hr>
+/ define arguments [r;h] first
+/ define variable pi
+/ must have space after atan and before -1
+/ no space for volc[2;3]
+```
 
-**🔵 11.2 Write function sph that takes radius and returns the area and volume**\
-v = 4/3 * pi * r^3 \
-a = 4 * pi * r^2
+**🔵 11.2 Write function sph that takes radius and returns the area and volume**
 
 ```q
+/ v = 4/3 * pi * r^3
+/ a = 4 * pi * r^2
+
 sph: { [r] pi:-4*atan -1; a:(4%3)*pi*r xexp 3; v:4*pi*r xexp 2; `area`volume ! (a;v)}
-```
-```q
 sph[1]
+
+key    | value
+----------------
+area   | 4.18
+volume | 12.56
+
+/ define argument [r]
+/ define variable pi with formula
+/ define variable a with formula
+/ define variable v with formula
+/ show dictionary with symbols `area `volume against values a and v
 ```
-key|value
--|-
-area	|4.18
-volume |	12.56
-
-* define argument [r]
-* define variable pi with formula
-* define variable a with formula
-* define variable v with formula
-* show dictionary with symbols `area `volume against values a and v
-
-<hr>
 
 **🔵 11.3 Create function setc that takes one argument and sets the global value c to that argument**
 ```q
 setc: {c::x}
 setc[10]
 c
-```
-10
-* setc 10 = setting x = 10 (implicit variable)
-* since x = 10, and you've set c as the global variable to x, then c = 10
 
-```q
+10
+/ setc 10 = setting x = 10 (implicit variable)
+/ since x = 10, and you've set c as the global variable to x, then c = 10
+
 setc `hi
 c
-```
 `hi
-* you set setc = `hi, so c = x = `hi
 
-<hr>
+/ you set setc = `hi, so c = x = `hi
+```
 
 **🔵 11.4 Given raise:{x xexp y}, create function that is projection of the raise. Ex, root[9] = 3**
 ```q
 raise: {x xexp y}
 root: raise[ ; 0.5]
 root[9]
-```
 3
-* an embedded function is a function within another function
-* root function sets y as 0.5
-* so root 9 =x
 
-<hr>
+/ an embedded function is a function within another function
+/ root function sets y as 0.5
+/ so root 9 =x
+```
 
 **🔵 11.5 Convert all entries of list L to a string**
-* list of long, sym, and boolean
 ```q
 l: (100;`price;1b)
 string l
-```
 "100"
 "price"
 "1b"
 
-* remember, mixed lists have to be contained in parathesis ( )
-
-<hr>
+/ l is a list of long, sym, and boolean
+/ remember, mixed lists have to be contained in parathesis ( )
+```
 
 **🔵 11.6 Given the string, find and replace "cow" with "kangaroo"**
 
 ```q
 st: "the cow jumped over the moon"
 ssr [st; "cow";"kangaroo"]
-```
 "the kangaroo jumped over the moon"
-* ssr = string search replace.
-* syntax = ssr [listname + find this + replace with this]
 
-<hr>
+/ ssr = string search replace.
+/ syntax = ssr [listname + find this + replace with this]
+```
 
 **🔵 11.7 Create function sayHi that takes 2 arguments, first one name, second one age and behaves as follows:**
-
-sayHi("joe";90] \
-"hello 90 year old joe"
-
+```q
+/ sayHi["joe";90]
+/ "hello 90 year old joe"
+```
 ```q
 sayHi:{[name;age] "hello ", string[age]," year old ", name}
 sayHi["joe";90]
-```
 hello 90 year old joe
-* name and age are your arguments
-* "hello" and "year old" are simply lists of characters
-* you have to convert raw data values into strings, use , to concatenate the strings together
-* need to convert [age] to string
-* when you define argument "joe" have to use parathesis otherwise wont work
 
-<hr>
+/ name and age are your arguments
+/ "hello" and "year old" are simply lists of characters
+/ you have to convert raw data values into strings, use , to concatenate the strings together
+/ need to convert [age] to string
+/ when you define argument "joe" have to use parathesis otherwise wont work
+```
 
 **🔵 11.8 I have a box of 7 eggs, find the median and average weight**
-
+```q
 eggs: 10 20 30 40 50 60 70
 
-```q
 med eggs
-```
-40
-```q
-avg eggs
-```
 40
 
+avg eggs
+40
+```
 <hr>
 
 **🔵 11.9 I sold 2 boxes of eggs. 1 box had 10 eggs and i sold it for 50 each. the other box had 20 eggs and sold it for 100 each. find the average price paid per egg**
 
 ```q
 10 20 wavg 50 100
-```
 83.3
-* wavg = weight average function
 
-<hr>
+/ wavg = weight average function
+/ num1 num2 wavg value1 value2
+
+```
 
 **🔵 11.10 Generate list k of 10 random integers. Find the moving average with window size of 3**
 ```
 k: 10?10
 mavg[3;k]
-```
 8 4.5 6 5 6 5 5.33 4.33 5 4.67
 
-**Find the 3 largest numbers in list k**
+/ Find the 3 largest numbers in list k
 
-```q
 3#desc k
-```
 9 8 8 
-* take 3 of the largest from k, sort by desc
 
-**Find the difference between the successive elements of k**
+/ take 3 of the largest from k, sort by desc
 
-```q
+/ Find the difference between the successive elements of k
+
 deltas k
-```
 8 -7 8 -4 -1 2 0 -5 7 -3
-
-<hr>
+```
 
 **🔵 11.11 Create function factw, using a loop to write a factorial function**
 ```q
 factw:{r:i:1; while[i<=x; r*:i; i+:1];r}
 factw 3
-```
-6
-* x is implicit variable= 3
-* set r = i = 1
-* while i(1) <= x(3) TRUE, execute following statements
-* r = r(1) * i(1) = 1
-* i = i(1) + 1 = 2
+
+/ x is implicit variable= 3
+/ set r = i = 1
+/ while i(1) <= x(3) TRUE, execute following statements
+/ r = r(1) * i(1) = 1
+/ i = i(1) + 1 = 2
 
 i(2) <= x(3) TRUE, so continue executing
-* r = r(1) x i(2) = 2
-* i = i(2) + 1 = 3
+/ r = r(1) x i(2) = 2
+/ i = i(2) + 1 = 3
 
 i(3) <= x(3) TRUE
-* r = r(2) x i(3) = 6
-* i = i(3) + 1 = 4
+/ r = r(2) x i(3) = 6
+/ i = i(3) + 1 = 4
 
 i(4) <= x(3) FALSE, so returns r = 6
-
-<hr>
+```
 
 **🔵 11.12 Re-create the factorial function as factp without using loops**
 ```q
 factp:{prd 1+til x}
 factp 3
-```
 6
-* x = implicit variable. 
-* right to left (til 6 = 0 1 2...5) + 1, multiplie together
 
-<hr>
+/ x = implicit variable. 
+/ right to left (til 6 = 0 1 2...5) + 1, multiplie together
+```
+
 
 **🔵 11.13 Demonstrate which calculation is faster, factorial using loops or via KDB**
 ```q
 \ts do[1000;factw 12]
-```
 4 1008
-* 4 miliseconds 1008 bytes of memory
 
-```q
+/ 4 miliseconds 1008 bytes of memory
+
 \ts do[1000;factp 12]
-```
 0 1008
-* 0 miliseconds 1008 bytes of memory
 
-<hr>
+/ 0 miliseconds 1008 bytes of memory
+```
 
 **🔵 11.14 Create function safefact that wraps factp with protected evaluation to return null On instead of error when calling on a negattive number**
 ```q
 safefact:{@[factp; x; 0N]}
 safefact -10
-```
 0N
-* apply factp, if true, return x, if false, return 0N
 
-<hr>
+/ apply factp, if true, return x, if false, return 0N
+```
+
 
 **🔵 11.15 Write function isPalindrome that returns `yes if single argument is a palindrome list. Otherwise return `no**
 ```q
 isPalindrome:{$[x~reverse x;`yes;`no]}
 isPalindrome 1 2 2 1
-```
 yes
-* $ means if/else statement
-* if x is the reverse of x, return yes. otherwise, no
-* remember, ~ is the match function
-* x = list of numbers
 
-<hr>
+/ $ means if/else statement
+/ if x is the reverse of x, return yes. otherwise, no
+/ remember, ~ is the match function
+/ x = list of numbers
+```
 
 **🔵 11.16 Find the sum of all multiples of 3 or 5 below 1000**
 ```q
 sum where {(0 =x mod 3) or (0 = x mod 5)}[til 1000]
-```
-233168
-* sum where = adds everything together
-* 0 = x mod 3/5 = no remainders when x is divdied by 3 or 5 = multiples of 3 or 5
-x = implicit variable
-til 1000 = implicit variable (runs through 0...999)
 
-<hr>
+233168
+
+/ sum where = adds everything together
+/ 0 = x mod 3/5 = no remainders when x is divdied by 3 or 5 = multiples of 3 or 5
+/ x = implicit variable
+/ til 1000 = implicit variable (runs through 0...999)
+```
+
 
 <a name="tables_header"></a>
 ## 🔴 12. Tables
