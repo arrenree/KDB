@@ -3711,7 +3711,7 @@ c   13    130
 ```q
 / vertical joins
 / keeps columns, adds additional rows
-/ both tables must have same schema (column names + types)
+/ both tables MUST HAVE SAME SCHEMA (column names + types)
 
 t1
 sym  side price size
@@ -3772,7 +3772,43 @@ t1,-5#trade
 
 / combining first 5 rows with last 5 rows 
 ```
+### LEFT JOIN on tables
 
+```q
+/ using left join to join tables
+
+t1:([]sym:`a`b`c;ex:`one`two`three;size:100 200 300)
+t2:([]sym:`a`b`c;ex:`one`two`three;price:0.1 0.2 0.3)
+
+t1
+sym |ex   | size
+-----------------
+a   |one  | 100
+b   |two  | 200
+c   |three| 300
+
+t2
+sym |ex   | prrice
+-----------------
+a   |one  | 0.1
+b   |two  | 0.2
+c   |three| 0.3
+
+/ to use LEFT JOIN to join tables, the tables must first be keyed!
+
+2!t1
+2!t2
+
+/ keys first 2 cols of both t1 and t2
+
+(2!t1) lj (2!t2)
+
+sym |ex   | size | price
+-------------------------
+a   |one  | 100  | 0.1
+b   |two  | 200  | 0.2
+c   |three| 300  | 0.3
+```
 
 <a name="find_table"></a>
 ### 🔵 12.19 Find on Tables
@@ -4190,7 +4226,7 @@ e  |john|    ts  | 15
 ```
 
 <a name="upsert_keys"></a>
-### 🔵 14.7 Upserting Keys
+### 🔵 14.7 Upserting Keyed Rows / Tables
 
 ```q
 nd: ( [id:`e`f] name:`dan`kate; employer:`walmart`walmart; age:200 200)
@@ -4258,7 +4294,7 @@ employer|loc |size|area
 ```
 
 <a name="retrieve_value_keys"></a>
-### 🔵 14.9 Retrieving Values from Keyed Table
+### 🔵 14.9 Retrieving Values as Tables from Keyed Table
 
 ```q
 id |name|employer|age
@@ -4277,6 +4313,7 @@ jane| citi   |11
 jim | citi   |22
 
 / retrieves rows based on the values in column id (a and b)
+/ returning data as a non-keyed table
 
 or
 
@@ -4290,7 +4327,10 @@ id|name |employer|age
 / uses the #take function to lookup values in column id
 / notice it also returns the key column (id)
 ```
+
 ```q
+/ retrieve values from et where key = ms and hk
+
 Table et
 employer|loc |size|area
 -----------------------
@@ -4315,6 +4355,8 @@ size|area
  10 | 1
 
 / looks up values for both ms+HK (returns 30 and 3) and kx+NY (returns 10 and 1)
+
+
 ```
 <a name="retrieve_value_keys"></a>
 ### 🔵 14.10 xgroup/ungroup Tables
@@ -4348,70 +4390,64 @@ ungroup select price, size, cond by sym, date, time from trade
 [Top](#top)
 
 **🔵 15.1 Create the following keyed table**
-
+```q
 table p
 
-`book` | `ticker`|size
--|-|-
-`A`| `MS`| 100
-`B`| `AAPL`| 200
-`B`| `MS`| 300
-`C`| `C`| 400
-
-```Q
-p: ( [book:`A`B`B`C; ticker:`MS`AAPL`MS`C] size:100 200 300 400)
+`book`| `ticker`| size
+----------------------
+`A`   | `MS`    | 100
+`B`   | `AAPL`  | 200
+`B`   | `MS`    | 300
+`C`   | `C`     | 400
 ```
-* book and ticker are keys
-* must use backtick for values
-* no ; after the []
-* no commas between values
 
-<hr>
+```q
+p: ( [book:`A`B`B`C; ticker:`MS`AAPL`MS`C] size:100 200 300 400)
+
+/ book and ticker are keys
+/ must use backtick for values
+/ no ; after the []
+/ no commas between values
+```
 
 **🔵 15.2 Retrieve entries where book is B, using select**
 ```q
 select from p where book=`B
-```
-book | ticker|size
--|-|-
-`B`| `AAPL`| 200
-`B`| `MS`| 300
 
-<hr>
+book | ticker|size
+------------------
+`B`  | `AAPL`| 200
+`B`  | `MS`  | 300
+```
 
 **🔵 15.3 Retrieve entries where book is C and ticker is c, using take**
 ```q
 ( [book:enlist`C; ticker:enlist`C]) # p
-```
-book | ticker|size
--|-|-
-`C`| `C`| 400
 
-* underlying table p has 2 keyed columns (book and ticker)
-* you cannot retrieve 2 keyed columns if underlying table only has 1 key column
+book | ticker| size
+-------------------
+`C`  | `C`   | 400
+
+/ need to use enlist since only one row
+
+```
 
 **🔵 15.4 Upsert the following values**
-
-table p
-
-`book` | `ticker`|size
--|-|-
-`A`| `MS`| 100
-`B`| `AAPL`| 200
-`B`| `MS`| 300
-`C`| `C`| **400**
-**`D`**|**`MS`**|**500**
-
 ```q
-upsert [p; ([book:`C`D; ticker:`C`MS]size:400 500)]
-```
+p
 `book` | `ticker`|size
--|-|-
-`A`| `MS`| 100
-`B`| `AAPL`| 200
-`B`| `MS`| 300
-`C`| `C`| 400
-`D`|`MS`|500
+----------------------
+`A`    | `MS`    | 100
+`B`    | `AAPL`  | 200
+`B`    | `MS`    | 300
+`C`    | `C`     |**400**
+**`D`**|**`MS`** |**500**
+
+upsert [p; ([book:`C`D; ticker:`C`MS]size:400 500)]
+
+/ for `C`C -> updates old value to 400
+/ `D`MS 500 -> adds new row
+```
 
 <hr>
 
