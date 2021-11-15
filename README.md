@@ -111,7 +111,8 @@
 15. [Insert Rows Table](#insert_table)
 16. [Upsert Rows Table](#upsert_table)
 17. [Operations on Tables](#operations_table)
-18. [Joins](#joins_table)
+18. [Joins on Tables](#joins_table)
+19. [Find on Tables](#find_table)
 
 ## 13. [Tables Problem Set](#tables_problem_set)
 
@@ -3640,7 +3641,7 @@ guava	30
 ```
 
 <a name="operations_table"></a>
-### 🔵 12.16 Operations on Tables
+### 🔵 12.17 Operations on Tables
 
 ```q
 / with KEYED tables, you can use arithmetic between tables
@@ -3705,7 +3706,7 @@ c   13    130
 ```
 
 <a name="joins_table"></a>
-### 🔵 12.17 Joins on Tables
+### 🔵 12.18 Joins on Tables
 
 ```q
 / vertical joins
@@ -3773,8 +3774,8 @@ t1,-5#trade
 ```
 
 
-<a name="joins_table"></a>
-### 🔵 12.17 Find on Tables
+<a name="find_table"></a>
+### 🔵 12.19 Find on Tables
 
 ```q
 t: ([] a: 1 2 3; b: 4 5 6; c: 7 8 9)
@@ -3796,6 +3797,25 @@ t? (2 5 8; 3 6 9)
 
 / can find more than 1 list of indices at once
 / returns list of indices
+```
+
+```q
+/ find first index position where chem appears in tab2
+
+tab1:([id:"abc"]pupil:`john`paul`rachel;subject:`maths`physics`chem;mark:96 55 82)
+
+id| pupil |subject  | mark
+--------------------------
+a | john  | maths   | 96
+b | paul  | physics | 55
+c | rachel| chem    | 82
+
+tab2[`subject]?`chem
+2
+
+/ you can lookup index position by finding VALUE from table[col_name]
+/ syntax = tablename[col_name]?`sym
+
 ```
 
 <hr>
