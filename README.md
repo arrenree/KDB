@@ -20,6 +20,7 @@
 15. [+:](#pluscolon)
 16. [Multi-line Comment](#multilinecomment)
 17. [Signum](#signum)
+18. [Cross](#cross_operator)
 
 ## 2. [Data Types & Casting & Enumeration](#casting_header)
 1. [Datatype Table](#datatype_table)
@@ -594,6 +595,72 @@ tickdirection: {signum deltas[first x;x]}
 tickdirection prices
 
 ```
+
+<a name="cross_operator"></a>
+### 🔵 1.18 Cross 
+
+```q
+x cross y
+/ cross returns all possible combinations of x and y
+/ note - does NOT multiply or add
+
+1 cross 3 4
+1 3
+1 4
+
+/ x(1) to y(3)
+/ x(1) to y(4)
+  
+1 2 cross 3 4
+1 3
+1 4
+2 3
+2 4
+
+/ x(1) to y(3)
+/ x(1) to y(4)
+/ x(2) to y(3)
+/ x(2) to y(4)
+```
+```q
+/ also works on tables
+
+s:`IBM`MSFT`AAPL
+v: 1 2
+
+([]s) cross ([]v)
+
+s    | v
+---------
+IBM  | 1
+IBM  | 2
+MSFT | 1
+MSFT | 2
+AAPL | 1
+AAPL | 2
+
+/ so takes every element of s (IBM, MSFT, AAPL) and combines with every element of v (1 2)
+```
+```q
+/ useful for building xbar timeseries
+
+time: 09:00u 09:15u 09:30u 09:45u
+sym: `GOOG`IBM
+
+([] sym) cross ([] time)
+
+sym  | time
+------------
+GOOG | 09:00
+GOOG | 09:15
+GOOG | 09:30
+GOOG | 09:45
+IBM  | 09:00
+IBM  | 09:15
+IBM  | 09:30
+IBM  | 09:45
+```
+
 
 <hr>
 
