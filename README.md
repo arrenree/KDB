@@ -250,6 +250,8 @@
 9. [@ Apply](#at_apply)
 10. [. Apply](#dot_apply)
 
+## 33. [Racking](#racking)
+
 
 <hr>
 
@@ -9119,7 +9121,7 @@ x[y]
 11
 ```
 <a name="operator_at"></a>
-### 🔵 30.2 @ Operator
+### 🔵 32.2 @ Operator
 
 ```q
 / @ is used for single dimensional lists
@@ -9137,7 +9139,7 @@ list1[index]
 ```
 
 <a name="operator_dot"></a>
-### 🔵 30.3 . Operator
+### 🔵 32.3 . Operator
 
 ```q
 / . is used for nested lists
@@ -9181,7 +9183,7 @@ list[1 2;2 1]
 ```
 
 <a name="amending_at"></a>
-### 🔵 30.4 Amending List Items using @
+### 🔵 32.4 Amending List Items using @
 ```q
 / amending using square bracket colon method [ ]:
 
@@ -9228,7 +9230,7 @@ list: "abcde"
 ```
 
 <a name="amending_dot"></a>
-### 🔵 30.5 Amending List Items using .
+### 🔵 32.5 Amending List Items using .
 
 ```q
 / add 5 to each item in rows 1 and 2 and columns 1 and 2
@@ -9250,7 +9252,7 @@ list: (8 4 2; 9 3 1; 5 7 6)
 ```
 
 <a name="advanced_at"></a>
-### 🔵 30.6 Advanced use @ index
+### 🔵 32.6 Advanced use @ index
 
 ```q
 / l is a mixed list of syms and ints
@@ -9265,7 +9267,7 @@ m: `a`b!100 200
 ```
 
 <a name="advanced_at"></a>
-### 🔵 30.7 Using . index with database tables
+### 🔵 32.7 Using . index with database tables
 
 ```q
 / can index into simple table using . operator
@@ -9292,7 +9294,7 @@ msft|  9.8  | 6
 ```
 
 <a name="zero_dot"></a>
-### 🔵 30.8 zero dimensional amend (dot operator)
+### 🔵 32.8 zero dimensional amend (dot operator)
 
 ```q
 / .index allows us to amend entire object at once by passing in empty set of indices
@@ -9314,7 +9316,7 @@ list: (1 2;3 4 5;6 7 8 9)
 ```
 
 <a name="at_apply"></a>
-### 🔵 30.9 @ Apply
+### 🔵 32.9 @ Apply
 ```q
 / @ is used when function takes single argument
 / . is used when function takes multiple arguments
@@ -9353,7 +9355,7 @@ a| b | c
 ```
 
 <a name="dot_apply"></a>
-### 🔵 30.10 . Apply
+### 🔵 32.10 . Apply
 ```q
 g:{x+y}
 
@@ -9364,6 +9366,150 @@ g[4;5]
 
 .[g;(4;5)]
 9
+```
+
+<a name="racking"></a>
+## 🔴 33. Racking
+[Top](#top)
+
+```q
+
+trade:([] sym:`GOOG`IBM`GOOG`IBM`IBM; 
+       time: 09:00 09:01 09:20 09:32 09:34; 
+       size: 200 100 1200 200 400; 
+       price: 30.9 36 30.9 36.1 36.2)
+
+sym  | time  | size | price
+---------------------------
+GOOG | 09:00 |  200 | 30.9
+IBM  | 09:01 |  100 | 36.0
+GOOG | 09:20 | 1200 | 30.9
+IBM  | 09:32 |  200 | 36.1
+IBM  | 09:34 |  400 | 36.2
+
+/ lets bucket the size by sym in 15 min windows
+
+select sum size by sym, 15 xbar time.minute from trade
+
+sym  | minute | size
+---------------------
+GOOG | 09:00  |  200
+GOOG | 09:15  |	1200
+IBM  | 09:00  |  100
+IBM  | 09:30  |  600
+
+/ but not all syms + time buckets are present
+/ ex, GOOG @ 9:30 isn't present
+```
+
+```q
+/1 start by creating complete list of buckets
+
+start: 09:00
+end: 09:59
+bucket: 15
+
+/ so each bucket will be 15 mins
+
+/2 number of buckets required for time span (end-start)
+
+(end-start) % bucket
+3.933
+
+/ round up to whole number
+
+ceiling (end-start) % bucket
+4
+
+/ ceiling function will round 3.933 up to 4
+```
+
+```q
+/3 create list of buckets by creating list of integers to num of buckets
+/ this is done by multiplying each element x bucket size (15)
+
+bucket * til ceiling (end-start) % bucket
+0 15 30 45
+
+/ bucket x til 4
+/ 15 x 0 1 2 3
+
+/4 add start time by making list of time buckets and rename as times
+
+times: start+bucket * til ceiling (end-start) % bucket
+09:00u; 09:15u; 09:30u; 09:45u
+```
+
+```q
+/4 cross distinct syms with times list you just created
+/ and sort by sym
+
+rack:(`sym xasc select distinct sym from trade) cross ([] minute:times)
+
+sym  | minute
+-------------
+GOOG | 09:00
+GOOG | 09:15
+GOOG | 09:30
+GOOG | 09:45
+IBM  | 09:00
+IBM  | 09:15
+IBM  | 09:30
+IBM  | 09:45
+```
+
+```q
+
+/5 Now that you've created rack, join on original trade table with the xbar you want
+
+rack # select sum size, last price by sym, bucket xbar time.minute from trade
+
+sym  | time  | size | price
+---------------------------
+GOOG | 09:00 |  200 | 30.9
+GOOG | 09:15 | 1200 | 30.9
+GOOG | 09:30 |	    |	
+GOOG | 09:45 |	    |	
+IBM  | 09:00 | 100  | 36.0
+IBM  | 09:15 |	    |	
+IBM  | 09:30 | 600  | 36.2
+IBM  | 09:45 |      |		
+```
+
+```q
+/6 update null size with 0
+
+update 0^size from rack # select sum size, last price by sym, bucket xbar time.minute from trade
+
+sym  | time  | size | price
+---------------------------
+GOOG | 09:00 |  200 | 30.9
+GOOG | 09:15 | 1200 | 30.9
+GOOG | 09:30 |	  0 |	
+GOOG | 09:45 |	  0 |	
+IBM  | 09:00 |  100 | 36.0
+IBM  | 09:15 |	  0 |	
+IBM  | 09:30 |  600 | 36.2
+IBM  | 09:45 |    0 |	
+```
+
+```q
+/7 update null price with last price
+
+update fills price by sym from update 0^size 
+from rack # select sum size, last price by sym, 
+bucket xbar time.minute from trade
+
+sym  | time  | size | price
+---------------------------
+GOOG | 09:00 |  200 | 30.9
+GOOG | 09:15 | 1200 | 30.9
+GOOG | 09:30 |	  0 | 30.9	
+GOOG | 09:45 |	  0 | 30.9	
+IBM  | 09:00 |  100 | 36.0
+IBM  | 09:15 |	  0 | 36.0	
+IBM  | 09:30 |  600 | 36.2
+IBM  | 09:45 |    0 | 36.2	
 ```
 
 
