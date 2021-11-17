@@ -9527,7 +9527,7 @@ IBM  | 09:45
 
 ```q
 
-/5 Now that you've created rack, join on original trade table with the xbar you want
+/5 Join rack with original xbar table using # take operator
 
 rack # select sum size, last price by sym, bucket xbar time.minute from trade
 
