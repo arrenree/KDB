@@ -9439,6 +9439,34 @@ g[4;5]
 ## 🔴 33. Racking
 [Top](#top)
 
+### Loading AQ fakedb.q script
+
+```q
+\l fakedb.q
+
+makehdb[`:hdb;10;1000;1000]
+
+/ `: directory name
+/ 10 = number of partitions
+/ 1000 = trades in each table
+/ 1000 = number of quotes in each table
+
+\l hdb
+
+tables[]
+`depth`quotes`trades
+
+/ to view the tables, you have to use select
+
+select from trades
+
+date       | sym  | time                       | src | price | size
+--------------------------------------------------------------------
+2014-04-21 | AAPL | 2014-04-21T08:00:44.437000 | O   | 25.34 | 1785
+2014-04-21 | AAPL | 2014-04-21T08:04:41.246000 | L   | 25.34 |  427
+2014-04-21 | AAPL | 2014-04-21T08:04:47.586000 | L   | 25.34 | 1528
+```
+
 ```q
 
 trade:([] sym:`GOOG`IBM`GOOG`IBM`IBM; 
