@@ -252,6 +252,9 @@
 10. [. Apply](#dot_apply)
 
 ## 33. [Racking](#racking)
+1. [Loading fakedb.q Script](#loadfakedb)
+2. [Racking](#racking)
+3. [Alignment](#alignment)
 
 
 <hr>
@@ -9439,6 +9442,11 @@ g[4;5]
 ## 🔴 33. Racking
 [Top](#top)
 
+
+<a name="loadfakedb"></a>
+### 🔵 33.1 Loading fakedb.q script
+
+
 ### Loading AQ fakedb.q script
 
 ```q
@@ -9466,6 +9474,9 @@ date       | sym  | time                       | src | price | size
 2014-04-21 | AAPL | 2014-04-21T08:04:41.246000 | L   | 25.34 |  427
 2014-04-21 | AAPL | 2014-04-21T08:04:47.586000 | L   | 25.34 | 1528
 ```
+
+<a name="racking"></a>
+### 🔵 33.2 Racking xbar
 
 ```q
 
@@ -9605,6 +9616,145 @@ IBM  | 09:00 |  100 | 36.0
 IBM  | 09:15 |	  0 | 36.0	
 IBM  | 09:30 |  600 | 36.2
 IBM  | 09:45 |    0 | 36.2	
+```
+
+<a name="alignment"></a>
+### 🔵 33.3 Alignment
+
+```q
+/ align 2 sets of asynchronous timeseries data where the timestamps dont match
+/ could be aligning different syms, ie, GOOG and IBM
+```
+
+```q
+/ quick recap on AJ
+
+\l fakedb.q
+makehdb[`:hdb;10;1000; 1000]
+\l hdb
+
+trades1:select time, sym, price, size from trades where date in 2014.04.21
+
+time                       | sym  | price | size
+-------------------------------------------------
+2014-04-21T08:00:44.437000 | AAPL | 25.34 | 1785
+2014-04-21T08:04:41.246000 | AAPL | 25.34 |  427
+2014-04-21T08:04:47.586000 | AAPL | 25.34 | 1528
+...
+
+quotes1: select time, sym, bid, ask from quotes where date in 2014.04.21
+
+time                       | sym  | bid   | ask
+-------------------------------------------------
+2014-04-21T08:05:56.520000 | AAPL | 25.34 | 25.35
+2014-04-21T08:18:39.592000 | AAPL | 25.34 | 25.35
+2014-04-21T08:23:23.765000 | AAPL | 25.330| 25.38
+...
+
+aj[`sym`time;trades1;quotes1]
+
+/ aj will make an exact match on sym, then asof match on time
+/ pulls in prevailing bid or ask from latest time
+
+time                       | sym  | price | size | bid   | ask
+----------------------------------------------------------------
+2014-04-21T08:00:44.437000 | AAPL | 25.34 | 1785 |	 |	
+2014-04-21T08:04:41.246000 | AAPL | 25.34 |  427 |	 |	
+2014-04-21T08:04:47.586000 | AAPL | 25.34 | 1528 |	 |	
+2014-04-21T08:08:09.192000 | AAPL | 25.35 | 8136 | 25.34 | 25.35
+2014-04-21T08:11:23.934000 | AAPL | 25.35 | 8945 | 25.34 | 25.35
+2014-04-21T08:12:58.862000 | AAPL | 25.35 | 6577 | 25.34 | 25.35
+```
+```q
+/ what if we want to align prices and cum vol of 2 diff sym?
+/ for ex, compare price and vol of AAPL and GOOG
+
+apple: select time, Appleprice: price, AppletoVol: sums size from trades1 where sym in `AAPL
+
+/ need to use sums to get cum vol at specific time + price
+/ if you just use sum, it will simply add together all sizes
+
+time                       | Appleprice | AppletoVol
+----------------------------------------------------
+2014-04-21T08:00:44.437000 | 25.34      | 1785
+2014-04-21T08:04:41.246000 | 25.34      | 2212
+2014-04-21T08:04:47.586000 | 25.34      | 3740
+
+google: select time, Googleprice: price, GoogletoVol: sums size from trades1 where sym in `GOOG
+
+time                       | Googleprice | GoogletoVol
+------------------------------------------------------
+2014-04-21T08:02:44.628000 | 41.36       | 493
+2014-04-21T08:07:14.804000 | 41.36       | 817
+
+aj[`time;apple;google]
+
+time                       | Appleprice | AppletoVol | Googleprice | GoogletoVol
+----------------------------------------------------------------------------------
+2014-04-21T08:00:44.437000 | 25.34      | 1785	     |             |
+2014-04-21T08:04:41.246000 | 25.34	| 2212	     | 41.36       | 493
+2014-04-21T08:04:47.586000 | 25.34	| 3740	     | 41.36       | 493
+2014-04-21T08:08:09.192000 | 25.35	| 11876      | 41.36       | 817
+```
+
+<a name="pivot"></a>
+### 🔵 33.3 Pivoting
+
+```q
+/ pivoting used for swapping row values to column values
+
+tab1: ([] sym:`GOOG`IBM`GOOG`APPL; time: 09:00 09:01 09:04 09:10; price: 30.1 28.2 30.2 42.3)
+
+sym  | time  | price
+--------------------
+GOOG | 09:00 | 30.1
+IBM  | 09:01 | 28.2
+GOOG | 09:04 | 30.2
+APPL | 09:10 | 42.3
+
+/1 extract distinct syms (this will be your new column headers)
+
+exec distinct sym from tab1
+`GOOG`IBM`AAPL
+
+/2 sort col names ascending
+
+colnames: asc exec distinct sym from tab1
+`AAPL`GOOG`IBM
+
+/3 add the sorted attribute
+
+`s#`AAPL`GOOG`IBM
+
+/4 
+
+exec sym!price by time from tab1
+
+key   | value
+--------------------
+09:00 |	,`GOOG!,30.1
+09:01 |	,`IBM!,28.2
+09:04 |	,`GOOG!,30.2
+09:10 |	,`APPL!,42.3
+
+pivtab1: exec colnames#sym!price by time:time from tab1
+
+time  | AAPL | GOOG | IBM
+---------------------------
+09:00 |	     | 30.1 |	
+09:01 |	     |      | 28.2
+09:04 |	     | 30.2 |	
+09:10 |	42.3 |      |		
+
+
+pivtab1: fills exec colnames#sym!price by time:time from tab1
+
+time  | AAPL | GOOG | IBM
+---------------------------
+09:00 |	     | 30.1 |	
+09:01 |	     | 30.1 | 28.2
+09:04 |	     | 30.2 | 28.2	
+09:10 |	42.3 | 30.2 | 28.2	
 ```
 
 
