@@ -9479,7 +9479,13 @@ date       | sym  | time                       | src | price | size
 ```
 
 <a name="racking"></a>
-### 🔵 33.2 Racking xbar
+### 🔵 33.2 Racking
+```q
+/ a common operation is to aggregate data using xbar
+/ xbar only produces buckets where there is a value
+/ if we need a timeseries where all values are present
+/ then need to create a rack of times to join data to
+```
 
 ```q
 
@@ -9512,7 +9518,7 @@ IBM  | 09:30  |  600
 ```
 
 ```q
-/1 start by creating complete list of buckets
+/1 start by creating complete list of buckets (need start + end + buckets)
 
 start: 09:00
 end: 09:59
@@ -9525,7 +9531,7 @@ bucket: 15
 (end-start) % bucket
 3.933
 
-/ round up to whole number
+/3 round up to whole number
 
 ceiling (end-start) % bucket
 4
@@ -9534,7 +9540,7 @@ ceiling (end-start) % bucket
 ```
 
 ```q
-/3 create list of buckets by creating list of integers to num of buckets
+/4 create list of buckets by creating list of integers to num of buckets
 / this is done by multiplying each element x bucket size (15)
 
 bucket * til ceiling (end-start) % bucket
@@ -9543,15 +9549,14 @@ bucket * til ceiling (end-start) % bucket
 / bucket x til 4
 / 15 x 0 1 2 3
 
-/4 add start time by making list of time buckets and rename as times
+/5 add start time by making list of time buckets and rename as times
 
-times: start+bucket * til ceiling (end-start) % bucket
+times: start + bucket * til ceiling (end-start) % bucket
 09:00u; 09:15u; 09:30u; 09:45u
 ```
 
 ```q
-/4 cross distinct syms with times list you just created
-/ and sort by sym
+/6 cross distinct syms with times list you just created and sort by sym
 
 rack:(`sym xasc select distinct sym from trade) cross ([] minute:times)
 
@@ -9565,11 +9570,12 @@ IBM  | 09:00
 IBM  | 09:15
 IBM  | 09:30
 IBM  | 09:45
+
+/ this creates a "rack" of every sym and every 15 min time bucket
 ```
 
 ```q
-
-/5 Join rack with original xbar table using # take operator
+/7 join rack with original xbar table using # take operator
 
 rack # select sum size, last price by sym, bucket xbar time.minute from trade
 
@@ -9583,6 +9589,9 @@ IBM  | 09:00 | 100  | 36.0
 IBM  | 09:15 |	    |	
 IBM  | 09:30 | 600  | 36.2
 IBM  | 09:45 |      |		
+
+/ can also join using left join
+/ rack lj select sum size, last price by sym, bucket xbar time.minute from trade
 ```
 
 ```q
@@ -9668,6 +9677,7 @@ time                       | sym  | price | size | bid   | ask
 2014-04-21T08:11:23.934000 | AAPL | 25.35 | 8945 | 25.34 | 25.35
 2014-04-21T08:12:58.862000 | AAPL | 25.35 | 6577 | 25.34 | 25.35
 ```
+
 ```q
 / what if we want to align prices and cum vol of 2 diff sym?
 / for ex, compare price and vol of AAPL and GOOG
