@@ -256,6 +256,9 @@
 2. [Racking](#racking)
 3. [Alignment](#alignment)
 
+## 34. [Profiling](#profiling)
+
+
 
 <hr>
 
@@ -9761,6 +9764,132 @@ time  | AAPL | GOOG | IBM
 09:01 |	     | 30.1 | 28.2
 09:04 |	     | 30.2 | 28.2	
 09:10 |	42.3 | 30.2 | 28.2	
+```
+
+<a name="profiling"></a>
+### 🔵 34 Profiling
+```q
+/ profiling compares activity for a specific time period against the average activity (profile) over a wider period
+/ for example, compares trading vol on specific date vs average daily volume over a period
+
+1. calc Average Daily Profile by dividing each day into time slices
+2. sum trading activity in each time slice
+3. creating a cumulative sum of full day
+4. then averaging these cumulative sums
+```
+
+```q
+/1 define date range
+
+dts: (2014.04.22; 2014.05.22)
+```
+
+```q
+/2 select cumulative size grouped by date, sym, and 5 min time buckets
+
+p: select sum size by date, sym, 5 xbar time.minute from trades where date within dts
+
+date      | sym  | minute| size
+--------------------------------
+2014-04-22| AAPL | 08:00 | 17377
+2014-04-22| AAPL | 08:15 | 252
+2014-04-22| AAPL | 08:20 | 8716
+2014-04-22| AAPL | 08:25 | 2456
+
+/ grouped by date, sym, minute
+```
+
+```q
+/3 update p (size) to get cumulative sum for each day (cumulative for each 5 min bucket)
+
+p: update sums size by date,sym from p
+
+date      | sym  | minute| size
+--------------------------------
+2014-04-22| AAPL | 08:00 | 17377
+2014-04-22| AAPL | 08:15 | 17629
+2014-04-22| AAPL | 08:20 | 26345
+2014-04-22| AAPL | 08:25 | 28801
+
+/ notice not all time buckets are filled (8:05 missing)
+```
+
+```q
+/4 calculate average volume (profile)
+
+/ sum sizes for each sym and each time slice over date range
+/ then divide by number of distinct dates
+/ aka, over this date range, what is the total vol traded on avg for this 5 min window
+
+p1: select avgcumulative: (sum size)% count distinct date by sym, minute from p
+
+sym  | minute| avgcumulative
+-----------------------------
+AAPL | 08:00 |  5046.2
+AAPL | 08:05 |  6925.8
+AAPL | 08:10 | 10805.0
+AAPL | 08:15 | 11583.8
+```
+
+```q
+/5 build a rack 
+
+/ rack = table of all distinct syms crossed with each 5 min time buckets
+/ require start and end times
+
+start: min exec minute from p1
+end: max exec minute from p1
+
+/ p1 is the table with avgcum vol for each time bucket
+/ extracts the min/max time where there is an execution
+/ start = 08:00
+/ end = 16:25
+
+rack: (select distinct sym from p) cross ([] minute: start+00:05*til 1+`int$(end-start)%00:05)
+
+sym  | minute
+-------------
+AAPL | 08:00
+AAPL | 08:05
+AAPL | 08:10
+AAPL | 08:15
+```
+
+```q
+/ breaking down the syntax:
+
+start+00:05*til 1+`int$(end-start)%00:05
+
+end-start
+/ 8:25
+
+(end-start)%00:05
+/ 101 buckets
+
+til 1 + `int$(end-start)%00:05
+/ 0 1 2 3...101
+
+00:05*til 1+`int$(end-start)%00:05
+/ 00:00, 00:05, 00:10
+/ 5 min buckets
+
+start+00:05*til 1+`int$(end-start)%00:05
+/ 08:00, 08:05, 08:10...
+```
+
+```q
+/ 6 finally, join the rack with the table of cumulative averages
+
+rack lj p1
+
+sym  | minute| avgcumulative
+----------------------------
+AAPL | 08:00 |  5046.2
+AAPL | 08:05 |  6925.8
+AAPL | 08:10 | 10805.0
+AAPL | 08:15 | 11583.8
+AAPL | 08:20 | 14399.6
+AAPL | 08:25 | 18444.8
 ```
 
 
