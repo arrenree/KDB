@@ -257,7 +257,10 @@
 3. [Alignment](#alignment)
 
 ## 34. [Profiling](#profiling)
+1. [Comparing Trading Vol vs Average Profile](#profile_one)
+2. [Creating Functions for Comparing Profiles](#profiling_func)
 
+## 35. [Trade Analysis](#tradeanalysis)
 
 
 <hr>
@@ -9777,7 +9780,12 @@ time  | AAPL | GOOG | IBM
 ```
 
 <a name="profiling"></a>
-### 🔵 34 Profiling
+## 🔴 34. Profiling
+[Top](#top)
+
+<a name="profile_one"></a>
+### 🔵 34.1 Comparing Trading Vol vs Average Profile
+
 ```q
 / profiling compares activity for a specific time period against the average activity (profile) over a wider period
 / for example, compares trading vol on specific date vs average daily volume over a period
@@ -9903,8 +9911,7 @@ AAPL | 08:25 | 18444.8
 ```
 
 <a name="profiling_func"></a>
-### 🔵 34.2 Profiling as a single function
-[Top](#top)
+### 🔵 34.2 Creating Functions for Comparing Profiles
 
 ```q
 \l fakedb.q
@@ -10013,6 +10020,143 @@ AAPL | 08:10 | 10805.0       | 4618  | 0.4274
 AAPL | 08:15 | 11583.8       | 11955 | 1.032
 AAPL | 08:20 | 14399.6       | 12151 | 0.8438
 AAPL | 08:25 | 18444.8       | 19066 | 1.033
+```
+
+<a name="tradeanalysis"></a>
+## 🔴 35. Trade Analysis
+[Top](#top)
+
+```q
+/ case study to perform some PnL trade analysis
+/ calc PnL of each trade at diff time points (before/after trade time)
+/ assume every trade is a buy trade
+/ will go to market at the trade price instead of the quoted price
+```
+
+```q
+\l fakedb.q
+makedb[1000;100000]
+
+select from trades
+
+time                       | sym  | src | price | size
+--------------------------------------------------------
+2021-11-19T08:00:00.531000 | DELL | N   | 21.7	| 4567
+2021-11-19T08:00:00.754000 | MSFT | O   | 46.51	| 436
+2021-11-19T08:00:01.007000 | NOK  | O   | 22.87	| 7915
+2021-11-19T08:00:01.025000 | CSCO | O   | 35.77 | 783
+
+/1 create copy of trade, but time coloumn shifted back 5 mins
+
+select sym, time:time-0D00:05, priceplus5: price from trades
+
+sym  | time                       | priceplus5
+-----------------------------------------------
+DELL | 2021-11-19T07:55:00.531000 | 21.7
+MSFT | 2021-11-19T07:55:00.754000 | 46.51
+NOK  | 2021-11-19T07:55:01.007000 | 22.87
+CSCO | 2021-11-19T07:55:01.025000 | 35.77
+```
+
+```q
+/2 join this onto original table using asof join
+/ this gives current trade price along with the prevailing trade price 5 mins later
+
+tab1:aj[`sym`time;trades;select sym, time:time-0D00:05, priceplus5: price from trades]
+
+time                       | sym  | src | price | size | priceplus5
+-------------------------------------------------------------------
+2021-11-19T08:00:00.531000 | DELL | N   | 21.7	| 4567 | 21.7
+2021-11-19T08:00:00.754000 | MSFT | O   | 46.51	| 436  | 46.51
+2021-11-19T08:00:01.007000 | NOK  | O   | 22.87	| 7915 | 22.87
+2021-11-19T08:00:01.025000 | CSCO | O   | 35.77 | 783  | 35.77
+```
+
+```q
+/3 add pnl column by multiplying the difference in prices by size
+
+update pnl:size*(priceplus5 - price) from tab1
+
+time                       | sym  | src | price | size | priceplus5 | pnl
+-------------------------------------------------------------------------
+2021-11-19T08:00:00.531000 | DELL | N   | 21.7	| 4567 | 21.7       | 274.02
+2021-11-19T08:00:00.754000 | MSFT | O   | 46.51	| 436  | 46.51      |   0
+2021-11-19T08:00:01.007000 | NOK  | O   | 22.87	| 7915 | 22.87      | -316
+2021-11-19T08:00:01.025000 | CSCO | O   | 35.77 | 783  | 35.77      | 0
+```
+```q
+/4 generalize this by shifting the time by a specified number of seconds
+
+sel: {select sym, time.second-x, price from trades}
+sel 10
+
+sym  | second   | price
+------------------------
+DELL | 07:59:50	| 21.7
+MSFT | 07:59:50	| 46.51
+NOK  | 07:59:51	| 22.87
+CSCO | 07:59:51	| 35.77
+```
+
+```q
+/5 rename price col using xcol to plus10
+
+sel: {(`sym`second,`$"PLUS",string x) xcol select sym, time.second-x, price from trades}
+sel 10
+
+sym  | second   | PLUS10
+------------------------
+DELL | 07:59:50	| 21.7
+MSFT | 07:59:50	| 46.51
+NOK  | 07:59:51	| 22.87
+CSCO | 07:59:51	| 35.77
+```
+
+```q
+/ this however, doesnt work with negative values
+/6 so need to add an if/else statement
+/ also use abs x to take absolute value of x
+
+sel: {(`sym`second,`$$[x<0;"MINUS";"PLUS"],string abs x) xcol select sym, time.second-x, price from trades}
+sel -10
+
+sym  | second   | MINUS10
+------------------------
+DELL | 07:59:50	| 21.7
+MSFT | 07:59:50	| 46.51
+NOK  | 07:59:51	| 22.87
+CSCO | 07:59:51	| 35.77
+```
+
+```q
+/7 now can use this function in the asof join
+
+aj[`sym`second;select sym, time.second, price, size from trades;sel 300]
+
+sym  | second   | price | size | PLUS300
+-----------------------------------------
+DELL | 08:00:00 | 21.7	| 4567 | 21.76
+MSFT | 08:00:00	| 46.51	| 436  | 46.51
+NOK  | 08:00:01	| 22.87	| 7915 | 22.83
+CSCO | 08:00:01	| 35.77	| 783  | 35.77
+```
+
+```q
+/8 retrieve new cols for prices at different times
+
+/ achieved by using the adverb over
+/ takes trade table as first x arg, and list of time values as y arg
+/ adds col if the trade price shifts forward by the first time in the list
+/ then takes this new updated table as the next x arg, then next arg as next y
+
+{aj[`sym`second;x;sel y]}/ [select sym, time.second, price, size from trades;10 20 30]
+
+sym  | second   | price | size | PLUS10 | PLUS20 | PLUS 30
+-----------------------------------------------------------
+DELL | 08:00:00 | 21.7	| 4567 | 21.76  | 21.76  | 21.76
+MSFT | 08:00:00	| 46.51	| 436  | 46.51  | 46.51  | 46.46
+NOK  | 08:00:01	| 22.87	| 7915 | 22.83  | 22.83  | 22.87
+CSCO | 08:00:01	| 35.77	| 783  | 35.77  | 35.77  | 35.78
 ```
 
 <a name="bottom"></a>
