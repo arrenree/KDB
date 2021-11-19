@@ -9713,11 +9713,13 @@ GOOG | 09:04 | 30.2
 APPL | 09:10 | 42.3
 
 /1 extract distinct syms (this will be your new column headers)
+/ use exec to extract syms as a list
 
 exec distinct sym from tab1
+
 `GOOG`IBM`AAPL
 
-/2 sort col names ascending
+/2 sort list in ascending order
 
 colnames: asc exec distinct sym from tab1
 `AAPL`GOOG`IBM
@@ -9726,7 +9728,7 @@ colnames: asc exec distinct sym from tab1
 
 `s#`AAPL`GOOG`IBM
 
-/4 
+/4 Exact dictionaries for sym!price for each time value that we have
 
 exec sym!price by time from tab1
 
@@ -9737,6 +9739,9 @@ key   | value
 09:04 |	,`GOOG!,30.2
 09:10 |	,`APPL!,42.3
 
+/5 populate dictionaries using colnames list
+/ have to also name the time col
+
 pivtab1: exec colnames#sym!price by time:time from tab1
 
 time  | AAPL | GOOG | IBM
@@ -9746,6 +9751,7 @@ time  | AAPL | GOOG | IBM
 09:04 |	     | 30.2 |	
 09:10 |	42.3 |      |		
 
+/6 forward fill the price column using fills function
 
 pivtab1: fills exec colnames#sym!price by time:time from tab1
 
