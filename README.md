@@ -9892,7 +9892,117 @@ AAPL | 08:20 | 14399.6
 AAPL | 08:25 | 18444.8
 ```
 
-
+<a name="profiling_func"></a>
+### 🔵 34.2 Profiling as a single function
 [Top](#top)
+
+```q
+\l fakedb.q
+makehdb[`:hdb;60;1000;1000]
+\l hdb
+```
+
+```q
+/1 write function that calculates avg cum vol in 5 min time buckets
+
+adv: {[startdate;enddate;bucketsize]
+
+/2 extract the bucketed totals
+p: select sum size by date,sym, bucketsize xbar time.minute from trades where date within (startdate;enddate);
+
+/3 make total cumulative
+p: update sums size by date, sym from p;
+
+/4 calc avg value across all dates
+p: select avgcumulative: (sum size)%count distinct date by sym, minute from p;
+
+/5 rack the data
+start:min exec minute from p;
+end: max exec minute from p;
+rack:(select distinct sym from p) cross ([] minute: start+bucketsize*til `int$(end - start)%bucketsize);
+
+/6 return the racked data and fill forward
+update fills avgcumulative by sym from rack lj p}
+```
+
+```q
+/7 call arguments
+
+adv[2014.04.22;2014.05.22;5]
+
+sym  | minute| avgcumulative
+----------------------------
+AAPL | 08:00 |  5046.2
+AAPL | 08:05 |  6925.8
+AAPL | 08:10 | 10805.0
+AAPL | 08:15 | 11583.8
+AAPL | 08:20 | 14399.6
+AAPL | 08:25 | 18444.8
+```
+
+```q
+/8 add comparison by joining on cumulative size data for specified date
+
+adv[2014.04.22;2014.05.22;5] lj update sums size from select sum size by sym, 5 xbar time.minute from trades where date = 2014.05.22
+
+sym  | minute| avgcumulative | size
+------------------------------------
+AAPL | 08:00 | 5046.2	     |
+AAPL | 08:05 | 6925.8	     | 4618
+AAPL | 08:10 | 10805.0       |	
+AAPL | 08:15 | 11583.8       | 11955
+AAPL | 08:20 | 14399.6       | 12151
+AAPL | 08:25 | 18444.8       | 19066
+```
+
+```q
+/9 fill forward to remove any blank values in the size column
+
+update fills size from adv[2014.04.22;2014.05.22;5] lj update sums size from select sum size by sym, 5 xbar time.minute from trades where date = 2014.05.22
+
+sym  | minute| avgcumulative | size
+------------------------------------
+AAPL | 08:00 | 5046.2	     |
+AAPL | 08:05 | 6925.8	     | 4618
+AAPL | 08:10 | 10805.0       | 4618
+AAPL | 08:15 | 11583.8       | 11955
+AAPL | 08:20 | 14399.6       | 12151
+AAPL | 08:25 | 18444.8       | 19066
+```
+```q
+/10 add comparison column that divides the size on that day over the entire date range
+
+update sizetoADV: size%avgcumulative from update fills size from adv[2014.04.22;2014.05.22;5] lj update sums size from select sum size by sym, 5 xbar time.minute from trades where date = 2014.05.22
+
+sym  | minute| avgcumulative | size  | sizetoADV
+-----------------------------------------------
+AAPL | 08:00 | 5046.2	     |       | 
+AAPL | 08:05 | 6925.8	     | 4618  | 0.6668
+AAPL | 08:10 | 10805.0       | 4618  | 0.4274
+AAPL | 08:15 | 11583.8       | 11955 | 1.032
+AAPL | 08:20 | 14399.6       | 12151 | 0.8438
+AAPL | 08:25 | 18444.8       | 19066 | 1.033
+```
+
+```q
+/11 combine everything together in one function
+
+comparetoADV:{ [startdate;enddate;bucketsize;comparisondate]
+  update sizetoAdv:size%avgcumulative from / lastly update to include comparison column
+    update fills size from / fill forward to remove blanks
+      adv[startdate;enddate;bucketsize] lj
+        update sums size from select sum size by sym, bucketsize xbar time.minute from trades where date = comparisondate}
+        
+comparetoADV[2014.04.22;2014.05.22;5;2014.05.22]
+
+sym  | minute| avgcumulative | size  | sizetoADV
+-----------------------------------------------
+AAPL | 08:00 | 5046.2	     |       | 
+AAPL | 08:05 | 6925.8	     | 4618  | 0.6668
+AAPL | 08:10 | 10805.0       | 4618  | 0.4274
+AAPL | 08:15 | 11583.8       | 11955 | 1.032
+AAPL | 08:20 | 14399.6       | 12151 | 0.8438
+AAPL | 08:25 | 18444.8       | 19066 | 1.033
+```
 
 <a name="bottom"></a>
