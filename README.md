@@ -3330,6 +3330,30 @@ ford    |    300    | 101
 
 ```
 
+```q
+/ sort using >
+
+fruit   grocer  price   quantity
+--------------------------------
+apple	mark	1	10
+orange	mark	2	20
+pear	allen	3	30
+banana	tom	4	40
+
+
+select [>grocer] from sales
+
+fruit   grocer  price   quantity
+--------------------------------
+banana	tom	4	40
+apple	mark	1	10
+orange	mark	2	20
+pear	allen	3	30
+
+/ order our table in descending according to grocer
+```
+
+
 <a name="union_table"></a>
 ### 🔵 12.10 Union Table
 ```q
@@ -5077,19 +5101,6 @@ date|time|sym|price|size|cond|bookId | owner|name
 [Top](#top)
 
 ```q
-select
-select a by b from t where c
-
-update
-select a by b from t where c
-
-exec
-exec a by b from t where c
-
-delete
-delete a by b from t where c
-```
-```q
 Evaluated in the following order:
 1. from 
 2. where (filter data)
@@ -5193,8 +5204,18 @@ ungroup select price by sym from trade
 (select count i by sym, sizegroup:`medium from trade where size within 1000 8999),
 (select count i by sym, sizegroup:`big from trade where size > 8999)
 
+sym | sizebucket | x
+-------------------------
+A   | large      | 45645
+A   | med        | 4009
+A   | small      | 480
+AA  | large      | 45425
+
 / can use multiple select queries, but this is inefficient
 / instead, you can write a function using BIN to help classify your buckets
+```
+```q
+/ slight detour example:
 
 sizes: 2000 100 6000 11000
 0 1000 9000 bin sizes
@@ -5206,26 +5227,43 @@ sizes: 2000 100 6000 11000
 / 100 = index position 0 bin
 / 6000 = index position 1 bin
 / 11000 = index position 2 bin
+```
+
+```q
+/ test out the bin using the sizes list you just created
 
 `small`med`big 0 1000 9000 bin sizes
 `med`small`med`big
+```
 
-/ so you can name your bins using syms as small med big
+```q
+/ back to original problem, you can name your bins small med big
 / this will bin your size list into the sym named buckets
+/ create function that sorts into bins, taking argument x as sizes
 
 tradesize:{`small`med`big 0 1000 9000 bin x}
+
+/ testing out the function with sizes, returns same as above
 tradesize sizes
 `med`small`med`big
+```
 
-/ create function tradesize will has the small med big buckets + bin x variable
-/ testing out the function with sizes, returns same as above
+```q
+/ now loop this back into the original query:
 
 select count i by sym, sizebucket:(tradesize;size) fby sym from trade
 
-/ bring it back to the original query, can use tradesize function as an aggregator for fby
+sym | sizebucket | x
+-------------------------
+A   | large      | 45645
+A   | med        | 4009
+A   | small      | 480
+AA  | large      | 45425
+
+/ sizebucket becomes tradesize function with size as x
+/ the tradesize function becomes an aggregator for fby
 / and returns the number of trades (count i), sorted by sym and its size bucket
 ```
-
 
 <a name="selectadd_template"></a>
 ### 🔵 19.2) Adding a new column using select
