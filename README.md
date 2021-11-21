@@ -5133,6 +5133,7 @@ t:([] sym:`a`b`c`d; price: 1 2 3 4)
 
 / returns the first 2 rows of t
 ```
+
 ```q
 / Given a table, select the high, low, open, and close price by sym
 
@@ -5173,9 +5174,9 @@ fruit   pear
 -----------
 pear	3
 banana	4
+```
 
-/ where statement use in for syms
-
+```q
 / only return 1 row for select
 
 select [1;]fruit, price from sales where fruit in `banana`pear
@@ -5204,7 +5205,7 @@ ungroup select price by sym from trade
 (select count i by sym, sizegroup:`medium from trade where size within 1000 8999),
 (select count i by sym, sizegroup:`big from trade where size > 8999)
 
-sym | sizebucket | x
+sym | sizegroup  | x
 -------------------------
 A   | large      | 45645
 A   | med        | 4009
@@ -5214,6 +5215,7 @@ AA  | large      | 45425
 / can use multiple select queries, but this is inefficient
 / instead, you can write a function using BIN to help classify your buckets
 ```
+
 ```q
 / slight detour example:
 
@@ -5489,6 +5491,7 @@ price   size
 / this is correct. 
 / no max price (70) that is greater than 200 (300)
 ```
+
 ```q
 / extract all the following results:
 / gender - male and grade - A
@@ -5537,12 +5540,12 @@ select i, sym, price from trade where i>5
 select price, i by sym from trade
 ```
 
-
-
 <a name="select_by"></a>
 ### 🔵 19.6) By
 
 ```q
+/ find the first price and time for AAPL by date
+
 select first price, first time by date from trade where sym=`AAPL
 
 date        |price|time
@@ -5551,7 +5554,6 @@ date        |price|time
 `2021-05-30`|60.8 |09:30:02.686
 `2021-05-31`|55.1 |09:30:18.274
 
-/ select = return column of values
 / by date = groups date as the key column
 ```
 
@@ -5565,9 +5567,10 @@ date        |open |high  |low |close
 
 / open: renames the column
 ```
+### tickdirection case study!
 
 ```q
-/ lets say you want to check if the latest value was an uptick, downtick, or unch
+/1 lets say you want to check if the latest value was an uptick, downtick, or unch
 / can make use of the deltas + signum function
 
 select from trade
@@ -5593,7 +5596,7 @@ signum deltas prices
 ```
 
 ```q
-/ create function for signum deltas
+/2 create function for signum deltas
 
 tickdirection:{signum delta x}
 
@@ -5618,8 +5621,9 @@ A  |  63  |73000|B   |-1
 
 / same result as above
 ```
+
 ```q
-/ now lets say you want to group it by sym and see total size traded by direction (uptick, downtick, etc)
+/3 now lets say you want to group it by sym and see total size traded by direction (uptick, downtick, etc)
 
 select sum size by sym, dir from update dir:tickdir price by sym from trades
 
@@ -5655,6 +5659,7 @@ sym|dir|size
 / uses function tickdir as aggregator for signums from price column
 / the fby aggregates the tickdir from price column by sym
 ```
+
 ```q
 / find total size of trades where size > 10 tick moving average
 / 10 tick moving average requires a price calculation 
@@ -5674,51 +5679,55 @@ select sum size by sym, price > (mavg[10];price) fby sym from trade
 ### 🔵 19.7) Select Count 
 
 ```q
-select count i, max prirce by date, time.hh from trade where sym=`RBS
+/ find the number of total number of trades for RBS grouped by date and hours
+
+select count i, max price by date, time.hh from trade where sym=`RBS
+
+date        |hh   | x   | price
+------------------------------
+`2021-05-29`|`9`  | 645 | 50.5 
+`2021-05-30`|`10` | 154 | 50.0
 
 / i is a virtual column that returns the number of rows (as column x)
 ```
-date|hh|x|prrice
--|-|-|-
-`2021-05-29`|	`9`|	645 |	50.5 
-`2021-05-30`|	`10`	|154	| 50.0
 
 <a name="using_ops_functions"></a>
 ### 🔵 19.8) Using Operations and Functions 
 
 ```q
+/ find all AAPL prices that are less than the avg price grouped by date
+
 select price by date from trade where sym=`AAPL, price < avg price
 
-/ finds all AAPL prices that are less than the avg price grouped by date
-```
-
-date|price
--|-
+date        | price
+--------------------------
 `2021-05-29`| 100 99 22 33
 `2021-05-30`| 23 199 44 12
+```
 
 ```q
+/ retrieve prices, keyed by TODAY, where AAPL's price is less than the avg price
+
 select price by date=.z.d from trade where sym=`AAPL, price < avg price
 
-/ retrieve prices, keyed by TODAY, where AAPL's price is less than the avg price
+d   | price
+--------------
+`0` | 23 52 63
+`1` | 23 66 12
+
 / grouped by today; 0 = false, 1 = true
 ```
 
-d | price
--|-
-`0` | 23 52 63
-`1`| 23 66 12
-
 ```q
+/ retrieve price / max price, keyed by today, where the price is less than the avg price
+
 select {x % max x} price by date = .z.d from trade where sym=`AApl, price < avg price
 
-/ retrieve price / max price, keyed by today, where the price is less than the avg price
-```
-
-d | price
--|-
+d    | price
+-------------------
 `0b` | 0.98 0.7 0.8
 `1b` | 0.12 0.43 0.32
+```
 
 <a name="in_function"></a>
 ### 🔵 19.9) In Function
