@@ -5733,43 +5733,49 @@ d    | price
 ### 🔵 19.9) In Function
 
 ```q
+/ retrieve data for AAPL and RBS
+
 select from trade where sym in `AAPL`RBS
+
+date      | time         | sym |price   |size   | cond
+------------------------------------------------------
+2021-05-30| 09:30:02.743 | RBS | 97.113	| 80700 | C
+2021-05-30| 09:30:03.025 | AAPL| 78.66  | 19000	| A
 
 / in function checks if every LHS argument occurs anywhere in RHS argument (AAPL or RBS)
 / a faster way of checking "or" arguments
 ```
-
-date|time|sym|price|size|cond
--|-|-|-|-|-
-2021-05-30|	09:30:02.743 |	RBS |	97.113	| 80700 |	C
-2021-05-30|	09:30:03.025 |	AAPL |	78.66 |	19000	| A
 
 
 <a name="within_function"></a>
 ### 🔵 19.10) Within Function
 
 ```q
+/ retrieve trades for RBS where price is between 95 and 100
+
 select from trade where sym=`RBS, price within 95 100
+
+date      |time          |sym   |price  | size | cond
+------------------------------------------------------
+2021-05-30| 09:30:02.743 | RBS  | 97.113| 80700 | C
+2021-05-30| 09:30:03.025 | AAPL | 98.66 | 19000	| A
 
 / checks if LHS argument is within the range on RHS argument
 / has to have lower + upper bind
 ```
 
-date|time|sym|price|size|cond
--|-|-|-|-|-
-2021-05-30|	09:30:02.743 |	RBS |	97.113	| 80700 |	C
-2021-05-30|	09:30:03.025 |	AAPL |	98.66 |	19000	| A
-
 ```q
+/ retrieve trades for RBS within 95 and 100 and between 11:30 - 12:00
+
 select from trade where sym=`RBS, price within 95 100, time within 11:30 12:00
 
-/ 2 within filters, price and time
-```
+date      | time          |sym   | price  | size | cond
+-------------------------------------------------------
+2021-05-30| 11:40:02.743 | RBS   | 97.113 | 80700 | C
+2021-05-30| 11:44:03.025 | AAPL  | 98.66  | 19000 | A
 
-date|time|sym|price|size|cond
--|-|-|-|-|-
-2021-05-30|	11:40:02.743 |	RBS |	97.113	| 80700 |	C
-2021-05-30|	11:44:03.025 |	AAPL |	98.66 |	19000	| A
+/ two within filters, price and time
+```
 
 <a name="xbar_function"></a>
 ### 🔵 19.11) Xbar Function
@@ -5783,6 +5789,8 @@ x bar time.ss / x second buckets
 20 xbar time.ss / same thing
 0d00:00:20 xbar time / same thing
 ```
+
+### xbar price
 
 ```q
 / grouping for other data buckets (price)
@@ -5804,6 +5812,9 @@ sym|price|  size  |cnt
 / cnt = tallies virtual column i; how many trades were executed by sym for that price bucket
 ```
 
+### xbar time
+
+
 ```q
 / find the max price and total size of trades during 5 min window
 
@@ -5820,7 +5831,6 @@ AAPL | 08:10 | 28.2 | 300
 / sym + minute are keyed (since by)
 ```
 
-```
 ```q
 select max price by sym, 45 xbar time.minute from trade
 
@@ -6005,9 +6015,7 @@ sym    |cond | price
 `AAPL` |     | 95
 `AAPL` | `A` | 43
 `KX`   | `C` | 32
-
 ```
-
 
 ```q
 a: ([] c1: 1 2 3 1 2; c2: `a`b`c`a`b)
@@ -6034,6 +6042,7 @@ london   | england
 ny       | usa
 vancouver| canada
 ```
+
 ```q
 exec city, distinct country from cnc
 
@@ -6042,6 +6051,7 @@ key    | value
 city   | toronto london ny vancouver
 country| canada england usa
 ```
+
 ```q
 select city, distinct country from cnc
 
@@ -6055,54 +6065,63 @@ select city, distinct country from cnc
 / if column doesnt exist, gets added to end of column list
 / original table unaffected unless the data is persisted by using backtick
 ```
-```q
-update price: 10.0 from trade
 
-/ this will update all prices to 10
-```
 ```q
-/ to update a single where condition:
+/1 update all prices to 10
+
+update price: 10.0 from trade
+```
+
+```q
+/2 update a single where condition:
 
 update price:10.0 from trade where sym=`C
 
-date       time         sym  price    size  cond
-------------------------------------------------
-2021.10.30 09:30:02.553 C    10       63500 B   
+date       | time         | sym | price| size  | cond
+-----------------------------------------------------
+2021.10.30 | 09:30:02.553 | C   | 10   | 63500 | B   
+```
 
-/ to update multiple where conditions:
+```q
+/3 update multiple where conditions:
 
 update price:10.0 from trade where sym in `AAPL`GOOG
 
-date       time         sym  price    size  cond
-------------------------------------------------
-2021.10.30 09:30:02.553 C    10       63500 B   
-2021.10.30 09:30:02.701 MSFT 10       1700  B   
-2021.10.30 09:30:02.743 RBS  10       80700 C  
+date       | time         | sym  | price| size  | cond
+-----------------------------------------------------
+2021.10.30 | 09:30:02.553 | C    | 10   | 63500 | B   
+2021.10.30 | 09:30:02.701 | MSFT | 10   | 1700  | B   
+2021.10.30 | 09:30:02.743 | RBS  | 10   | 80700 | C  
 
 / this will update prices to 10 for AAPL and GOOG 
 / the where clause updates only the filtered records
 ```
+
 ```q
+/4 add new column vol, which is price x size
+
 update vol:price*size from trade where sym in `AAPL`GOOG
-
-/ new column vol is added
 ```
+
 ```q
+/5 updates price to average price, grouped by sym 
+
 update price:avg price by sym from trade where sym in `AAPL`GOOG
-
-/ updates the price to average price, grouped by sym 
 ```
+
 ```q
+/6 randomly select 100 rows
+
 tt:100?trade
 
-/ randomly selects 100 rows
-```
-
-```q
 date       |  time   | sym |price|size| cond
 ---------------------------------------------
 2021.01.01 | 15:10:01| BAC | 70  |422| B
 2021.03.01 | 15:09:01| JPM | 74  |412| C
+```
+
+```q
+/7 update all cond to "D"
 
 update cond: "D" from tt
 
@@ -6110,11 +6129,11 @@ date       |  time   | sym |price|size| cond
 ---------------------------------------------
 2021.01.01 | 15:10:01| BAC | 70  |422 | D
 2021.03.01 | 15:09:01| JPM | 74  |412 | D
-
-/ updates cond to "D"
 ```
 
 ```q
+/8 divide all size values by 100
+
 update size%100 from tt
 
 date       |  time   | sym |price|size| cond
@@ -6123,11 +6142,12 @@ date       |  time   | sym |price|size| cond
 2021.03.01 | 15:09:01| JPM | 74  |41.2| D
 2021.03.01 | 15:09:01| UBS | 41  |31.2| D
 
-
 / can perform function on entire column. size divided by 100
 ```
 
 ```q
+/9 add a new column called advice and populate with sell
+
 update advice:`sell from tt
 
 date       |  time   | sym |price|size|cond|advice
@@ -6136,13 +6156,14 @@ date       |  time   | sym |price|size|cond|advice
 2021.03.01 | 15:09:01| JPM |  74 |41.2|D   | sell
 2021.03.01 | 15:09:01| UBS |  41 |31.2|D   | sell
 
-
 / if you update a column that doesnt exist, it will add the column
 / new column added called advice and populates with sell
 / notice it has to be backtick sell
 ```
 
 ```q
+/10 update advice to buy if price less than 70
+
 update advice: `buy from tt where price < 70
 
 date       |  time   | sym |price|size|cond|advice
@@ -6156,6 +6177,8 @@ date       |  time   | sym |price|size|cond|advice
 ```
 
 ```q
+/11 add new column maxprice populated with max prices by sym
+
 update maxprice: max price by sym from tt
 
 date       |   time  | sym |price|size|cond|maxprice
