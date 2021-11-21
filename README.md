@@ -5376,14 +5376,47 @@ AAPL|2021-06-02|17:29:58.262|76.18|22500|A
 t1: ([] date: 2021.10.21 2021.10.21 2021.10.21 2021.10.21; sym: `GOOG`MSFT`FB`AMZN; exch: `nyse`nyse`nasdaq`nasdaq)
 t2: ([] sym: `GOOG`FB; exch: `nyse`nasdaq)
 
+t1
+date       | sym  | exch
+----------------------------
+2021-10-21 | GOOG | nyse
+2021-10-21 | MSFT | nyse
+2021-10-21 | FB	  | nasdaq
+2021-10-21 | AMZN | nasdaq
+
+t2
+sym  | ex
+------------
+GOOG | nyse
+FB   | nasdaq
+
 select from t1 where date=2021.10.21,([]sym;exch) in t2
 
-/ this will filter date = 2021.10.21
-/ and where the sym + exch columns appear in t2
+date       | sym  | exch
+----------------------------
+2021-10-21 | GOOG | nyse
+2021-10-21 | FB	  | nasdaq
+
+/ this will filter date = 2021.10.21 in t1
+/ and filter = sym + exch columns appear in t2
+
 ```
+
 ```q
-/ retrieve IBM from cond A, CSCO from A or B, MSFT from C
-/ first, check the meta of the trade table
+/ case study: Retrieve IBM from cond A, CSCO from cond A or B, and MSFT from cond C with date = 2021.11.17
+
+trade
+date       time         sym  price    size  cond
+------------------------------------------------
+2021.11.17 09:30:01.663 MS   92.84566 31500 A   
+2021.11.17 09:30:01.788 D    73.02565 17500 A   
+2021.11.17 09:30:01.819 RBS  90.76262 29100 B   
+2021.11.17 09:30:01.961 RBS  97.44952 70200 B   
+2021.11.17 09:30:02.007 RBS  60.16924 88100 B   
+
+/1 first, check the meta of the trade table
+
+meta trade
 
 c    |t|f|a
 ------------
@@ -5394,9 +5427,9 @@ price|f| |
 size |i| |		
 cond |c| |		
 
-/ notice sym datatype is sym and cond datatype is char
+/ notice sym datatype = sym and cond datatype = char
 
-/ create new table, toget with the target parameters
+/2 create new table, toget, with the target parameters
 
 toget:([] sym:`IBM`CSCO`CSCO`MSFT; cond:"AABC")
 
@@ -5407,9 +5440,9 @@ CSCO   A
 CSCO   B
 MSFT   C
 
-/ then write a select statement using WHERE to retrieve from 2 tables
+/3 then write a select statement using WHERE to retrieve from 2 tables
 
-select from trade where date=2021.10.30,([]sym;cond) in toget
+select from trade where date=2021.11.17, ([]sym;cond) in toget
 
 date       sym  price size cond
 -------------------------------
