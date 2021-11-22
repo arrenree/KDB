@@ -6260,80 +6260,88 @@ delete from tt
 
 ```q
 `sym`price xasc tt
-```
-date|time|sym|price|size | cond
--|-|-|-|-|-
-2021.01.01 | 15:10:01| A | 70| 42.2| D
-2021.03.01 | 15:09:01| B | 73| 41.2| E
-2021.03.01 | 15:09:01| C | 79| 31.2| F
 
-* first sorts ascending by sym, then by price
+date       |time     |sym|price|size | cond
+--------------------------------------------
+2021.01.01 | 15:10:01| A | 70  | 42.2| D
+2021.03.01 | 15:09:01| B | 73  | 41.2| E
+2021.03.01 | 15:09:01| C | 79  | 31.2| F
+
+/ first sorts ascending by sym, then by price
+```
 
 ```q
 `sym`price xdesc tt
-```
-date|time|sym|price|size | cond
--|-|-|-|-|-
-2021.01.01 | 15:10:01| C | 79| 42.2| D
-2021.03.01 | 15:09:01| B | 73| 41.2| E
-2021.03.01 | 15:09:01| A | 70| 31.2| F
 
-* first sorts descending by sym, then by price
+date       | time    |sym|price| size| cond
+--------------------------------------------
+2021.01.01 | 15:10:01| C | 79  | 42.2| D
+2021.03.01 | 15:09:01| B | 73  | 41.2| E
+2021.03.01 | 15:09:01| A | 70  | 31.2| F
+
+/ first sorts descending by sym, then by price
+
+```
 
 <a name="rename_reorder_columns"></a>
 ### 🔵 19.17) Renaming / Reordering Columns
 
 ```q
 `new1`new2 xcol tt
-```
-new1|new2|sym|price|size | cond
--|-|-|-|-|-
-2021.01.01 | 15:10:01| C | 79| 42.2| D
-2021.03.01 | 15:09:01| B | 73| 41.2| E
-2021.03.01 | 15:09:01| A | 70| 31.2| F
 
-* renames first 2 columns to new1 and new 2
+new1       |new2     |sym|price| size| cond
+--------------------------------------------
+2021.01.01 | 15:10:01| C | 79  | 42.2| D
+2021.03.01 | 15:09:01| B | 73  | 41.2| E
+2021.03.01 | 15:09:01| A | 70  | 31.2| F
+
+/ renames first 2 columns to new1 and new 2
+```
 
 ```q
 `cond`size xcols tt
-```
-cond|size|date|time|sym|price
--|-|-|-|-|-
-D| 79| 2021.01.01 | 15:10:01| C | 42.2
-E| 73| 2021.03.01 | 15:09:01| B | 41.2
-F| 70| 2021.03.01 | 15:09:01| A | 31.2
 
-* reorders columns cond and size to beginning
+cond|size| date       |time     |sym| price
+--------------------------------------------
+D   | 79 | 2021.01.01 | 15:10:01| C | 42.2
+E   | 73 | 2021.03.01 | 15:09:01| B | 41.2
+F   | 70 | 2021.03.01 | 15:09:01| A | 31.2
+
+/ reorders columns cond and size to beginning
+```
 
 ```q
 `sym xgroup tt
-```
-sym| date
--|-
+
+sym   | date
+------------------
 `BAC` | 2021.01.01
 `RBS` | 2021.01.23
 
-* group by column sym
+/ group by column sym
+```
 
 ```q
 `date`sym xgroup tt
-```
-date| sym| time
--|-|-
+
+date         | sym   | time
+---------------------------
 `2021.01.01` | `BAC` | 1:12
 `2021.01.02` | `JPM` | 1:45
 
-* group and key by 2 columns (date and sym)
+/ group and key by 2 columns (date and sym)
+```
 
 ```q
 `date`sym xkey tt
-```
-date| sym| time | price | size | cond
--|-|-|-|-|-
-`2021.01.01` | `BAC` | 1:12 | 83 | 834 | B
-`2021.01.02` | `JPM` | 1:45 | 34 | 342 | A
 
-* make date and sym key columns
+date         | sym   | time | price | size | cond
+--------------------------------------------------
+`2021.01.01` | `BAC` | 1:12 | 83    | 834  | B
+`2021.01.02` | `JPM` | 1:45 | 34    | 342  | A
+
+/ make date and sym key columns
+```
 
 <a name="fby_sql"></a>
 ### 🔵 19.18) Filter by fby
