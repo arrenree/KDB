@@ -6420,22 +6420,43 @@ time      |sym  |src| price | size
 ```
 ### fby Example 3
 ```q
-/ find the max price on this date
+/1 find the max price on this date
 
 select from trade where date=2021.10.31, price=max price
 
 / filter by date, then the max price from this date
 ```
+
 ```q
-/ find max price by sym on this date
+/2 find max price by sym on this date
 
 select from trade where date=2021.10.31, price=(max;price) fby sym
 
+date       | time         | sym | price | size | cond
+------------------------------------------------------
+2021-11-26 | 10:17:09.373 | A	| 109.9	| 94300| C
+2021-11-26 | 10:25:22.268 | MSFT| 109.9	| 49100| C
+2021-11-26 | 11:49:11.143 | D	| 109.9 |  5600| A
+
 / filter by date, then find max price by sym
 / groups the aggregation by sym
+/ notice this returns the whole table (max price by sym)
+
+/ if you did this instead:
+
+select max price by sym from trade where date = 2021.11.26
+
+sym  | price
+-------------
+A    | 109.9
+AA   | 113.2
+AAPL | 339.1
+
+/ this will ONLY return the max price column
 ```
+
 ```q
-/ find max price by sym and cond on this date
+/3 find max price by sym AND cond on this date
 
 select from trade where date=2021.10.31, price=(max;price) fby ([]sym;cond)
 
@@ -6539,9 +6560,9 @@ select from trade where (deltas price)> 0
 
 date       time         sym    price    size  cond 
 --------------------------------------------------
-2021-10-19	09:30:02.553	C	     107.2	   63500	  B
-2021-10-19	09:30:02.743	RBS	    97.1	   80700	  C
-2021-10-19	09:30:02.758	A	     100.3	   50300	  B
+2021-10-19 09:30:02.553	C      107.2    63500  B
+2021-10-19 09:30:02.743	RBS     97.1    80700  C
+2021-10-19 09:30:02.758	A      100.3    50300  B
 ```
 
 <a name="nextprev_sql"></a>
@@ -6630,6 +6651,7 @@ m iasc count each m
 
 / order m by number of elements in each sublist
 ```
+
 ```q
 / Case Study: Pull the best bid from orderbook
 
