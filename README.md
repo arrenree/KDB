@@ -6615,7 +6615,7 @@ date       time         sym  price    size  cond duration
 ```
 
 <a name="iasc_sql"></a>
-### 🔵 19.24) iasc/idesc
+### 🔵 19.24) iasc/idesc (advanced)
 
 ```q
 / iasc - returns indices needed to sort a list in ascending order
@@ -6656,12 +6656,15 @@ m iasc count each m
 / Case Study: Pull the best bid from orderbook
 
 table t:
-
 t         bidPrices            bidSizes
 ------------------------------------------------
 05:15:43  7.83 8.20 9.84 6.93  57 0 72 50 62 51
 00:59:05  0.97 7.44 9.33 2.93  97 99 27 31
 01:19:44  2.88 5.63 4.98 5.56  47 57 31 15 68 49
+```
+
+```q
+/1 create new column bidIndex, which shows the index position in descending values (large to small)
 
 update bidIndex:({idesc x} each bidPrices) from t
 
@@ -6673,6 +6676,10 @@ t         bidPrices            bidSizes           bidIndex
 
 / from col bidPrices, shows index position of descending values
 / 2nd index position = 3rd value = 9.84 largest
+```
+
+```q
+/2 now isolate only the largest value
 
 update bidIndex:({first idesc x} each bidPrices) from t
 
@@ -6684,6 +6691,10 @@ t         bidPrices            bidSizes           bidIndex
 
 / adding first = only retrieves first value 
 / largest bid since ordered by idesc
+```
+
+```q
+/3 add a new column, bestBid, and retrieve the bestBid from the index position in bidIndex
 
 update bestBid:bidPrices@'bidIndex from update bidIndex:({first idesc x} each bidPrices) from t
 
@@ -6695,6 +6706,10 @@ t         bidPrices            bidSizes     bidIndex   bestBid
 
 / bestbid = looks at bidIndex col, retrieves index position 2 from bidPrice col = 9.8
 / everything after from is what we calculated above as the bidIndex col
+```
+
+```q
+/4 add new column, bestBidSize, and retrieve the largest bidsize based on the bidIndex column
 
 update bestBidSize:bidSizes@'bidIndex from update bidIndex:({first idesc x} each bidPrices) from t
 
@@ -6705,8 +6720,9 @@ t         bidPrices            bidSizes     bidIndex   bestBidSize
 01:19:44  2.88 5.63 4.98 5.56  57 31 15 49   1          31
 
 / bestBidSize = looks at bidIndex col, retrieves index position 2 from bidSizes col = 50
-
-/ can combine all 3 queries into single one:
+```
+```q
+/5 Now combine all 3 queries into single one:
 
 update bestBid:bidPrices@'bidIndex, bestBidSize:bidSizes@'bidIndex from update bidIndex:({first idesc x}each bidPrices) from t
 
