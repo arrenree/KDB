@@ -3568,9 +3568,23 @@ ford    |-105
 ```
 
 <a name="insert_table"></a>
-### 🔵 12.15 Insert Rows Table
+### 🔵 12.15 Add / Insert Rows Table
 
 ```q
+/ to add rows into a table, either use INSERT or UPSERT
+/ 2 different syntax when using INSERT
+
+`t insert (`ferrari`bmw;9 7)
+
+/ or
+
+insert [`t; (`ferrari`bmw; 9 7)]
+
+```
+
+```q
+/ INSERT Example 1
+
 / create empty table 
 
 cars:([] brand:`$();model:`$();purchasedate:`date$())
@@ -3585,10 +3599,11 @@ bmw   318   2021-01-01
 
 / have to backtick table (`cars) to insert, otherwise will fail
 / have to insert correct datatype. `318 is a sym
+/ don't need enlist
 ```
 
 ```q
-/ insert multiple
+/ INSERT Multiple Example
 
 `cars insert (`audi`ford;`a5`fiesta;2021.01.02 2021.01.03)
 
@@ -3618,13 +3633,13 @@ ford	     2021-01-03
 ```
 
 ```q
+/ INSERT Example 2 (diff syntax)
+
 t: ( [] company: (); employees: () )
 company|employees
 
 / create empty table
-```
 
-```q
 insert [`t; (`Ferrari; 8)]
 
 company|employees
@@ -3634,9 +3649,12 @@ Ferrari| 8
 / backtick t to update underlying table
 / first argument is table name(t), second argument are the values to be inserted
 / semi colon separate columns for the values
+/ don't need enlist
 ```
 
 ```q
+/ INSERT Multiple Example 2
+
 insert [`t; (Ferrari`bmw; 9 7)]
 
 company|employees
@@ -3649,6 +3667,8 @@ bmw    | 7
 ```
 
 ```q
+/ INSERT table into another table 
+
 x: ( [] company: `Subaru`Hyundai; employees: 55 56)
 
 company|employees
@@ -3674,6 +3694,7 @@ Hyundai| 56
 
 t:t,x
 ```
+
 <a name="upsert_table"></a>
 ### 🔵 12.16 Upsert Rows Tables
 ```q
