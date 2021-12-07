@@ -1853,7 +1853,26 @@ d[`a]
 d`a
 d@`a
 
-/ all 3 syntax work for retrieving values in a dictionary
+/ note - this only returns the values. if you want to return a dictionary, use # take
+
+`a`b # d
+
+key | value
+-----------
+a   | 1
+b   | 2
+
+
+/ key # dict_name
+/ returns a dictionary
+
+(enlist `a) # d
+
+key | value
+-----------
+a   | 1
+
+/ for single row retrieval, need to use enlist
 ```
 
 ```q
