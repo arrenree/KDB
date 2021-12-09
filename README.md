@@ -6392,6 +6392,7 @@ date         | sym   | time | price | size | cond
 / aggr = aggregate function = max, min, sums, etc.
 / d = column name
 / g = another column name
+/ fby goes at the END of your QSQL statement
 ```
 
 ### Example fby aggregations
@@ -6404,6 +6405,11 @@ date         | sym   | time | price | size | cond
 (first;price) fby sym
 (max;price) fby sym
 (avg;price) fby sym
+
+
+/ select from trade where price = (max;price) fby sym 
+/ fby goes at the END
+/ fby goes after where
 ```
 ### Functions on fby
 
