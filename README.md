@@ -6640,11 +6640,12 @@ date       time         sym  price    size  cond duration
 ```
 
 <a name="carrot_sql"></a>
-### 🔵 19.23) ^ Carrot
+### 🔵 19.23) Coalescing ^
 
 ```q
-/ ^ replaces nulls with atom on left
+/ ^ replaces nulls on right with atom on left
 / has to be of compatible type
+/ right item prevails over left item except when right item is null
 
 3 ^ 1 2 0N 4 5 0N
 1 2 3 4 5 3
