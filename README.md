@@ -2384,8 +2384,8 @@ f: { [a] a * a}
 f [3]
 9
 
-/ [a] = defines the argument
-/ f[3] or f@3 calls the function with a=3
+/ [a] = this defines the argument
+/ f[3] calls the function with argument a=3
 ```
 
 ```q
@@ -2394,9 +2394,9 @@ add [3;5]
 8
 
 / multi argument function
-/ [a;b] = defines first, second argument
-/ a+b = statement
+/ [a;b] = defines arguments A and B
 ```
+
 ```q
 / the answer returned is the LAST expression evaluated in function
 
@@ -2407,6 +2407,7 @@ t[1;2;3]
 / 1*2*3 = 6
 / 6*2 = 12
 ```
+
 ```q
 / can supress the function by adding ; to end 
 
@@ -2416,6 +2417,7 @@ t[1;2;3]
 
 / nothing returned
 ```
+
 ```q
 / can force an output by adding semi colon :
 
@@ -2448,7 +2450,7 @@ f:{[arg1] arg1+10}
 f[2]
 12
 
-/ implicit (up to 3 arguments)
+/ implicit (up to 3 arguments: x, y, z)
 
 f:{x+10}
 f[2]
@@ -2459,12 +2461,6 @@ f[2]
 / diadic (accepts 2 arguments)
 
 f:{[a;b] a*b}
-f[2;4]
-8
-
-/ alternatively can be implicit:
-
-f:{x*y}
 f[2;4]
 8
 
@@ -2486,6 +2482,7 @@ f[1;2;3;4]
 
 / now this works
 ```
+
 ```q
 / max amount of arguments is 8!
 / can get around by using dictionary as argument
@@ -2498,12 +2495,14 @@ f[d]
 
 <a name="anon_function"></a>
 ### 🔵 10.2 Anonymous Functions
+
 ```q
-{[a] a*a}6
+{[a] a*a} 6
 36
 
-/ you dont assign variable 
-/ simply call the argument outside the function { } 
+/ in q, you do NOT need to assign a function to a variable name
+/ this is known as an anonymous function (lambda function)
+/ you can simply call the argument outside the function { } 
 ```
 
 <a name="implicit_argu"></a>
@@ -2570,7 +2569,7 @@ g [1]
 raise: {x xexp y}
 raise [10; 2 3 4]
 100 1000 1000f
-
+ 
 / calls x = 10 and y = 2 3 4
 ```
 
@@ -2601,8 +2600,6 @@ g
 / if you call g, you'll see it contains original expression
 / and the set parameters are shown in [ ]
 ```
-
-
 
 <a name="iftrue_state"></a>
 ### 🔵 10.6 If Statements
