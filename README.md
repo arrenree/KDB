@@ -1648,25 +1648,41 @@ maxs l
 
 / running sums, running products, running max
 ```
+
 ```q
+/ moving window sums
+
+l: 0 10 20 30 40 50 
+
 3 msum 1
+0 10 30 60 90 120
 
-/ moving window sum of 3
+/ initial values less than window returns values 
+/ 0, 10 (less than window 3)
+/ 0 + 10 + 20 = 30
+/ next window 10 + 20 + 30 = 60
 ```
-```q
-3 mmax l
 
-/ moving window max of 3
+```q
+3 mmax 10 30 20 30 20
+10 30 30 30 30
+
+/ returns MAX in window of 3
+/ initial values less than window returned (10, 30)
+/ next element also 30, since still max
 ```
 
 <a name="contain_ops"></a>
 ### 🔵 6.7 Contain
 
 ```q
+/ in operator returns booleans
+
 5 in 1 2 3 4
 0000b
 
-/ is x in y? no, so 0
+/ is x in y? 
+/ no, so 0
 ```
 
 <a name="except_ops"></a>
@@ -1676,6 +1692,7 @@ maxs l
 1 2 3 4 except 3
 1 2 4
 
+/ returns x except y
 / return the list except 3
 ```
 
@@ -1686,6 +1703,8 @@ maxs l
 1 2 3 inter 2 3 4
 2 3
 
+/ x inter y
+/ returns items in both x and y
 / inter returns values occuring in both lists
 ```
 
@@ -1696,7 +1715,7 @@ maxs l
 distinct `a`a`b`b`c`c
 a b c
 
-/ distinct only returns distinct values
+/ distinct only returns distinct items/values
 ```
 
 <a name="reverse_ops"></a>
