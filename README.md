@@ -1482,9 +1482,9 @@ GL: (`p; 1b; 100200j)
 
 **🔵 5.3 Given the following**
 
-p: 100 200 300 400 500 600
-t: "say hello world to bob"
-m: (1 2 3; 10 20 30; 100 200 300)
+p: 100 200 300 400 500 600 <br>
+t: "say hello world to bob" <br>
+m: (1 2 3; 10 20 30; 100 200 300) <br>
 
 **Retrieve first 3 items from p**
 ```q
@@ -1497,10 +1497,15 @@ m: (1 2 3; 10 20 30; 100 200 300)
 **🔵 5.4 From t, retrieve the list "sold"**
 
 ```q
+t?"sold"
+0 8 6 14
+
+/ retrieve index positions for chars in string "sold"
+
 t[0 8 6 14]
 "sold"
 
-/ you are retrieving characters from their index position
+/ then you can retrieve chars using indexing
 ```
 
 <hr>
@@ -1510,18 +1515,16 @@ t[0 8 6 14]
 ```q
 t?"shoot"
 0 4 8 8 16
-```
 
-```q
 t? "bob"
 19 8 19
-```
-```q
+
 t(0 4 8 8 16; 19 8 19)
 ("shoot";"bob")
 
-/ you are finding the index locations of those chars from list t
-/ then retrieving those index positions (letters) to spell out 
+/ find index location of chars in string "shoot" and "bob"
+/ then retrieving those index positions (letters) to spell out
+/ since you are retrieving a list of chars, need to use () instead of [ ]
 ```
 
 <hr>
@@ -1531,7 +1534,8 @@ t(0 4 8 8 16; 19 8 19)
 ```q
 p[5]: 1000
 
-/ upsert. find index location 5, replace value with 1000
+/ upsert function (update insert)
+/ find index location 5, replace value with 1000
 ```
 
 <hr>
@@ -1778,13 +1782,15 @@ b:n?100f
 ## 🔴 7. Primitive Operations Problem Set
 [Top](#top)
 
-**🔵 7.1 Find index location for a string of chars**
+**🔵 7.1 Find index location for "ryan" in "hello ryan where is ryan"
 
 ```q
 "hello ryan where is ryan" ss "ryan"
 6 20
 
-/ ss = finds the index location
+/ ss = string search
+/ returns index location
+/ ryan appears twice; at the 6th and 20th index location
 ```
 
 <hr>
@@ -1795,27 +1801,32 @@ b:n?100f
 ssr["hello ryan where is ryan";"ryan";"john"]
 hello johhn where is john
 
-/ this is similar to excel search and replace function
+/ ssr = search string replace function
+/ first arg = input string
+/ second arg = what to replace
+/ third arg = what to replace with
 ```
 
 <hr>
 
 **🔵 7.3 Find the number of days in 2004**
 ```
-2005.01.01-2004.01.01
+2005.01.01 - 2004.01.01
 366
 
 ```
 
 <hr>
 
-**🔵 7.4 Given list L and K, find the common numbers in both lists**
-l: 7 5 13 20 19 17 30
-k: 7 17 200 300 400 1000
+**🔵 7.4 Given list L and K, find the common numbers in both lists** <br>
+l: 7 5 13 20 19 17 30 <br>
+k: 7 17 200 300 400 1000 <br>
 
 ```q
 l inter k
 7 17
+
+/ inter = finds same values in x inter y
 ```
 
 <hr>
@@ -1824,14 +1835,19 @@ l inter k
 ```q
 sum 5#l
 64
+
+/ take first 5 numbers from l
+/ then sum them together
 ```
 
 <hr>
 
-**🔵 7.6 Find the result whhen you remove the last 2 items from k**
+**🔵 7.6 Find the result when you remove the last 2 items from k**
 ```q
 -2_k
 7 17 200 300
+
+/ drop last 2 items from k
 ```
 
 <hr>
@@ -1840,21 +1856,31 @@ sum 5#l
 ```q
 l mod 5
 2 0 3 0 4 2 0
-```
 
-```q
-l where 0 = l mod 5
+/ returns remainder where l divide by 5
+/ 0 means fully divisible
+
+l where not l mod 5
 5 20 30
 
-/ show list l where l divide by 5 = 0
+/ l where not l mod 5 = 
+
+/ return value where l mod 5 = 0
+/ not l mod 5 will return the values at 0
 ```
 
 <hr>
 
 **🔵 7.8 Subtract the average of list l from max value in list k**
+
 ```q
 max[k] - avg [l] 
 984.14
+
+/ or also:
+
+max k - avg l
+9784.14
 ```
 
 <hr>
@@ -1864,23 +1890,21 @@ max[k] - avg [l]
 p: 1000?100
 a: sqrt p
 
+/ a = list containing square roots of every number in p
 / a will contain both ints and floats
-```
 
-```q
 a = `int$a
 
 / cast a as an integer (whole number)
-```
-```q
+/ since a is made up ints and floats
+
 p where a=`int$a
 
-/ return value in p where a = whole number
-```
-```q
+/ return value in p where a = whole number (square numbers)
+
 count p where a=`int$a
 
-/ count the number of times p is a whole number
+/ count number of p = square numbers
 ```
 
 <hr>
