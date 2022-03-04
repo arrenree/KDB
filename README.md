@@ -1720,9 +1720,19 @@ a b c
 
 <a name="reverse_ops"></a>
 ### 🔵 6.11 Reverse
+
 ```q
+/ reverse ints
+
 reverse 1 2 3
 3 2 1
+```
+
+```q
+/ reverse strings
+
+reverse "hello"
+"olleh"
 ```
 
 <a name="uppercase_ops"></a>
@@ -1730,10 +1740,13 @@ reverse 1 2 3
 
 ```q
 upper "adsf"
-lower "ADSF"
-
 ADSF
+
+
+lower "ADSF"
 adsf
+
+/ converts a sequence of characters to upper or lower
 ```
 
 <a name="uppercase_ops"></a>
