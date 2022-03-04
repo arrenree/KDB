@@ -1137,7 +1137,7 @@ L[0 1 2] : 40 50 60
 ```
 
 <a name="nest_list"></a>
-### 🔵 4.8 Nested Lists
+### 🔵 4.8 Nested Lists (Lists of Lists)
 
 ```q
 list: (1 2; 3 4; 5 6; 7 8)
@@ -1155,13 +1155,29 @@ NL: (L; K; `pp`qq`rr)
 
 / NL is a list of 3 nested lists: L, K, and the syms
 
-NL [ 0 2]
+NL [0 2]
 10 20 30 40 50
 `pp`qq`rr
 
 / So think of list NL as 3 separate lists.
 / Retrieve index location 0 and 2, so returned the first and 3rd list
+```
 
+```q
+NL[(0 1;2)]
+(10 20 30 40 50; 0.1 0.2 0.3)
+`pp`qq`rr
+
+/ if your argument is a nested list, the output will also be nested list
+/ the shape of your result will = the shape of your argument
+/ 0 = first row (of l)
+/ 1 = second row, but output is grouped as nested list together with 0
+/ 2 = second argument = new row
+```
+
+index to depth
+
+```q
 NL [0][0]
 10
 
@@ -1172,27 +1188,52 @@ NL [0][0]
 <a name="matrix_list"></a>
 ### 🔵 4.9 Matrix
 
+```q
 m: (10 20 30; 40 50 60; 70 80 90)
 
-0|1|2
--|-|-
+0 | 1 | 2
+----------
 10| 20| 30
 40| 50| 60
 70| 80| 90
 
-* when retrieving in a matrix, always go ROW, then COLUMN
+/ when retrieving in a matrix, always go ROW, then COLUMN
+```
 
 ```q
 m[1; ]
-```
 40 50 60
-* takes index 1 location (2nd row)
+
+/ retrieves row 2 (index position 1 - row)
+```
 
 ```q
 m[ ; 1]
-```
 20 50 80
-* ignores row (blank), retrieves index 1 location for column (2nd column)
+
+/ ignores row (blank),
+/ retrieves 2nd column (index location 1 - col)
+```
+
+What happens when retrieve outside of range?
+
+```q
+/ assume irregular matrix
+
+dl: (1 2 3; `a`b`c; 1.0 2.0)
+
+ 1  |  2  | 3
+ a  |  b  | c
+1.0 | 2.0 |  
+
+dl[;2]
+3
+`c
+0N 
+
+/ returns null bc doesnt exist
+/ want 3rd column aka 2nd index position for col
+```
 
 
 <a name="sublist_list"></a>
