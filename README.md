@@ -46,6 +46,12 @@
 12. [Random Operator](#random_list)
 13. [Count Operator](#count_list)
 14. [Raze](#raze_intro)
+15. [Union - Lists](#union_list)
+16. [Where Clause - Lists](#where_lists)
+17. [Contain](#contain_ops)
+18. [Except](#except_ops)
+19. [Inter](#inter_ops)
+20. [Distinct](#distinct_ops)
 
 ## 5. [Lists Problem Set](#list_problemset)
 
@@ -56,12 +62,8 @@
 4. [Basic Operations](#basic_operations)
 5. [Division Remainders Mod](#mod_operations)
 6. [Running Sums/Moving Windows](#running_sums)
-7. [Contain](#contain_ops)
-8. [Except](#except_ops)
-9. [Inter](#inter_ops)
-10. [Distinct](#distinct_ops)
-11. [Reverse](#reverse_ops)
-12. [Upper/Lowercase](#uppercase_ops)
+7. [Reverse](#reverse_ops)
+8. [Upper/Lowercase](#uppercase_ops)
 
 ## 7. [Primitive Operations Problem Set](#primitive_problemset)
 
@@ -1544,7 +1546,7 @@ raze string `a`b`c
 "abc"
 ```
 
-<a name="raze_intro"></a>
+<a name="union_lists"></a>
 ### 🔵 4.15 Union Lists
 
 ```q
@@ -1554,7 +1556,7 @@ raze string `a`b`c
 / union returns only the distinct elements in both lists
 ```
 
-<a name="raze_intro"></a>
+<a name="where_lists"></a>
 ### 🔵 4.16 Where clause with Lists
 
 ```q
@@ -1580,6 +1582,70 @@ size where price > 5
 avg size where price > 5
 
 / can perform calc on 2nd list too (avg price)
+```
+<a name="contain_ops"></a>
+### 🔵 4.17 Contain
+
+```q
+/ in operator returns booleans
+
+5 in 1 2 3 4
+0000b
+
+/ is x in y? 
+/ no, so 0
+```
+
+<a name="except_ops"></a>
+### 🔵 4.18 Except
+
+```q
+1 2 3 4 except 3
+1 2 4
+
+/ returns x except y
+/ return the list except 3
+```
+
+<a name="inter_ops"></a>
+### 🔵 4.19 Inter
+
+```q
+1 2 3 inter 2 3 4
+2 3
+
+/ x inter y
+/ returns items in both x and y
+/ inter returns values occuring in both lists
+```
+
+<a name="distinct_ops"></a>
+### 🔵 4.20 Distinct
+
+```q
+/ distinct syms
+
+distinct `a`a`b`b`c`c
+a b c
+
+/ distinct only returns distinct items/values
+```
+
+```q
+/ distinct ints
+
+distinct 1 2 2 3 3 4 4 5
+1 2 3 4 5
+```
+
+```q
+/ distinct lists
+
+distinct 100?5
+4 0 1 3 2
+
+/ return only the distinct numbers
+/ from 100 random numbers between 0-4
 ```
 
 <hr>
@@ -1811,73 +1877,8 @@ l: 0 10 20 30 40 50
 / next element also 30, since still max
 ```
 
-<a name="contain_ops"></a>
-### 🔵 6.7 Contain
-
-```q
-/ in operator returns booleans
-
-5 in 1 2 3 4
-0000b
-
-/ is x in y? 
-/ no, so 0
-```
-
-<a name="except_ops"></a>
-### 🔵 6.8 Except
-
-```q
-1 2 3 4 except 3
-1 2 4
-
-/ returns x except y
-/ return the list except 3
-```
-
-<a name="inter_ops"></a>
-### 🔵 6.9 Inter
-
-```q
-1 2 3 inter 2 3 4
-2 3
-
-/ x inter y
-/ returns items in both x and y
-/ inter returns values occuring in both lists
-```
-
-<a name="distinct_ops"></a>
-### 🔵 6.10 Distinct
-
-```q
-/ distinct syms
-
-distinct `a`a`b`b`c`c
-a b c
-
-/ distinct only returns distinct items/values
-```
-
-```q
-/ distinct ints
-
-distinct 1 2 2 3 3 4 4 5
-1 2 3 4 5
-```
-
-```q
-/ distinct lists
-
-distinct 100?5
-4 0 1 3 2
-
-/ return only the distinct numbers
-/ from 100 random numbers between 0-4
-```
-
 <a name="reverse_ops"></a>
-### 🔵 6.11 Reverse
+### 🔵 6.7 Reverse
 
 ```q
 / reverse ints
@@ -1894,7 +1895,7 @@ reverse "hello"
 ```
 
 <a name="uppercase_ops"></a>
-### 🔵 6.12 Upper/Lowercase
+### 🔵 6.8 Upper/Lowercase
 
 ```q
 upper "adsf"
@@ -1908,7 +1909,7 @@ adsf
 ```
 
 <a name="uppercase_ops"></a>
-### 🔵 6.13 Timing and Performance
+### 🔵 6.9 Timing and Performance
 ```q
 
 n: 1000000
