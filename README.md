@@ -264,6 +264,8 @@
 
 ## 35. [Trade Analysis](#tradeanalysis)
 
+## 36. [Creating Tables with Random Data](#creatingrandomtable)
+
 
 <hr>
 
@@ -10714,6 +10716,85 @@ DELL | 08:00:00 | 21.7	| 4567 | 21.76  | 21.76  | 21.76
 MSFT | 08:00:00	| 46.51	| 436  | 46.51  | 46.51  | 46.46
 NOK  | 08:00:01	| 22.87	| 7915 | 22.83  | 22.83  | 22.87
 CSCO | 08:00:01	| 35.77	| 783  | 35.77  | 35.77  | 35.78
+```
+
+
+<a name="creatingrandomtable"></a>
+## 🔴 36. Creating Tables with Random Data
+[Top](#top)
+
+```q
+/ lets create table for sym A, random times, and random prices
+/ assume 100 rows
+```
+
+1. Generate 100 random times in a 6 hour period
+
+```q
+n:100
+
+n?06:00
+05:11u;00:49u;01:56u;04:57u;03:27u
+
+/ add 8 hours to time starts at 08:00
+
+08:00+n?06:00
+08:48u;09:06u;09:53u;11:06u;11:22u
+
+/ then sort by ascending
+
+asc 08:00+n?06:00
+08:00u;08:10u;08:20u;08:25u;08:28u
+```
+
+2. Generate 100 sequential prices
+
+```q
+/ prices generally only move up or down in a limited range
+/ assume price moves up or down by -0.1 0 0.1 
+/ generate list of random values from this set
+
+n? -0.1 0 0.1 
+0 -0.1 0.1 0.1 -0.1 -0.1 -0.1
+
+/ then take running sums to make movement consecutive
+
+sums n? -0.1 0 0.1 
+0.1 0 0.1 0.2 0.3 0.2 0.1 0.2
+
+/ finally, offset by some base value (say, 40)
+
+40+sums n? -0.1 0 0.1 
+40 40.1 40 39.9 39.8 39.9 40 40.1
+```
+
+3. Putting it all together
+
+```q
+t: ([] sym:`A; time: asc 08:00+n?06:00; price: 40+ sums n? -0.1 0 -.2)
+
+sym    | time  | price
+-----------------------
+A      | 08:04 | 39.9
+A      | 08:05 | 39.7
+A      | 08:08 | 39.6
+A      | 08:15 | 39.6
+A      | 08:18 | 39.6
+```
+
+```q
+/ bucket by hours
+
+select by time.hh from t
+
+hh	sym	time	price
+-----------------------------
+8	A	08:56	38.7
+9	A	09:59	37.1
+10	A	10:55	35.3
+11	A	11:57	33.5
+12	A	12:59	32.6
+13	A	13:51	31.30
 ```
 
 <a name="bottom"></a>
