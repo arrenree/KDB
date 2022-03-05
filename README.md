@@ -1851,10 +1851,29 @@ l: 0 10 20 30 40 50
 ### 🔵 6.10 Distinct
 
 ```q
+/ distinct syms
+
 distinct `a`a`b`b`c`c
 a b c
 
 / distinct only returns distinct items/values
+```
+
+```q
+/ distinct ints
+
+distinct 1 2 2 3 3 4 4 5
+1 2 3 4 5
+```
+
+```q
+/ distinct lists
+
+distinct 100?5
+4 0 1 3 2
+
+/ return only the distinct numbers
+/ from 100 random numbers between 0-4
 ```
 
 <a name="reverse_ops"></a>
