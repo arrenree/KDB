@@ -2390,13 +2390,20 @@ key     | value
 alpha	| 1 2 3
 bravo	| 4 5 6
 charlie | 7 8 9
+```
 
-/ adding new row via join
+Adding new row to dict via join
 
+```q
 dict,(`delta`echo)!(10 11 12;13 14 15)
 
-/ however, to update the underlying table, need to use join assign ,:
+/ join not in place, which means its not saved to dict
+/ to update the underlying table, need to use join assign ,:
+```
 
+Adding new row via Join Assign
+
+```q
 dict,:(`delta`echo)!(10 11 12;13 14 15)
 
 key     | value
@@ -2407,8 +2414,12 @@ charlie | 7 8 9
 delta   | 10 11 12
 echo    | 13 14 15
 
-/ amending key/values via indexing
+/ join assign adds the row + updates underlying dict
+```
 
+Upserting Rows
+
+```q
 dict[`charlie]: 100 200 300
 
 key     | value
@@ -2419,8 +2430,12 @@ charlie | 100 200 300
 delta   | 10 11 12
 echo    | 13 14 15
 
-/ to add a single row (need to use enlist!)
+/ updates values based on indexed key (`charlie)
+```
 
+Inserting a single row to dict (enlist!)
+
+```q
 dict,:(enlist `golf)! enlist 10
 
 key     | value
@@ -2431,6 +2446,8 @@ charlie | 100 200 300
 delta   | 10 11 12
 echo    | 13 14 15
 golf    | 100
+
+/ need to use enlist when adding / upserting single row to dict
 ```
 
 ```q
@@ -2700,7 +2717,7 @@ s  | 100
 u  | 200
 ```
 
-**🔵 4. Create dictionary d2, only containing values of p q r from dictionary d**
+**🔵 4. Create dictionary d2, by taking values of p q r from dictionary d**
 ```q
 d2:`p`q`r#d
 
@@ -2710,10 +2727,11 @@ p  | 2
 q  | 20
 r  | 40
 
-/ use # take function to take values of p q r from dictionary d
+/ when TAKE # from dict, output is a dict contains both keys + values
 ```
 
-**🔵 5. Add common elements in d2 and d, only return common keys and values**
+**🔵 5. Find common keys in d and d2, and retrieve keys + values from combined d+d2
+
 ```q
 d+d2
 
@@ -2725,17 +2743,30 @@ r  | 80
 s  | 100
 u  | 200
 
-/ adds all values together where there is a match in keys
+/ wrong - adds ALL values together
+/ includes non common keys
+```
 
+```q
 d inter d2
 2 20 40
 
 / dict inter dict will return values occuring in both dicts
+/ but you want to return both keys + values, not just values
+```
 
-key[d] inter k[d2]
+```q
+key[d] inter key[d2]
 `p`q`r
 
-/ have to use key[dict_name] inter key[dict2_name] to return keys in both dict
+/ retrieve keys in both d and d2
+/ inter = retrieves common values 
+/ so this will return the keys in both dict
+```
+
+```q
+/ now that you know the common keys, use TAKE
+/ to retrieve a dict from combined d + d2
 
 (key[d] inter key[d2]) # d + d2
 
@@ -2750,6 +2781,7 @@ r  | 80
 ```
 
 **🔵 6. Given the 2 dictionaries below, find those who are greater than 1.7m in height**
+
 ```q
 dheight:`john`mark`luke`paul`ian`peter!1.5 1.6 1.7 1.8 1.9 1.4
 dweight:`john`mark`luke`paul`ian`peter!81 72 88 91 55 110
@@ -2785,7 +2817,7 @@ paul | 1b
 ian  | 1b
 peter| 0b
 
-/ dictionary + condition = examines values as booleans, returns as true/false
+/ comparison operator on a dict returns a table of booleans
 
 where dheight > 1.7
 paul ian
