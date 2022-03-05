@@ -1909,26 +1909,79 @@ adsf
 ```
 
 <a name="uppercase_ops"></a>
-### 🔵 6.9 Timing and Performance
+### 🔵 6.9 Timing Queries
+
 ```q
+/ KDB is all about speed
+/ \t function allows you to time your queries
 
 n: 1000000
 
 a:n?100f
 b:n?100f
 
-/ a and b are lists of a million floats
+/ a and b are lists of a million random floats
 
 \t r1:a+b
 1
 
-/ time took less than 1 millisecond
+/ query time took less than 1 millisecond
+```
+
+```q
+/ vector addition is very fast
 
 \t:100 r1:a+b
 120
 
-/ run it 100x
-/ time still only 120 ms
+/ \t: 100 = run it 100x
+/ query time still only 120 ms
+/ much faster than executing a while loop 
+```
+
+```q
+/ iterative method (slower)
+
+a:n?100f
+b:n?100f
+
+/ a and b are lists of a million random floats
+
+r2: n#0f
+/ first setup empty results list
+
+i: 0
+/ then an setup index which will cycle through the 2 lists
+/ initialized at 0
+
+while[i<n;r2[i]:a[i]+b[i];i+:1]
+
+/ i<n = while our index i is less than n
+/ r2[i] = the results list at position i is equals to
+/ a[i]+b[i] = the value of a at i plus b at i
+/ i+:1 = then increment i by 1
+
+/ if you time the iterative while loop:
+
+\t while[i<n;r2[i]:a[i]+b[i];i+:1]
+1388
+
+/ much slower than vector addition
+```
+
+```q
+/ adverb method using EACH '
+
+r3:+'[a;b]
+
+/ add EACH element of a and b
+
+/ if you time it
+
+\t r3:+'[a;b]
+111
+
+/ faster than while loop, but still slower than vector addition
 ```
 
 <hr>
