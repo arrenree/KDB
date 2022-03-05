@@ -2717,7 +2717,7 @@ s  | 100
 u  | 200
 ```
 
-**🔵 4. Create dictionary d2, by taking values of p q r from dictionary d**
+**🔵 4. Create dictionary d2, by TAKING values of p q r from dictionary d**
 ```q
 d2:`p`q`r#d
 
