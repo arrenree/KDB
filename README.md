@@ -78,6 +78,8 @@
 8. [Repeat Keys](#repeat_key_dict)
 9. [Find Operator](#find_dict)
 10. [Dictionary Operators](#dict_opt)
+11. [Adding / Joining Dictionaries](#dict_adding)
+12. [Boolean Comparisons](#dict_boo)
 
 ## 9. [Dictionary Problem Set](#dict_problemset)
 
@@ -2175,9 +2177,10 @@ count p where a=`int$a
 [Top](#top)
 
 ```q
-/ A dictionary is a mapping between a list of keys and a list of values of the same length
+/ A dictionary is a data structure that maps between a domain of keys and a range of values
 / left of ! = list of keys
 / right of ! = list of values
+/ can map from any TYPE of domain to any TYPE of range
 ```
 
 <a name="dict_from_list"></a>
@@ -2219,7 +2222,6 @@ key | value
 -----------
 a   | 1
 b   | 2
-
 
 / key # dict_name
 / returns a dictionary
@@ -2316,6 +2318,8 @@ d`a`b
 ```
 
 ```q
+/ retrieving single row from dictionary
+
 (enlist`a)#d
 1
 
@@ -2354,7 +2358,6 @@ key | value
 ----------
 a   | 1
 c   | 3
-
 ```
 
 
@@ -2428,8 +2431,8 @@ charlie | 100 200 300
 delta   | 10 11 12
 echo    | 13 14 15
 golf    | 100
-
 ```
+
 ```q
 / avg + avg each dictionary
 
@@ -2455,7 +2458,6 @@ bravo	| 5
 charlie | 8
 
 / avg each nested dictionary = average per ROW
-
 ```
 
 <a name="multi_key_dict"></a>
@@ -2501,27 +2503,48 @@ a
 ### 🔵 8.9 Find Operator ?
 
 ```q
-dict: `a`b`c`d!1 5 8 12
+dict: `a`b`c`d!1 2 3 4
 
-dict?12
-`d
+Key | Value
+-----------
+a   |	1
+b   |	2
+c   |	3
+d   |	4
 
-/ ? find operator
-/ lookup value 12, returns key
+dict ? 3
+`c
+
+/ ? FIND value 3, and return the key
+/ ? FIND works for both lists and dictionaries
 ```
 
 <a name="dict_opt"></a>
 ### 🔵 8.10 Dictionary Operators
+
+sum 
 ```q
 d: `a`b`c ! 1 2 3
 
 sum d
 6
 
+/ sums all values together, returns single atom
+```
+avg
+
+```q
 avg d
 2
 
+/ avg of values
+```
+
+neg
+
+```q
 neg d
+
 key|value
 --------
 a  | -1
@@ -2529,7 +2552,10 @@ b  | -2
 c  | -3
 
 / turns all values negative
+```
+% all values
 
+```q
 d%100
 key|value
 ---------
@@ -2539,11 +2565,15 @@ c  |0.03
 
 / divides all values by 100
 ```
+
+<a name="dict_adding"></a>
+### 🔵 8.11 Adding / Joining Dictionaries
+
 ```q
-Adding / Joining Dictionaries
+/ partial match on keys
 
 d1:`a`b`c!1 2 3
-d2:`a`b`c!1 2 3
+d2:`a`b`d!1 2 3
 
 d1+d2
 d1,d2
@@ -2552,7 +2582,67 @@ key|value
 --------
 a  | 2
 b  | 4
-c  | 6
+c  | 3
+d  | 3
+
+/ finds matching keys, add values together
+/ if no matching keys, simply returns original values (kinda like union)
+```
+
+```q
+/ keys match, values don't
+
+d1: `a`b`c ! 1 2 3
+d2: `a`b` ! 100 200
+
+d1, d2
+
+key|value
+--------
+a  | 100
+b  | 200
+c  | 3
+
+/ when joining dict, if keys match, but values are different
+/ 2nd dict over-rides value of first dict
+```
+
+<a name="dict_boo"></a>
+### 🔵 8.12 Boolean Comparisons
+
+```q
+dict: `a`b`c`d ! 1 2 3 4
+
+dict = 2
+
+Key | Value
+-----------
+a   | 0b
+b   | 1b
+c   | 0b
+d   | 0b
+
+/ compares every value in dict =2
+/ and returns a dictionary of booleans
+```
+
+boolean comparison 2 dictionaries
+
+```q
+d1: `a`b`c ! 1 2 3
+d2: `a`d ! 4 5
+
+d1 < d2
+
+Key | Value
+-----------
+a   | 1b
+b   | 0b
+c   | 0b
+d   | 1b
+
+/ when comparing 2 dict using comparison operator
+/ if no match on key, returns 0 false
 ```
 
 <hr>
