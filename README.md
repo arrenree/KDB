@@ -903,9 +903,10 @@ time
 / y = source type
 / Casting y to x
 ```
-```q
-/ casting strings to sym
 
+Casting strings to sym
+
+```q
 "S" $ "a","b","c"
 `abc
 
@@ -913,36 +914,36 @@ time
 / or can also use `
 ```
 
-```q
-/ Converting syms to strings 
+Casting syms to strings 
 
+```q
 string `abc
 "abc"
 
 / sym to string, simply use "string" function
 ```
 
-```q
-/ casting int to dates
+Casting int to dates
 
+```q
 `date$2
 2000-01-03d
 
 / 2nd day of the millennia
 ```
 
-```q
-/ casting int to time
+Casting int to time
 
+```q
 `time$2
 00:00:00.002t
 
 / 2 + 00:00:00.000
 ```
 
-```q
-/ casting int to month
+Casting int to month
 
+```q
 `month$2
 2000.03m
 
@@ -950,25 +951,24 @@ string `abc
 / 2 + 2000.01.01
 ```
 
-```q
-/ casting int to minute
+Casting int to minute
 
+```q
 `minute$2
 00:02
 
 / takes 2 + 00:00
 ```
 
-```q
-/ casting int to seconds
+Casting int to seconds
 
+```q
 `seconds$2
 00:00:02
 ```
+Casting ints/0 to booleans
 
 ```q
-/ casting to booleans
-
 `boolean$9
 1b
 
@@ -977,9 +977,10 @@ string `abc
 `boolean$0
 0b
 ```
-```q
-/ converting list of syms to string
 
+Converting list of syms to string
+
+```q
 string `a`b`c`d`e
 ("a";"b";"c";"d";"e")
 
@@ -992,6 +993,32 @@ raze string `a`b`c`d`e
 -7h
 
 / a negative type means it's an atom!
+```
+
+Float Rounding when Casting to Int
+
+```q
+`int$3.1
+3i
+
+`int$3.9
+4i
+
+/ will round accordingly up or down
+```
+
+Casting a date to a symbol
+
+```q
+`$2020.01.01
+error
+
+/ can't cast a date directly to a sym
+/ need to cast as string first
+
+`$string 2021.01.01
+
+/ cast as string first, then cast as sym
 ```
 
 <a name="enu_cast"></a>
