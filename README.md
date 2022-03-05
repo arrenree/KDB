@@ -1914,7 +1914,11 @@ adsf
 ```q
 / KDB is all about speed
 / \t function allows you to time your queries
+```
 
+Example 1: Vector Addition Method
+
+```
 n: 1000000
 
 a:n?100f
@@ -1939,9 +1943,9 @@ b:n?100f
 / much faster than executing a while loop 
 ```
 
-```q
-/ iterative method (slower)
+Example 1: Iterative method (while loop)
 
+```q
 a:n?100f
 b:n?100f
 
@@ -1969,9 +1973,9 @@ while[i<n;r2[i]:a[i]+b[i];i+:1]
 / much slower than vector addition
 ```
 
-```q
-/ adverb method using EACH '
+Example 1: Adverb method using EACH '
 
+```q
 r3:+'[a;b]
 
 / add EACH element of a and b
@@ -1982,6 +1986,53 @@ r3:+'[a;b]
 111
 
 / faster than while loop, but still slower than vector addition
+```
+
+Example 2
+
+```q
+/ generate list of 1mm ints from 0-199
+
+d: 1000000?200
+
+/ OBJECTIVE: sum all values > 100
+```
+
+While Loop
+
+```q
+i:0
+r1:0
+
+while[i<count d; if [d[i]>100;r1+:d[i]]; i+:1]
+
+/ runs while i is less than the count of the list
+/ if value of list at index i is greater than 100
+/ then add to value of result
+```
+
+Adverb Version
+
+```q
+/ uses a lambda function which
+/ adds x to the result if x > 100
+/ and does this for each element x in list d
+
+r2: 0
+{if[x>100;r2+::x];}each d
+
+/ faster than using while loop
+```
+
+Vector Version
+
+```q
+d: 1000000?200
+
+sum d where d > 100
+
+/ much faster than while loop or adverb
+/ and much easier logically
 ```
 
 <hr>
