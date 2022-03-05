@@ -2448,6 +2448,8 @@ echo    | 13 14 15
 golf    | 100
 
 / need to use enlist when adding / upserting single row to dict
+/ for dict enlist, need to enlist both key AND value
+
 ```
 
 ```q
