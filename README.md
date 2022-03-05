@@ -1495,22 +1495,42 @@ Raze collapses one level of nesting
 
 ```q
 t: (1 2; 3 4 5) / this is a nested list containing 2 levels
+1 2
+3 4 5
 
-raze t:(1 2; 3 4 5)
+raze t
 1 2 3 4 5 
 
 / collapses 1 level of nesting and joins all items together
 ```
 
 ```q
+/ 2 levels of nesting
+
 b: (1 2; (3 4; 5 6); 7; 8)
 1 2
-3 4
-5 6
+    3 4
+    5 6
 7
 8
 
-raze/[b]
+raze b
+1
+2
+3 4
+5 6
+7 
+8
+
+/ collapses 1 2 to 2 levels
+/ collapses 3 4 up a level
+```
+
+```
+/ flatten all levels raze/
+
+b: (1 2; (3 4; 5 6); 7; 8)
+raze/ [b]
 1 2 3 4 5 6 7 8
 
 / using raze/[x] will flatten all levels
