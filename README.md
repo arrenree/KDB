@@ -394,87 +394,140 @@ True, False, True
 
 <a name="over_intro"></a>
 ### 🔵 1.8 Over
+
 ```q
-0 +/ 1 2 3
++/ [2 3 4] 
+9
+
+/ reduces 2, 3, 4 with +
+/ returns SINGLE output 9
+/ execuutes "over" entire list
 ```
-1 2 3
-* / means over
-* execute "over" entire list
+
+```q
+0 +/ 2 3 4
+9
+
+/ 0 + 9 = 9
+```
+
+```q
+1 +/ 2 3 4
+10
+
+/ 1 + 9 = 10
+```
 
 ```q
 (*/) 2 # 5
-```
 25
-* take 2 values from 5 = 5 5
-* multiply 5 x 5 = 25
+
+/ 2#5= 5 5
+/ (*/) means multiple over the list 5 x 5 = 25
+/ notice you have to use ( ) to contain the (*/)
+
+
+2 */ 2#5
+50
+
+/ notice no more parenthesis if you are multiplying 2 over
+/ 2 * 5 * 5 = 50
+```
 
 <a name="scan_intro"></a>
 ### 🔵 1.9 Scan
-* scan is similar to over /, but instead of returning the final result, returns all values
+
+```q
+/ scan is similar to over /, but returns all values
+
+(+\) 2 3 4
+2 5 9
+
+/ starts with 2
+/ 2 + 3 = 5
+/ 5 + 4 = 9
+/ accumulates and adds next value
+```
 
 ```q
 (+\) 1 + 0 1 2 3
-```
 1 3 6 10
+
+/ 1 2 3 4
+/ 1
+/ 1 + 2 = 3
+/ 3 + 3 = 6
+/ 6 + 4 = 10
+```
 
 <a name="larger_intro"></a>
 ### 🔵 1.10 Larger
 
 ```q
 4 | 5
-```
 5
-* | is called style or bar
-* returns the larger of the two operants
+
+/ | is called style or bar
+/ returns the larger of the two operants
+```
 
 ```q
-(|/) til 10
+(|/) til 4
+3
+
+/ find the largest value over the list
+/ 0 1 2 3 = list
+/ compares each element, returns larger 
 ```
-9
-* find the largest value over the list
 
 ```q
 max 10 20 30
-```
 30
-* return the largest value over the list
+
+/ return the largest value over the list
+```
 
 <a name="smaller_intro"></a>
 ### 🔵 1.11 Smaller
 
 ```q
 10 & 2
-```
 2
-* the & is called amper
-* chooses the lesser of the 2
+
+/ the & is called amper
+/ chooses the lesser of the 2
+```
 
 ```q
-(&/) til 10
-```
+(&/) til 4
 0
-* return the smallest value over the list
+
+/ return the smallest value over the list
+```
 
 ```q
 min 10 20 30
-```
 10
-* return the smallest value  in this list
+
+/ return the smallest value  in this list
+```
 
 <a name="count_intro"></a>
 ### 🔵 1.12 Count
 
 ```q
 count (til 6; 10 20 30)
-```
 2
-* counted 2 lists
+
+/ counted 2 items in list
+```
 
 ```q
 count each (til 6; 10 20 30)
-```
 6 3
-* count each will count the number of values in each list
+
+/ counts the number of items in EACH nested list
+```
 
 <a name="take_intro"></a>
 ### 🔵 1.13 Take
@@ -502,24 +555,23 @@ k: 1 2 3 4
 / take 5 values from this list
 / notice take # wraps around until 5 elements are returned
 / sublist is similar, but wont wrap. 
-
 ```
 
 <a name="drop_intro"></a>
 ### 🔵 1.14 Drop
-```Q
 
+```q
 k: 1 2 3 4
 
 2_k
 3 4
 
-/ dropS the first 2 values from list k
+/ drops the FIRST 2 values from list k
 
 -2_k
 1 2
 
-/ drops the last 2 values from list k
+/ - drops the LAST 2 values from list k
 
 k_2
 1 2 4
@@ -537,18 +589,23 @@ l: 1 2 3 4 5 6
 (1 2; 3 4; 5 6)
 
 / cuts list into elements of 2
-
+```
+```q
 3 cut l
 (1 2 3; 4 5 6)
 
 / cuts list into elements of 3
+```
 
+```q
 1 4 cut l
 (2 3 4; 5 6)
 
-/ first element = drop all elements from this and before (1)
-/ 2nd element = cut after this (4)
+/ 2nd element (4) = cut list by 4
+/ first element (1) = AFTER cutting, then drop everything before this element (1) from output
+```
 
+```q
 2 3 cut l
 (3; 4 5 6)
 
@@ -556,20 +613,19 @@ l: 1 2 3 4 5 6
 / cut after 3
 ```
 
-
 <a name="pluscolon"></a>
 ### 🔵 1.15 +:
 
 ```q
 x+:1
-/ is the same as
-x:x+1
+
+/ is the same as x:x+1
 ```
 
 ```q
 x*:3
-/ is the same as
-x:x*3
+
+/ is the same as x:x*3
 ```
 
 <a name="multilinecomment"></a>
@@ -584,25 +640,34 @@ end with "\"
 ```
 
 <a name="signum"></a>
-### 🔵 1.17 Signum
+### 🔵 1.17 Deltas
 
 ```q
-/ Signum conveys whether a value is positive, negative, or 0
-
 prices: 3 2 2 1 5
 deltas prices
 3 -1 0 -1 4
 
 / deltas = difference between each element
+```
 
-signum deltas prices
+<a name="signum"></a>
+### 🔵 1.17 Signum
+
+```q
+/ signum conveys whether a value is positive, negative, or 0
+
+signum -2 0 1 3
+-1 0 1 1
+
+/ neg, 0, pos pos
+```
+
+```q
+deltas: 3 -1 0 -1 4
+signum deltas
 1 -1 0 -1 1
 
-/ signum shows if element is positive, negative or 0
-
-tickdirection: {signum deltas[first x;x]}
-tickdirection prices
-
+/ pos, neg, 0, neg, neg
 ```
 
 <a name="cross_operator"></a>
@@ -610,16 +675,21 @@ tickdirection prices
 
 ```q
 x cross y
+
 / cross returns all possible combinations of x and y
 / note - does NOT multiply or add
+```
 
+```q
 1 cross 3 4
 1 3
 1 4
 
 / x(1) to y(3)
 / x(1) to y(4)
-  
+```
+
+```q
 1 2 cross 3 4
 1 3
 1 4
@@ -631,12 +701,18 @@ x cross y
 / x(2) to y(3)
 / x(2) to y(4)
 ```
+
 ```q
-/ also works on tables
+/ also works on lists + tables
 
 s:`IBM`MSFT`AAPL
 v: 1 2
 
+s cross v
+((`ibm;1);(`ibm;2);(`apple;1);(`apple;2);(`msft;1);(`msft;2))
+```
+
+```q
 ([]s) cross ([]v)
 
 s    | v
@@ -649,7 +725,20 @@ AAPL | 1
 AAPL | 2
 
 / so takes every element of s (IBM, MSFT, AAPL) and combines with every element of v (1 2)
+/ the ([] s) returns a table
+
+```q
+/ ([]s) returns a single column table
+
+([]s)
+
+s
+----
+IBM
+MSFT
+AAPL
 ```
+
 ```q
 / useful for building xbar timeseries
 
@@ -669,7 +758,6 @@ IBM  | 09:15
 IBM  | 09:30
 IBM  | 09:45
 ```
-
 
 <hr>
 
