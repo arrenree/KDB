@@ -2790,6 +2790,11 @@ g
 ### 🔵 10.6 If Statements
 
 ```q
+/ if[test_condition; do_this]
+/ if first condition true = execute all statements that follow
+```
+
+```q
 if [10>3; a:11; show a*10]
 110
 
@@ -2805,13 +2810,16 @@ if[10>3; a:11; show a*10; show "hello"]
 ```
 
 ```q
+/ boolean promotion
+/ booleans can only be TRUE(1b) or FALSE(0b)
+/ Combine booleans + IF statements
+
 if[10; show "true"]
 "true"
 
-/ integers default to TRUE (1b)
-/ 0 default to FALSE (0b)
+/ Any number = boolean TRUE 
+/ 0 = defaults to boolean FALSE (0b)
 / since 10 is an int, and int will default to 1b (true)
-
 ```
 
 ```q
