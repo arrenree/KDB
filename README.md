@@ -2330,7 +2330,13 @@ d`a`b
 ### 🔵 8.5 Drop
 
 ```q
-/ drop used to delete key/values in dictionaries
+/ drop ROWS in dictionaries
+
+key | value
+----------
+a   | 1
+b   | 2
+c   | 3
 
 2_d
 
@@ -2342,6 +2348,8 @@ C   | 3
 ```
 
 ```q
+/ drop keys + values from dict
+
 d: `a`b`c ! 1 2 3
 
 key | value
@@ -2352,12 +2360,13 @@ c   | 3
 
 `b _ d
 
-/ drop key `b and its value 3 from dict
-
 key | value
 ----------
 a   | 1
 c   | 3
+
+/ drop key b and its associated value from the dict
+/ can drop multiple keys at once
 ```
 
 
@@ -2519,7 +2528,7 @@ a
 ```
 
 <a name="find_dict"></a>
-### 🔵 8.9 Find Operator ?
+### 🔵 8.9 Find Operator ? on Dictionaries
 
 ```q
 dict: `a`b`c`d!1 2 3 4
@@ -3715,7 +3724,7 @@ employees| | |
 
 ( [] company: `symbol$(); employees: `int$())
 
-/ changed company type to s (symbol) and employees to i (integer)
+/ changed company type to sym (symbol) and employees to int (integer)
 / if J is capital = nested lists
 
 c        |t|f|a
@@ -3770,6 +3779,7 @@ bmw | 100
 ```
 <a name="rename_column_table"></a>
 ### 🔵 12.7 Reorder Column Table (xcols)
+
 ```q
 
 company | employee
@@ -3789,7 +3799,6 @@ employee | company
 / doesn't have to be complete list of columns
 / just moves it to left of table
 ```
-
 
 <a name="add_column_table"></a>
 ### 🔵 12.8 Add Column
@@ -3822,6 +3831,7 @@ ford    |    300    | 101
 / will sort ascending by employees
 / or xdesc for descending
 ```
+
 ```q
 / sort by 2 columns
 
@@ -3833,7 +3843,6 @@ bmw	|    100    | 101
 ford    |    300    | 101
 
 / will sort by company first, then employees
-
 ```
 
 ```q
@@ -3845,7 +3854,6 @@ apple	mark	1	10
 orange	mark	2	20
 pear	allen	3	30
 banana	tom	4	40
-
 
 select [>grocer] from sales
 
@@ -3859,9 +3867,9 @@ pear	allen	3	30
 / order our table in descending according to grocer
 ```
 
-
 <a name="union_table"></a>
 ### 🔵 12.10 Union Table
+
 ```q
 / table union merges 2 tables together, but does NOT dupe values!
 
@@ -3889,11 +3897,10 @@ rover   | 100
 bmw     | 5 
 ford    | 5
 
-/ returns values that are same (ferrari 100) 
+/ matches on keys (ferrari). if same value, copies value
 / does NOT dupe same values
-/ any values that do NOT equal, adds as new row
-/ ford = 100 and 5. so new tables contains both values
-
+/ if match on key (ford), but no match on value (100 v 5), returns BOTH values
+/ if no match on key (rover), returns key + value as new row
 ```
 
 <a name="except_table"></a>
