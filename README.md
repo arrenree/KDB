@@ -4022,6 +4022,16 @@ Retrieves ALL columns from table
 
 ```q
 select from t
+
+company | employees
+-------------------
+ferrari | 100
+ford    | 100 
+rover   | 100
+bmw     | 5 
+ford    | 5
+
+/ QSQL method
 ```
 
 Retrieve values from column as a COLUMN
@@ -4036,6 +4046,8 @@ ford
 rover 
 bmw 	 
 ford 
+
+/ QSQL method
 ```
 
 Retrieve values from column as a LIST
