@@ -3690,6 +3690,8 @@ ford    | 300
 ### 🔵 12.4 Mixed Table
 
 ```q
+/ table of SYM, FLOAT, STRING
+
 ( [] syms:`a`b`c; floats: 1.1 2.2 3.3; strings: ("bob"; "jim"; "john"))
 
 syms|floats|strings
@@ -3700,6 +3702,34 @@ c   | 3.3 | john
 
 / syms have to start with backtick
 / strings have to enclose within (" ")
+```
+
+```q
+/ table of SYM, CHARS, TIME
+
+([] syms:`a`b`c; chars:"aaa"; times:08:00 08:30 09:00)
+
+syms | chars |	times
+----------------------
+a    |	 a   |	08:00
+b    |	 a   |	08:30
+c    |	 a   |	09:00
+
+/ notice chars "aaa" gets split into rows
+```
+
+```q
+/ columns with repeated values
+
+([] syms:`a`b`c; num: 33)
+
+syms | num
+------------
+a    | 33
+b    | 33
+c    | 33
+
+/ since syms column has 3 rows, a single value in second column will duplicate
 ```
 
 <a name="meta_datatypes_table"></a>
@@ -3721,10 +3751,14 @@ c        |t|f|a
 ---------------
 company  | | | 
 employees| | | 
+```
+
+```q
+/ cast columns to specific type
 
 ( [] company: `symbol$(); employees: `int$())
 
-/ changed company type to sym (symbol) and employees to int (integer)
+/ changed company type to SYM and employees to INT
 / if J is capital = nested lists
 
 c        |t|f|a
@@ -3963,6 +3997,16 @@ a|b
 ### 🔵 12.14 Retrieve From Table
 
 ```q
+3 methods to retrieve from table
+
+1) QSQL
+2) retrieve as a DICT
+3) retrieve as a LIST
+
+/ QSQL most common method
+```
+
+```q
 table t:
 
 company | employees
@@ -3973,14 +4017,16 @@ rover   | 100
 bmw     | 5 
 ford    | 5
 ```
-```q
-/ retrieves all columns from table t
 
+Retrieves ALL columns from table
+
+```q
 select from t
+```
+
+Retrieve values from column as a COLUMN
 
 ```q
-/ retrieve values from column as a column
-
 select company from t
 
 company 
@@ -3992,35 +4038,33 @@ bmw
 ford 
 ```
 
-```q
-/ retrieve values from column as a list
+Retrieve values from column as a LIST
 
+```q
 t[`employees]
 100 100 100 5 5
 ```
 
-```q
-/ retrieves row where company = ford 
+Retrieves row where company = ford 
 
+```q
 select from t where company = `ford
 
 company | employees
 -------------------
 ford    | 100 
-
 ```
 
-```q
-/ retrieves columns values as a row
+Retrieves columns values as a ROW
 
+```q
 t [`employees]
 100 100 100 5 5 
-
 ```
 
-```q
-/ perform operations on entire column
+Perform operations on entire column
 
+```q
 trade
 date      | time        | sym |price   |size |cond
 --------------------------------------------------
@@ -4041,9 +4085,9 @@ A   | 100.3| 200.3
 / adds 100 to each value in column price
 ```
 
-```q
-/ retrieve first 2 rows
+Retrieve first 2 rows
 
+```q
 t [ 0 1] / indexing method
 or
 2#t      / take method
@@ -4052,12 +4096,11 @@ company | employees
 --------------------
 ferrari | 0
 ford    | 0 
-
 ```
 
-```q
-/ returns last 3 rows
+Retrieve last 3 rows
 
+```q
 -3#t
 
 company | employees
@@ -4065,19 +4108,17 @@ company | employees
 rover   | 0
 bmw     |-105 
 ford    |-105
-
 ```
 
-```q
-/ randomly selects 2 rows from table
+Randomly selects 2 rows from table
 
+```q
 2 ? t
 
 company | employees
 -------------------
 rover   | 0
 ford    |-105
-
 ```
 
 <a name="insert_table"></a>
