@@ -4519,7 +4519,21 @@ Joining Tables using Take #
 ```q
 / assume large table called trade
 
-t1: 5#trade
+/ create t1, which is the first 3 rows of trade
+
+t1: 3#trade
+
+sym	price	size
+----------------------
+C	107.2	63500
+MSFT	96.8	1700
+RBS	97.1	80700
+```
+
+```q
+/ join t1 with last 3 rows of trade
+
+t1, -3#trade
 
 sym	price	size
 ----------------------
@@ -4528,11 +4542,7 @@ MSFT	96.8	1700
 RBS	97.1	80700
 A	100.3	50300
 B	55.8	92700
-
-/ t1 = first 5 rows of trade table
-
-t1, -5#trade
-
+C	45.3	99930
 
 / combining first 5 rows of trade with last 5 rows of trade
 
@@ -4542,8 +4552,8 @@ t1, -5#trade
 ```q
 / using left join to join tables
 
-t1:([]sym:`a`b`c;ex:`one`two`three;size:100 200 300)
-t2:([]sym:`a`b`c;ex:`one`two`three;price:0.1 0.2 0.3)
+t1:( []sym:`a`b`c; ex:`one`two`three; size:100 200 300)
+t2:( []sym:`a`b`c; ex:`one`two`three; price:0.1 0.2 0.3)
 
 t1
 sym |ex   | size
@@ -4558,7 +4568,11 @@ sym |ex   | prrice
 a   |one  | 0.1
 b   |two  | 0.2
 c   |three| 0.3
+```
 
+Tables must be keyed!
+
+```q
 / to use LEFT JOIN to join tables, the tables must first be keyed!
 
 2!t1
@@ -4579,7 +4593,7 @@ c   |three| 300  | 0.3
 ### 🔵 12.19 Find on Tables
 
 ```q
-t: ([] a: 1 2 3; b: 4 5 6; c: 7 8 9)
+t: ( [] a: 1 2 3; b: 4 5 6; c: 7 8 9)
 
 a b c
 ------
@@ -4587,23 +4601,25 @@ a b c
 2 5 8
 3 6 9
 
-t? 3 6 9
+t ? 3 6 9
 2
 
 / find these values within the table
-/ shows index position 2
+/ returns index position 2 (row 3)
+```
 
-t? (2 5 8; 3 6 9)
+```q
+t ? (2 5 8; 3 6 9)
 1 2 
 
-/ can find more than 1 list of indices at once
-/ returns list of indices
+/ can retrieve more than 1 set of values at once
+/ returns list of indices (rows 2, 3)
 ```
 
 ```q
 / find first index position where chem appears in tab2
 
-tab1:([id:"abc"]pupil:`john`paul`rachel;subject:`maths`physics`chem;mark:96 55 82)
+tab1:( [id:"abc"] pupil:`john`paul`rachel; subject:`maths`physics`chem; mark:96 55 82)
 
 id| pupil |subject  | mark
 --------------------------
@@ -4616,7 +4632,6 @@ tab2[`subject]?`chem
 
 / you can lookup index position by finding VALUE from table[col_name]
 / syntax = tablename[col_name]?`sym
-
 ```
 
 <hr>
@@ -4625,7 +4640,7 @@ tab2[`subject]?`chem
 # 🔴 13. Tables Problem Set
 [Top](#top)
 
-**🔵 Given:**
+**🔵 Problem Set 1**
 
 ```q
 stock: ( [] sym: `MS`C`AAPL; sector:`Financial`Financial`Tech; employees: 100 100 100)
@@ -4637,31 +4652,43 @@ C   |Financial |100
 AAPL|Tech      |100
 ```
 
-**🔵 13.1 Extract the employees numbers (without the header)**
+**🔵 13.1 Extract the employees values (without the header)**
 
 ```q
-stock [ ; `employees]
+/ since they only want values and no header, use INDEX retrieve
+
+stock[`employees]
 100 100 100
 ```
-```q
-stock[`employees]
-```
+other syntax:
+
 ```q
 stock.employees
 ```
 ```q
 stock`employees
 ```
+```q
+stock [ ; `employees]
+```
 
 **🔵 13.2 Key the first column in stock table above**
 
 ```q
 1!stock
+
+`sym` |sector    |employees
+-------------------------
+`MS`  |Financial |100
+`C`   |Financial |100
+`AAPL`|Tech      |100
 ```
 
 **🔵 13.3 Display only the first and second rows of the stock table**
 
 ```q
+/ use TAKE # method
+
 2#stock
 
 sym |sector    |employees
@@ -4669,10 +4696,15 @@ sym |sector    |employees
 MS  |Financial |100
 C   |Financial |100
 ```
-or
+
+alternative solution:
 
 ```q
+/ use index retrieve method
+
 stock [0 1]
+
+/ returns index position 0 and 1 (first 2 rows)
 ```
 
 **🔵 13.4 Select the last row of stock table as a dictionary**
@@ -4686,12 +4718,27 @@ sym       | AAPL
 sector    | Tech
 employees | 100
 
-/ last will retrieve the last row from table stock
+/ LAST will retrieve the last row from table stock
 / and return it as a dictionary
-
 ```
 
 **🔵 13.5 Insert GOOG in the tech sector with 100 employees**
+
+```q
+`stock insert(`GOOG; `Tech; 100)
+
+sym |sector    |employees
+-------------------------
+MS  |Financial |100
+C   |Financial |100
+AAPL|Tech      |100
+GOOG|Tech      |100
+
+/ remember need to `stock otherwise error
+/ saves + updates underlying table
+```
+
+alternative solution:
 
 ```q
 insert [`stock; ([] sym: enlist `GOOG; sector: enlist `tech; employees: enlist 100)]
@@ -4707,7 +4754,7 @@ GOOG|Tech      |100
 / must use enlist when adding single row!!
 ```
 
-**🔵 13.6 Given:**
+**🔵 Problem Set 2**
 
 ```q
 boss: ( [] name:`bob`bill`belinda; height: 188 186 174)
@@ -4731,32 +4778,36 @@ john| 170
 **🔵 13.6 Find the average height of the bosses, the employees, and both the bosses and employees**
 
 ```q
-avg boss `height
+avg boss[`height]
 182.667
 
-avg employees `height
+avg employees [`height]
 170f
 
-avg (employees, boss) `height
+avg (boss,employees)[`height]
 176.33
 
-/ joins the 2 tables together
-/ calculate the average height from joined table
+/ first JOIN boss and employees tables together
+/ index retrieve values from the height column
+/ then find average
 ```
 
 **🔵 13.7 Find the 2 tallest employees**
+
 ```q
-2#`height xdesc employees
+2 # `height xdesc employees
 
 name | height
 -------------
 jim  | 180
 john | 170
 
-/ take 2 from employees table, sorted descending by height
+/ first sort employees table by height (xdesc)
+/ syntax is column_name xdesc table_name
+/ then you take the first 2 rows 
 ```
 
-**🔵 13.8 Given the 2 tables:**
+**🔵 Problem Set 3**
 
 ```q
 stock: ( [sym:`MS`C`AAPL] sector:`Fin`Fin`Tech; employees: 100 100 100)
@@ -4777,19 +4828,58 @@ dt        |sym  |price| size
 2021-01-03|MS   |30   | 300
 2021-01-04|C	|40   | 400
 2021-01-05|AAPL	|50   | 500
-
 ```
 
 **🔵 13.8 Insert the following rows into trade table**
+
 ```q
 dt        |sym  |price| size
 ----------------------------
 2021-11-01|JPM	|1    | 100
 2021-11-02|UBS	|2    | 200
 
+meta trade
+
+c	t f a
+---------------
+dt	d		
+sym	s		
+price	j		
+size	j		
+
+/ since the values you insert HAS to match the datatype of table trade
+/ meta helps you know what each column datatype is
+
+`trade insert (2011.11.01 2021.11.02; `JPM`UBS; 1 2; 100 200)
+
+dt        | sym  | price| size
+-------------------------------
+2021-01-01| C	 |  10  | 100
+2021-01-02| C	 |  20  | 200
+2021-01-03| MS   |  30  | 300
+2021-01-04| C	 |  40  | 400
+2021-01-05| AAPL |  50  | 500
+2021-11-01| JPM	 |   1  | 100
+2021-11-02| UBS	 |   2  | 200
+
+/ can simply insert the values (without headers)
+/ remember to backtick `trade table name
+```
+
+alternative solution:
+
+```q
+/ insert table method
+
 `trade insert( [] dt:2021.11.01+1 ; sym:`JPM`UBS; price:1 2; size: 100 200) 
 
-/ or
+/ requires column header names
+```
+
+alternative solution:
+
+```q
+/ alternative syntax, but also requires column headers
 
 insert [`trade; ([] dt:2021.11.01+1 ; sym:`JPM`UBS; price:1 2; size: 100 200)]
 
@@ -4807,12 +4897,13 @@ dt        |sym  |price| size
 ```
 
 **🔵 13.9 Insert the following record into stock**
+
 ```q
 sym|sector|employees
 --------------------
 FB |Tech  | 100
 
-`stock insert [`FB; `Tech; 100]
+`stock insert (`FB; `Tech; 100)
 
 sym  |sector|employees
 ---------------------
@@ -4821,16 +4912,26 @@ C    |Fin   | 100
 AAPL |Tech  | 100
 FB   |Tech  | 100
 
-/ table name + insert (value1, value 2, value 3)
+/ insert values without header
+/ `FB automatically becomes keyed since table column sym is keyed
+/ remember to backtick `stock
 ```
 
 **🔵 13.10 In the stock table, change the number of employees for C to 300**
 
 ```q
 stock upsert (`C;`Fin;300)
+
+/ to update table values, use UPSERT
+/ don't need backtick on table name
 ```
-or
+
+alternative solution:
+
 ```q
+/ alternative syntax
+/ but this requires headers
+
 stock upsert ([sym: enlist`C] employees: enlist 300)
 
 sym|sector|employees
@@ -4839,6 +4940,7 @@ C  |Fin   |300
 
 / have to use enlist to create a vector for an atom
 ```
+
 **🔵 13.11 Sort the stock table by sym**
 
 ```q
@@ -4850,7 +4952,8 @@ AAPL|Tech  | 100
 C   |Fin   | 100
 MS  |Fin   | 100
 
-/ `column name + xasc + `table name
+/ syntax always goes column name xasc table name
+/ backtick stock table to save underlying table
 ```
 
 <a name="keyed_tables"></a>
