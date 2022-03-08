@@ -3809,20 +3809,18 @@ bmw | 100
 
 / renames first 2 columns from company/employee to a/b
 / xcol will only change col names from left to right
-
+/ NOT in place, not saved to underlying table
 ```
 <a name="rename_column_table"></a>
 ### 🔵 12.7 Reorder Column Table (xcols)
 
 ```q
-
 company | employee
 ------------------
 ford    |   300
 bmw     |   100
 
 `employees`company xcols t
-
 
 employee | company
 ------------------
@@ -3832,6 +3830,7 @@ employee | company
 / reorders columns
 / doesn't have to be complete list of columns
 / just moves it to left of table
+/ NOT in place, not saved to underlying table
 ```
 
 <a name="add_column_table"></a>
@@ -3941,7 +3940,8 @@ ford    | 5
 ### 🔵 12.11 Except Table
 
 ```q
-/ except table = only returns values found in LEFT table NOT found in RIGHT table
+/ x except y
+/ only returns values found in x NOT found in y
 
 t except u
 
@@ -3960,6 +3960,7 @@ rover   | 100
 ### 🔵 12.12 Inter Table
 
 ```q
+/ x inter y
 / inter table = think of it as inner join
 / only returns key/values that matches in both tables
 
@@ -4065,6 +4066,10 @@ select from t where company = `ford
 company | employees
 -------------------
 ford    | 100 
+
+/ note - since you are using QSQL and filtering with WHERE
+/ don't need backtick on column name = company
+/ you need a backtick on `ford since ford is a sym
 ```
 
 Retrieves columns values as a ROW
@@ -4072,6 +4077,8 @@ Retrieves columns values as a ROW
 ```q
 t [`employees]
 100 100 100 5 5 
+
+/ retrieve using indexing on column name returns all values in column
 ```
 
 Perform operations on entire column
@@ -4100,9 +4107,13 @@ A   | 100.3| 200.3
 Retrieve first 2 rows
 
 ```q
-t [ 0 1] / indexing method
-or
-2#t      / take method
+/ TAKE method
+
+2#t
+
+/ INDEXING method
+
+t[0 1]
 
 company | employees
 --------------------
@@ -4145,15 +4156,18 @@ ford    |-105
 / or
 
 insert [`t; (`ferrari`bmw; 9 7)]
-
 ```
 
+INSERT Example 1 (syntax 1)
+
 ```q
-/ INSERT Example 1
 
-/ create empty table 
+/ create empty table with the following columns:
+/ brand = sym datatype
+/ model = sym datatype
+/ purchasedate = date datatype
 
-cars:([] brand:`$();model:`$();purchasedate:`date$())
+cars:([] brand:`$(); model:`$(); purchasedate:`date$())
 
 / insert `bmw, 318; 2021.01.01
 
@@ -4163,13 +4177,17 @@ brand model date
 ----------------------
 bmw   318   2021-01-01
 
-/ have to backtick table (`cars) to insert, otherwise will fail
+/ HAVE TO BACKTICK table (`cars) to insert, otherwise will fail
 / have to insert correct datatype. `318 is a sym
 / don't need enlist
 ```
 
+INSERT Multiple Rows to Table (syntax 1)
+
 ```q
-/ INSERT Multiple Example
+/ insert the following rows into cars table
+/ `audi; `a5; 2021.01.02
+/ `ford; `fiesta; 2021.01.03
 
 `cars insert (`audi`ford;`a5`fiesta;2021.01.02 2021.01.03)
 
@@ -4178,13 +4196,32 @@ brand model  date
 bmw   318    2021-01-01
 audi  a5     2021-01-02
 ford  fiesta 2021-01-03
+```
 
-/ insert table into table
+INSERT table into table (syntax 1)
+
+```q
+/ insert table cars into existing table of cars
 
 `cars insert cars
-`cars ,:cars
 
-/ insert table with deleted column
+brand |	model  | purchasedate
+----------------------------
+bmw   | 318    | 2021-01-01
+audi  | a5     | 2021-01-02
+ford  | fiesta | 2021-01-03
+bmw   | 318    | 2021-01-01
+audi  | a5     | 2021-01-02
+ford  | fiesta | 2021-01-03
+
+/ alternative syntax: `cars ,:cars
+```
+
+INSERT table with deleted column (syntax 1)
+
+```q
+/ delete column model from cars
+/ then join onto existing table cars
 
 `cars insert delete model from cars
 
@@ -4196,15 +4233,24 @@ ford  fiesta 2021-01-03
 bmw	     2021-01-01
 audi	     2021-01-02
 ford	     2021-01-03
+
+/ deletes the column model first
+/ then that table is inserted into existing table
 ```
 
+INSERT Example 2 (syntax 2)
+
 ```q
-/ INSERT Example 2 (diff syntax)
+/ create empty table t with columns company and employees
 
 t: ( [] company: (); employees: () )
 company|employees
+```
 
-/ create empty table
+INSERT SINGLE Row to table (syntax 2)
+
+```q
+/ insert single row `ferrari; 8 into table t
 
 insert [`t; (`Ferrari; 8)]
 
@@ -4215,11 +4261,13 @@ Ferrari| 8
 / backtick t to update underlying table
 / first argument is table name(t), second argument are the values to be inserted
 / semi colon separate columns for the values
-/ don't need enlist
+/ DON'T need enlist
 ```
 
+INSERT MULTIPLE rows to Table (syntax 2)
+
 ```q
-/ INSERT Multiple Example 2
+/ insert `ferrari`bmw; 9; 7 to table t
 
 insert [`t; (Ferrari`bmw; 9 7)]
 
@@ -4230,10 +4278,13 @@ Ferrari| 9
 bmw    | 7
 
 / insert will append to the table each time (ferrari repeated)
+/ column values separated by semi colon
 ```
 
+INSERT table into another table (syntax 2)
+
 ```q
-/ INSERT table into another table 
+/ create table x with `subaru`hyundai; 55; 56
 
 x: ( [] company: `Subaru`Hyundai; employees: 55 56)
 
@@ -4244,6 +4295,8 @@ Hyundai| 56
 ```
 
 ```q
+/ insert table x into table t
+
 `t insert x
 
 company|employees
@@ -4254,8 +4307,6 @@ bmw    | 7
 Subaru | 8
 Hyundai| 56
 
-/ table x inserted into table t
-
 / alternatively:
 
 t:t,x
@@ -4263,6 +4314,7 @@ t:t,x
 
 <a name="upsert_table"></a>
 ### 🔵 12.16 Upsert Rows Tables
+
 ```q
 t:([fruit:`apple`banana] price:10 20; quantity: 100 50)
 
@@ -4278,15 +4330,21 @@ fruit  price quantity
 apple  100   800
 banana 20    200
 
-/ updates apple
+/ upsert = update/insert
+/ so in this case, it will find value `apple
+/ and update its values in price and quantity to 100 800
+```
 
-/ you cannot upsert multiple rows
+You cannot upsert multiple rows
 
+```
 `t upsert (`apple`orange;11 23; 100 200)
 /error
+```
 
-/ instead you have to upsert a dictionary
+Instead, you have to upsert a table
 
+```q
 `t upsert ([]fruit:`apple`orange; price: 11 23; quantity:100 200)
 
 fruit  price quantity
@@ -4317,7 +4375,8 @@ guava	30
 
 t1: ([sym: `a`b`c] num: 1 2 3)
 t2: ([sym: `a`b`c] num: 1 1 1)
-t1+t2
+
+t1 + t2
 
 sym | num
 ---------
@@ -4325,29 +4384,47 @@ a   | 2
 b   | 3
 c   | 4
 
-/ both tables have to be keyed
-/ column names have to match
+/ BOTH tables have to be keyed
+/ column names have to MATCH
+```
 
-/ if UNKEYED, can only do math on tables with numeric fields
+if UNKEYED, can only do math on tables with numeric fields
 
-t1: ([] sym: 1 2 3; num: 1 2 3)
-t2: ([] sym: 1 1 1; num: 1 1 1)
-t1+t2
+```q
+t1: ([] sym: `a`b`c; num: 1 1 1)
+t2: ([] sym: `a`b`c; num: 1 1 1)
 
-sym | num
----------
+t1 + t2
+/ error
+```
+
+```q
+/ only works if table is ALL nums
+
+t1: ([] num1: 1 1 1; num2: 1 1 1)
+t2: ([] num1: 1 1 1; num2: 1 1 1)
+
+t1 + t2
+
+num1 | num2
+-----------
 2   | 2
-3   | 3
-4   | 4
+2   | 2
+2   | 2
 
-/ will find the column names that match, and add values together
+/ Finds column names that match, and add values together
 / column names that dont match will be union joined as a new column
 ```
+
+Math on Partial Key Matches
+
 ```q
 / partial key match 
 
-t1:([id:`a`b`c] price: 1 2 3; rating: 10 20 30)
-t2:([id:`b`c] price: 10 10 ; rating: 100 100)
+t1:( [id:`a`b`c] price: 1 2 3; rating: 10 20 30)
+t2:( [id:`b`c] price: 10 10 ; rating: 100 100)
+
+/ t2 only has `b`c keyed
 
 t1
 id price rating
@@ -4361,26 +4438,27 @@ id price rating
 ---------------
 b   10    100
 c   10    100
+```
 
-t1+t2
+```q
+t1 + t2
 id price rating
 ---------------
 a   1     10
 b   12    120
 c   13    130
 
-/ only keys `b`c are matching between the 2 tables
-/ so will only add values in these 2 rows
-/ a will simply return its original value
+/ ONLY keys `b`c are matching between the 2 tables
+/ will only add values in these 2 rows
+/ `a will simply return its original value
 ```
 
 <a name="joins_table"></a>
 ### 🔵 12.18 Joins on Tables
 
 ```q
-/ vertical joins
-/ keeps columns, adds additional rows
-/ both tables MUST HAVE SAME SCHEMA (column names + types)
+/ if 2 tables columns MATCH, can JOIN to ADD ROW
+/ called vertical joins
 
 t1
 sym  side price size
@@ -4394,7 +4472,7 @@ sym  side price size
 GOOG buy   30 	 300
 MSFT sell  40	 400
 
-t1,t2
+t1, t2
 
 sym  side price size
 ---------------------
@@ -4403,9 +4481,12 @@ AAPL sell  20	 200
 GOOG buy   30 	 300
 MSFT sell  40	 400
 ```
+
 ```q
-/ horizontal rows joins tables with same number of rows
-/ adds extra set of columns
+/ if 2 tables have same number of rows
+/ and NO matching columns
+/ can join tables together by adding extra columns
+/ similar to LEFT JOIN
 
 t1
 sym  ex
@@ -4429,17 +4510,32 @@ IBM  nyse    10   100
 AAPL nyse    20   200
 GOOG nasdaq  30   300
 
-/ this actually uses each both to join the 2 tables horizontally
+/ t1 and t2 have diff column names
+/ but same number of rows
 ```
+
+Joining Tables using Take #
+
 ```q
-/ you can also do this"
+/ assume large table called trade
 
 t1: 5#trade
+
+sym	price	size
+----------------------
+C	107.2	63500
+MSFT	96.8	1700
+RBS	97.1	80700
+A	100.3	50300
+B	55.8	92700
+
 / t1 = first 5 rows of trade table
 
-t1,-5#trade
+t1, -5#trade
 
-/ combining first 5 rows with last 5 rows 
+
+/ combining first 5 rows of trade with last 5 rows of trade
+
 ```
 ### LEFT JOIN on tables
 
