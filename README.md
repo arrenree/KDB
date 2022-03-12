@@ -4992,11 +4992,37 @@ id | name |employer| age
 / columns id and name are both keyed columns
 ```
 
+Repeating Keys
+
+```q
+lt: ([a:1 2 2 3] val:`a`b`c`d)
+
+`a` | val
+---------
+`1` |  a
+`2` |  b
+`2` |  c
+`3` |  d
+
+/ KDB allows for non-unique keys
+/ so you have to be careful
+/ when you see a keyed table, don't assume keys are unique
+
+lt 2
+
+key | value
+-----------
+val | b
+
+/ when retrieving, returns FIRST instance 
+/ even tho multiple 2, only returns value = b
+```
+
 <a name="retrieving_keysvalues"></a>
 ### 🔵 14.3 Retrieving Keys/Values
 
 ```q
-/ retrieve keys from table
+/ retrieve keys as 
 
 key kt
 
@@ -5009,8 +5035,9 @@ d | john
 
 / key will return the entire column of keyed results
 ```
+
 ```q
-/ retrieve only the column names that are keyed
+/ retrieve ONLY the column names that are keyed
 
 keys kt
 
@@ -5037,14 +5064,18 @@ ts      | 44
 ### 🔵 14.4 Changing Keys (xkey)
 ```q
 table kt
-id |name|employer| age
+`id`|name|employer| age
 ----------------------
-`a`|jane|  citi  | 11
-`b`|jim |  citi  | 22
-`c`|kim |    ms  | 13
-`e`|john|    ts  | 15
+`a` |jane|  citi  | 11
+`b` |jim |  citi  | 22
+`c` |kim |    ms  | 13
+`e` |john|    ts  | 15
 
 / only id column is keyed for now
+```
+
+```q
+/ add name col as key
 
 `id`name xkey `kt
 
@@ -5058,30 +5089,42 @@ id | name |employer| age
 / changed key columns to both id and name
 / use backtick kt to change underlying table
 ```
+
 <a name="adding_keys"></a>
 ### 🔵 14.5 Adding Keys (xkey)
 
 ```q
 1!kt
-/ or
-`id xkey kt
 
-id |name|employer| age
+`id`|name|employer| age
 ----------------------
-`a`|jane|  citi  | 11
-`b`|jim |  citi  | 22
-`c`|kim |    ms  | 13
-`e`|john|    ts  | 15
+`a` |jane|  citi  | 11
+`b` |jim |  citi  | 22
+`c` |kim |    ms  | 13
+`e` |john|    ts  | 15
 
 / adds first column as a key
+```
+
+alternative syntax:
+
+```q
+`id xkey kt
+
+`id`|name|employer| age
+----------------------
+`a` |jane|  citi  | 11
+`b` |jim |  citi  | 22
+`c` |kim |    ms  | 13
+`e` |john|    ts  | 15
+
+/ same thing, just diff syntax
 ```
 
 <a name="removing_keys"></a>
 ### 🔵 14.6 Removing Keys (xkey)
 
 ```q
-() xkey `kt
-/ or
 0!kt
 
 id |name|employer| age
@@ -5090,13 +5133,38 @@ a  |jane|  citi  | 11
 b  |jim |  citi  | 22
 c  |kim |    ms  | 13
 e  |john|    ts  | 15
+```
 
+alternative syntax:
+
+```q
+() xkey `kt
+
+id |name|employer| age
+----------------------
+a  |jane|  citi  | 11
+b  |jim |  citi  | 22
+c  |kim |    ms  | 13
+e  |john|    ts  | 15
+
+/ same thing, just diff syntax
 ```
 
 <a name="upsert_keys"></a>
-### 🔵 14.7 Upserting Keyed Rows / Tables
+### 🔵 14.7 Adding 2 Keyed Tables Together
 
 ```q
+/ for keyed tables, use UPSERT instead of INSERT!!
+
+kt: ( [id:`a`b`c`d; name:`jane`jim`kim`john] employer:`citi`citi`ms`ts; age: 11 22 33 44)
+
+`id`|`name`|employer| age
+----------------------
+`a` |`jane`|  citi  | 11
+`b` |`jim` |  citi  | 22
+`c` |`kim` |   ms   | 13
+`e` |`john`|   ts   | 15
+
 nd: ( [id:`e`f] name:`dan`kate; employer:`walmart`walmart; age:200 200)
 
 id |name|employer|age
@@ -5104,23 +5172,35 @@ id |name|employer|age
 `e`|dan | walmart|200
 `f`|kate| walmart|200
 
+/ both table kt and nd have same schema (column names same)
+/ and both tables are keyed
+```
+
+```q
+/ join the 2 keyed tables together
+
 upsert[`kt;nd]
 
-id |name|employer|age
+`id`|name|employer|age
 ----------------------
-`a`|jane|citi    |11
-`b`|jim |citi    |22
-`c`|kim |ms      |13
-`e`|dan |walmart |200
-`f`|kate|walmart |200
+`a` |jane|citi    |11
+`b` |jim |citi    |22
+`c` |kim |ms      |13
+`e` |dan |walmart |200
+`f` |kate|walmart |200
 
 / if key exists and matches, updates value
 / if new key, adds new row
+/ a, b, c = unch
 / since key e already exists, overrides values for name, employer, age
 / must make sure underlying keyed columns match, otherwise error. (1 keyed col vs 2 keyed col)
 ```
 
+Upsert 2 rows to Keyed Tables
+
 ```q
+/ upsert id: `f`g; name: `ron`tom to table kt
+
 upsert [`kt; ( [id:`f`g] name:`ron`tom)]
 
 id |name|employer|age
@@ -5132,8 +5212,11 @@ id |name|employer|age
 `f`|ron |walmart |200
 'g'|tom |        |
 
-/ f was updated to ron, and since no employer or age info, pulled from existing kt table (kate's old row)
-/ g is new key, so adds new row. since no info, returns null
+/ when upserting rows to a keyed table, need column names
+/ f key exists, so key UPDATED to ron
+/ and since no other VALUES exist, pulls existing values from existing kt table (kate's old values)
+/ g is NEW key, so adds new row. 
+/ since no values for employer and age, returns null
 ```
 
 <a name="upsert_multi_rowkeys"></a>
@@ -5142,11 +5225,15 @@ id |name|employer|age
 ```q
 et: ([employer:`kx`ms`ms; loc:`NY`NY`HK] size: 10 20 30; area: 1 2 3)
 
-employer|loc |size|area
------------------------
-`kx`    |`NY`| 10 | 1
-`ms`    |`NY`| 20 | 2
-`ms`    |`HK`| 30 | 3
+`employer`|`loc`|size|area
+--------------------------
+`kx`      |`NY` | 10 | 1
+`ms`      |`NY` | 20 | 2
+`ms`      |`HK` | 30 | 3
+```
+
+```q
+/ add 2 rows to keyed table et
 
 upsert [et; ([employer:`kx`ms; loc:`NY`SG] size: 9 10)]
 
@@ -5157,64 +5244,125 @@ employer|loc |size|area
 `ms`    |`HK`|30  |3
 `ms`    |`SG`|10  |	
 
-/ updated kx, NY to 9 (overrides prev value)
-/ since there was no ms, SG, adds new row 
+/ need column names when upserting
+/ key columns kx + NY exist, so updates size from 10 to 9
+/ since no value for area, pulls in existing value from et (1)
+/ no key ms + SG exists, so adds new row with size = 10.
+/ no value for area, so returns null
 ```
 
 <a name="retrieve_value_keys"></a>
-### 🔵 14.9 Retrieving Values as Tables from Keyed Table
+### 🔵 14.9 Retrieving Values as a Dictionary from Keyed Table
 
 ```q
-id |name|employer|age
+kt: ( [id:`a`b`c`d] name:`jane`jim`kim`john; employer:`citi`citi`ms`ts; age: 11 22 33 44)
+
+`id`|name|employer|age
 ----------------------
-`a`|jane|citi    | 11
-`b`|jim |citi    | 22
-`c`|kim |ms      | 33
-`d`|john|ts      | 44
-`e`|dan |walmart | 200
+`a` |jane|  citi  | 11
+`b` |jim |  citi  | 22
+`c` |kim |    ms  | 33
+`d` |john|    ts  | 44
+
+/ table kt with id column keyed
+```
+
+Retrieve values from single key as a dictionary
+
+```q
+kt`a
+
+Key	 | Value
+----------------
+name	 |  jane
+employer |  citi
+age	 |    11
+
+/ returns values of key a as a dictionary
+```
+
+Retrieve values from multiple keys as a dictionary
+
+```q
+/ slightly different syntax
+
+kt`a`b
+/ this will fail
+
+kt[flip enlist `a`b]
+
+name | employer | age
+----------------------
+jane |   citi   | 11
+jim  |   citi   | 22
+
+/ returns values from both keys a and b as a dictionary
+```
+
+Table Loookup Method
+
+```q
+/ same thing, but better syntax
+/ return values of multiple keyed columns as a dictionary
 
 kt ( [] id:`a`b)
 
-name|employer|age
------------------
-jane| citi   |11
-jim | citi   |22
+name | employer | age
+----------------------
+jane |   citi   | 11
+jim  |   citi   | 22
 
-/ retrieves rows based on the values in column id (a and b)
-/ returning data as a non-keyed table
+/ retrieves values from keyed columns a and b as a dictionary
 
-or
+```
+
+alternative syntax:
+
+```q
+/ similar, but uses TAKE # function
 
 ( [] id:`a`b) # kt
 
-id|name |employer|age
----------------------
-`a`|jane| citi   |11
-`b`|jim | citi   |22
+`id`|name |employer| age
+-------------------------
+`a` | jane|  citi  | 11
+`b` | jim |  citi  | 22
 
 / uses the #take function to lookup values in column id
 / notice it also returns the key column (id)
 ```
 
+<a name="retrieve_value_keys"></a>
+### 🔵 14.9 Retrieving Values from Multi Key Columns as Dictionary
+
 ```q
-/ retrieve values from et where key = ms and hk
+et: ([employer:`kx`ms`ms; loc:`NY`NY`HK] size: 10 20 30; area: 1 2 3)
 
-Table et
-employer|loc |size|area
------------------------
-`kx`    |`NY`| 10 | 1
-`ms`    |`NY`| 20 | 2
-`ms`    |`HK`| 30 | 3
+`employer`|`loc`|size|area
+--------------------------
+`kx`      | `NY`| 10 | 1
+`ms`      | `NY`| 20 | 2
+`ms`      | `HK`| 30 | 3
 
+/ two keyed columns: employer and loc
+```
+
+Retrieve values as dictionary for keys ms + HK
+
+```q
 et`ms`HK
 
-key |value
----------
-size|30
-area|3
+key  | value
+------------
+size |  30
+area |   3
 
-/ will lookup the keys ms and HK and return the values
+/ will lookup the keys for `ms + `HK and return the VALUES as a dictionary
+```
 
+Retreiving multi values for multi keyed columns
+
+```q
 et(`ms`HK; `kx`NY)
 
 size|area 
@@ -5222,10 +5370,40 @@ size|area
  30 | 3
  10 | 1
 
-/ looks up values for both ms+HK (returns 30 and 3) and kx+NY (returns 10 and 1)
-
-
+/ returns values for both `ms + `HK (30 and 3) and `kx + `NY (10 and 1)
 ```
+
+alternative syntax:
+
+```q
+/ same thing, but slightly clearer syntax
+
+et ([] employer:`ms`kx; loc:`HK`NY)
+
+size|area 
+---------
+ 30 | 3
+ 10 | 1
+
+/ notice you have to specify the column names 
+/ when using table retrieve 
+```
+
+alternative syntax
+
+```q
+/ same thing, but uses the TAKE # function
+
+( [] employer:`ms`kx; loc:`HK`NY) # et
+
+employer | loc | size | area
+----------------------------
+ms	 | HK  |   30 |   3
+kx	 | NY  |   10 |   1
+
+/ using TAKE # returns a table which includes the KEY columns
+```
+
 <a name="retrieve_value_keys"></a>
 ### 🔵 14.10 xgroup/ungroup Tables
 
@@ -5251,7 +5429,6 @@ ungroup select price, size, cond by sym, date, time from trade
 ```
 
 <hr>
-
 
 <a name="keyed_table_problem_set"></a>
 ## 🔴 15. Keyed Tables Problem Set
