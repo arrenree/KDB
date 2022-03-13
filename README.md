@@ -130,7 +130,16 @@
 6. [Removing Keys](#removing_keys)
 7. [Upsert Keys](#upsert_keys)
 8. [Upsert Multi Row/Keys](#upsert_multi_rowkeys)
-9. [Retrieving Values from Keyed Table](#retrieve_value_keys)
+9. [Retrieving Values from SINGLE Keyed Table](#retrieve_single_value_keys)
+10. [Retrieve SINGLE ROW as a DICTIONARY](#ret1)
+11. [Retrieve MULTI ROWS as a DICTIONARY](#ret2)
+12. [Retrieve SINGLE ROW as a TABLE](#ret3)
+13. [Retrieve MULTI ROWS as a TABLE](#ret4)
+14. [Retrieving Values from MULTI Keyed Table](#retrieve_multi_value_keys)
+15. [Retrieve SINGLE ROW as a DICTIONARY](#ret5)
+16. [Retrieve MULTI ROWS as a DICTIONARY](ret6)
+17. [Retrieve SINGLE ROW as a TABLE](#ret7)
+18. [Retrieve MULTI ROWS as a TABLE](#ret8)
 
 ## 15. [Keyed Table Problem Set](#keyed_table_problem_set)
 
@@ -5251,7 +5260,7 @@ employer|loc |size|area
 / no value for area, so returns null
 ```
 
-<a name="retrieve_value_keys"></a>
+<a name="retrieve_single_value_keys"></a>
 ### 🔵 14.9 Retrieving Values from SINGLE KEY Table
 
 ```q
@@ -5267,7 +5276,9 @@ kt: ( [id:`a`b`c`d] name:`jane`jim`kim`john; employer:`citi`citi`ms`ts; age: 11 
 / table kt with id column keyed
 ```
 
-Retrieve values from SINGLE KEY table as a DICTIONARY
+<a name="ret1"></a>
+### 🔵 14.10 Retrieve SINGLE ROW as a DICTIONARY <br/>
+(SINGLE KEY TABLE)
 
 ```q
 kt`a
@@ -5281,29 +5292,13 @@ age	 |    11
 / returns values of key a as a dictionary
 ```
 
-Retrieve multiple values from SINGLE KEY table as a DICTIONARY
+<a name="ret2"></a>
+### 🔵 14.11 Retrieve MULTI ROWS as a DICTIONARY <br/>
+(SINGLE KEY TABLE)
 
 ```q
-/ slightly different syntax
-
-kt`a`b
-/ this will fail
-
-kt[flip enlist `a`b]
-
-name | employer | age
-----------------------
-jane |   citi   | 11
-jim  |   citi   | 22
-
-/ returns values from both keys a and b as a dictionary
-```
-
-Retrieve multiple values from SINGLE KEY table as a DICTIONARY <br/>
-(Table Loookup Method)
-
-```q
-/ same thing, but better syntax
+/ PREFERRED SYNTAX
+/ table lookup method
 / return values of multiple keyed columns as a dictionary
 
 kt ( [] id:`a`b)
@@ -5319,11 +5314,47 @@ jim  |   citi   | 22
 / retrieves values from keyed columns a and b as a dictionary
 ```
 
-Retrieve multiple values from SINGLE KEY table as a TABLE <br/>
-(TAKE # Method)
+Retrieve MULTI ROWS as a DICTIONARY <br/>
+(SINGLE KEY TABLE)
 
 ```q
-/ similar, but uses TAKE # function
+/ alternative syntax, but NOT preferred
+
+kt[flip enlist `a`b]
+
+name | employer | age
+----------------------
+jane |   citi   | 11
+jim  |   citi   | 22
+
+/ returns values from both keys a and b as a dictionary
+```
+
+<a name="ret3"></a>
+### 🔵 14.12 Retrieve SINGLE ROW as a TABLE <br/>
+(SINGLE KEY TABLE)
+
+```q
+/ use TAKE # Method
+
+( [] sym:enlist`b) # t1
+
+`sym` | ex  | size
+----------------
+`a`   | one | 100
+
+/ need ENLIST since only 1 row
+/ by using take #, you return a table
+/ includes the KEY column
+```
+
+<a name="ret4"></a>
+### 🔵 14.13 Retrieve MULTI ROWS as a TABLE <br/>
+(SINGLE KEY TABLE)
+
+
+```q
+/ uses TAKE # function
 
 ( [] id:`a`b) # kt
 
@@ -5338,8 +5369,8 @@ Retrieve multiple values from SINGLE KEY table as a TABLE <br/>
 / when you retrieve, you leave [ ] blank
 ```
 
-<a name="retrieve_value_keys"></a>
-### 🔵 14.9 Retrieving Values from MULTI KEY table
+<a name="retrieve_multi_value_keys"></a>
+### 🔵 14.14 Retrieving Values from MULTI KEY table
 
 ```q
 et: ([employer:`kx`ms`ms; loc:`NY`NY`HK] size: 10 20 30; area: 1 2 3)
@@ -5353,22 +5384,9 @@ et: ([employer:`kx`ms`ms; loc:`NY`NY`HK] size: 10 20 30; area: 1 2 3)
 / two keyed columns: employer and loc
 ```
 
-Retrieving SINGLE value from MULTI KEY table as TABLE
-
-```q
-( [] employer:enlist`kx; loc:`NY) # et
-
-`employer`|`loc`|size|area
---------------------------
-`kx`      | `NY`| 10 | 1
-
-/ NOTE - even though underlying table is keyed
-/ when RETRIEVE using TAKE #
-/ leave the [ ] blank
-/ have to use ENLIST for single row
-```
-
-Retreiving MULTI values for MULTI KEY TABLE as a DICT
+<a name="ret5"></a>
+### 🔵 14.15 Retrieve SINGLE ROW as a DICTIONARY <br/>
+(MULTI KEY TABLE)
 
 ```q
 / Retrieve values for keys ms + HK as a DICTIONARY
@@ -5383,24 +5401,13 @@ area |   3
 / will lookup the keys for `ms + `HK and return the VALUES as a dictionary
 ```
 
-Retreiving MULTI values for MULTI KEY TABLE as a DICT
+<a name="ret6"></a>
+### 🔵 14.16 Retrieve MULTI ROWS as a DICTIONARY <br/>
+(MULTI KEY TABLE)
 
 ```q
-et(`ms`HK; `kx`NY)
-
-size|area 
----------
- 30 | 3
- 10 | 1
-
-/ returns values for both `ms + `HK (30 and 3) and `kx + `NY (10 and 1)
-```
-
-Retreiving MULTI values for MULTI KEY as a DICT <br/>
-(Table Loookup Method)
-
-```q
-/ same thing, but slightly clearer syntax
+/ TABLE LOOKUP method
+/ PREFERRED syntax
 
 et ( [] employer:`ms`kx; loc:`HK`NY)
 
@@ -5416,11 +5423,45 @@ size|area
 / and simply call the col names
 ```
 
-Retreiving MULTI values for MULTI KEY TABLE as TABLE <br/>
-(TAKE # Method)
+Retrieving MULTI ROWS as a DICTIONARY <br/>
+(MULTI KEY TABLE)
 
 ```q
-/ same thing, but uses the TAKE # function
+/ alternative syntax (less preferred)
+
+et(`ms`HK; `kx`NY)
+
+size|area 
+---------
+ 30 | 3
+ 10 | 1
+
+/ returns values for both `ms + `HK (30 and 3) and `kx + `NY (10 and 1)
+```
+
+<a name="ret7"></a>
+### 🔵 14.17 Retrieve SINGLE ROW as a TABLE <br/>
+(MULTI KEY TABLE)
+
+```q
+( [] employer:enlist`kx; loc:`NY) # et
+
+`employer`|`loc`|size|area
+--------------------------
+`kx`      | `NY`| 10 | 1
+
+/ have to use ENLIST for single row
+/ NOTE - even though underlying table is keyed
+/ when RETRIEVE using TAKE #
+/ leave the [ ] blank
+```
+
+<a name="ret8"></a>
+### 🔵 14.18 Retrieve MULTI ROWs as a TABLE <br/>
+(MULTI KEY TABLE)
+
+```q
+/ Uses the TAKE # function
 
 ( [] employer:`ms`kx; loc:`HK`NY) # et
 
