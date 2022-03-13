@@ -5252,7 +5252,7 @@ employer|loc |size|area
 ```
 
 <a name="retrieve_value_keys"></a>
-### 🔵 14.9 Retrieving Values as a Dictionary from Keyed Table
+### 🔵 14.9 Retrieving Values from SINGLE KEY Table
 
 ```q
 kt: ( [id:`a`b`c`d] name:`jane`jim`kim`john; employer:`citi`citi`ms`ts; age: 11 22 33 44)
@@ -5267,7 +5267,7 @@ kt: ( [id:`a`b`c`d] name:`jane`jim`kim`john; employer:`citi`citi`ms`ts; age: 11 
 / table kt with id column keyed
 ```
 
-Retrieve values from single key as a dictionary
+Retrieve values from SINGLE KEY table as a DICTIONARY
 
 ```q
 kt`a
@@ -5281,7 +5281,7 @@ age	 |    11
 / returns values of key a as a dictionary
 ```
 
-Retrieve values from multiple keys as a dictionary
+Retrieve multiple values from SINGLE KEY table as a DICTIONARY
 
 ```q
 / slightly different syntax
@@ -5299,7 +5299,8 @@ jim  |   citi   | 22
 / returns values from both keys a and b as a dictionary
 ```
 
-Table Loookup Method
+Retrieve multiple values from SINGLE KEY table as a DICTIONARY <br/>
+(Table Loookup Method)
 
 ```q
 / same thing, but better syntax
@@ -5312,11 +5313,14 @@ name | employer | age
 jane |   citi   | 11
 jim  |   citi   | 22
 
+/ NOTE - even tho column id is KEYED
+/ when you retrieve, you leave [ ] blank
+/ and simply retrieve the column names id:`a`b
 / retrieves values from keyed columns a and b as a dictionary
-
 ```
 
-alternative syntax:
+Retrieve multiple values from SINGLE KEY table as a TABLE <br/>
+(TAKE # Method)
 
 ```q
 / similar, but uses TAKE # function
@@ -5330,10 +5334,12 @@ alternative syntax:
 
 / uses the #take function to lookup values in column id
 / notice it also returns the key column (id)
+/ NOTE - even though underlying table column id is keyed
+/ when you retrieve, you leave [ ] blank
 ```
 
 <a name="retrieve_value_keys"></a>
-### 🔵 14.9 Retrieving Values from Multi Key Columns as Dictionary
+### 🔵 14.9 Retrieving Values from MULTI KEY table
 
 ```q
 et: ([employer:`kx`ms`ms; loc:`NY`NY`HK] size: 10 20 30; area: 1 2 3)
@@ -5347,9 +5353,26 @@ et: ([employer:`kx`ms`ms; loc:`NY`NY`HK] size: 10 20 30; area: 1 2 3)
 / two keyed columns: employer and loc
 ```
 
-Retrieve values as dictionary for keys ms + HK
+Retrieving SINGLE value from MULTI KEY table as TABLE
 
 ```q
+( [] employer:enlist`kx; loc:`NY) # et
+
+`employer`|`loc`|size|area
+--------------------------
+`kx`      | `NY`| 10 | 1
+
+/ NOTE - even though underlying table is keyed
+/ when RETRIEVE using TAKE #
+/ leave the [ ] blank
+/ have to use ENLIST for single row
+```
+
+Retreiving MULTI values for MULTI KEY TABLE as a DICT
+
+```q
+/ Retrieve values for keys ms + HK as a DICTIONARY
+
 et`ms`HK
 
 key  | value
@@ -5360,7 +5383,7 @@ area |   3
 / will lookup the keys for `ms + `HK and return the VALUES as a dictionary
 ```
 
-Retreiving multi values for multi keyed columns
+Retreiving MULTI values for MULTI KEY TABLE as a DICT
 
 ```q
 et(`ms`HK; `kx`NY)
@@ -5373,12 +5396,13 @@ size|area
 / returns values for both `ms + `HK (30 and 3) and `kx + `NY (10 and 1)
 ```
 
-alternative syntax:
+Retreiving MULTI values for MULTI KEY as a DICT <br/>
+(Table Loookup Method)
 
 ```q
 / same thing, but slightly clearer syntax
 
-et ([] employer:`ms`kx; loc:`HK`NY)
+et ( [] employer:`ms`kx; loc:`HK`NY)
 
 size|area 
 ---------
@@ -5386,10 +5410,14 @@ size|area
  10 | 1
 
 / notice you have to specify the column names 
-/ when using table retrieve 
+/ when using table retrieve
+/ NOTE - even tho underlying table is keyed
+/ when retrieving, leave [ ] BLANK
+/ and simply call the col names
 ```
 
-alternative syntax
+Retreiving MULTI values for MULTI KEY TABLE as TABLE <br/>
+(TAKE # Method)
 
 ```q
 / same thing, but uses the TAKE # function
@@ -5402,6 +5430,9 @@ ms	 | HK  |   30 |   3
 kx	 | NY  |   10 |   1
 
 / using TAKE # returns a table which includes the KEY columns
+/ NOTE - even tho underlying table is keyed
+/ when retrieving, leave [ ] BLANK
+/ and simply call the col names
 ```
 
 <a name="retrieve_value_keys"></a>
@@ -5467,18 +5498,24 @@ book | ticker|size
 
 **🔵 15.3 Retrieve entries where book is C and ticker is c, using take**
 ```q
-( [book:enlist`C; ticker:enlist`C]) # p
+
+( [] book:enlist`C;ticker:enlist`C) # p
 
 book | ticker| size
 -------------------
 `C`  | `C`   | 400
 
 / need to use enlist since only one row
-
+/ NOTE - even tho underlying table is keyed
+/ when retrieving, leave [ ] BLANK
+/ and simply call the col names
 ```
 
 **🔵 15.4 Upsert the following values**
+
 ```q
+/ upsert the values surrounded by **
+
 p
 `book` | `ticker`|size
 ----------------------
@@ -5488,7 +5525,7 @@ p
 `C`    | `C`     |**400**
 **`D`**|**`MS`** |**500**
 
-upsert [p; ([book:`C`D; ticker:`C`MS]size:400 500)]
+upsert [p; ( [book:`C`D; ticker:`C`MS] size:400 500) ]
 
 / for `C`C -> updates old value to 400
 / `D`MS 500 -> adds new row
