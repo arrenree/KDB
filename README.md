@@ -5028,6 +5028,38 @@ val | b
 ```
 
 <a name="retrieving_keysvalues"></a>
+### 🔵 14.3 Removing Columns from keyed table
+
+```q
+/ you CANNOT delete/drop/remove columns from a KEYED table
+/ must first UNKEY, then drop the columns
+
+tab1:([id:"abc"]pupil:`john`paul`rachel;subject:`maths`physics`chem;mark:96 55 82)
+
+`id` | pupil  | subject | mark
+------------------------------
+`a`  | john   |	maths   |  96
+`b`  | paul   |	physics |  55
+`c`  | rachel |	chem	|  82
+
+/ tab1 is a keyed table (id column)
+
+0!tab1
+/ unkeys the table
+
+(enlist`id)_tab1
+
+/ after you UNKEY the table, you can drop columns
+/ need enlist since single column
+
+id | pupil  | subject | mark
+------------------------------
+a  | john   |	maths   |  96
+b  | paul   |	physics |  55
+c  | rachel |	chem	|  82
+```
+
+<a name="retrieving_keysvalues"></a>
 ### 🔵 14.3 Retrieving Keys/Values
 
 ```q
