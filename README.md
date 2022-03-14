@@ -2879,16 +2879,35 @@ peter| 56.1
 
 <a name="define_func"></a>
 ### 🔵 10.1 Defining & Calling Functions
+
 ```q
+/ create function f
+/ with has argument a
+/ and multiples a to itself
+
 f: { [a] a * a}
-f [3]
+
+/ now call this function f with a = 3
+
+f[3]
 9
 
-/ [a] = this defines the argument
-/ f[3] calls the function with argument a=3
+/ [a] = [ ] defines the argument (a)
+
+alternative syntax:
+
+f 3
+f @ 3
+
+/ these also all work
 ```
 
+Function with 2 Arguments
+
 ```q
+/ create function named add
+/ with 2 arguments, a and b
+
 add: { [a;b] a + b}
 add [3;5]
 8
@@ -2897,8 +2916,11 @@ add [3;5]
 / [a;b] = defines arguments A and B
 ```
 
+Multi Statement Functions
+
 ```q
 / the answer returned is the LAST expression evaluated in function
+/ statements separated by semi colons
 
 f:{[arg1;arg2;arg3] t:arg1*arg2*arg3; t*2}
 t[1;2;3]
@@ -2907,6 +2929,8 @@ t[1;2;3]
 / 1*2*3 = 6
 / 6*2 = 12
 ```
+
+Supressing Functions
 
 ```q
 / can supress the function by adding ; to end 
@@ -2917,6 +2941,8 @@ t[1;2;3]
 
 / nothing returned
 ```
+
+Forcing Function Output
 
 ```q
 / can force an output by adding semi colon :
@@ -2932,10 +2958,9 @@ t[1;2;3]
 
 +[1;2]
 3
-
 ```
 
-### 🔵 10.2 Types of Functions
+### 🔵 10.2 Types of Function Arguments
 
 ```q
 / niladic (accept no arguments)
@@ -2997,21 +3022,36 @@ f[d]
 ### 🔵 10.2 Anonymous Functions
 
 ```q
+/ in q, you do NOT need to assign a function to a variable name
+/ this is known as an ANONYMOUS function (lambda function)
+
 {[a] a*a} 6
 36
 
-/ in q, you do NOT need to assign a function to a variable name
-/ this is known as an anonymous function (lambda function)
-/ you can simply call the argument outside the function { } 
+/ notice how there's no variable assignment to function
+/ you can simply call your argument after the body of function
+
+/ alternative syntax:
+
+{[a] a*a}[6]
+36
 ```
 
 <a name="implicit_argu"></a>
-### 🔵 10.3 Implicit Argument
+### 🔵 10.3 Implicit Arguments
+
+```q
+/ implicit arguments = variable names that when used inside body of function
+/ are assumed to be arguments
+/ q permits up to 3 implicit arguments: x, y, z
+```
 
 ```q
 {x*x}5
 25
 
+/ this is an ANONYMOUS function
+/ which uses implicit variable x
 / omit defining argument [x], q implicitly understands x is an argument
 ```
 
@@ -3026,20 +3066,30 @@ f[d]
 ```q
 {x+z}[1;2]
 
-/ error because you can't skip the y. if only 2 implicit arguments, need to use x, y
+/ error because you can't skip the y
+/ if only 2 implicit arguments, need to use x and y
 ```
 
 <a name="local_global_variables"></a>
 ### 🔵 10.4 Local vs Global Variables
+
+Locally Defined Variables (inside Function)
+
 ```q
 {a:1; b:2; a+b*x} [12]
 25
 
-/ calling in x = 12 (implicit argument)
-/ 1 + 2 * 12 
-/ a and b are locally defined variables within the function
+/ 3 statements inside function body
+/ the LAST statement will be returned by function
+/ anonymous function (no variable assignment)
+/ x = implicit argument (since not defined)
+/ calls in 12 = x
+/ RIGHT to LEFT: 12 * 2 + 1 = 25
+/ a and b are LOCALLY DEFINED VARIABLES within the function
 / will NOT work if you try to recall variable a or b outside the function
 ```
+
+Global Variables
 
 ```q
 d:10
@@ -3048,9 +3098,12 @@ f [1]
 11
 
 / assign global variable D to 10 (outside the function)
+/ global variables can be pulled into function
 / f[1] calls in 1 for x (implicit argument)
 / = 10 + 1 = 11
 ```
+
+Global vs Local Variables in Functions
 
 ```q
 d: 10
@@ -3058,14 +3111,45 @@ g: {d:20; d+x}
 g [1]
 21
 
-/ d:20 is a locally defined variable
-/ local takes priority over global variable of 10
-/ = 20 + 1 = 21
+/ d:10 = GLOBAL variable
+/ but d appears again, inside function
+/ d:20 is a LOCALLY defined variable
+/ LOCAL (20) TAKES PRIORITY over global (10)
+/ x is implicit argument = 1
+/ 20 + 1 = 21
+```
+
+Global Variable Assignment
+
+```q
+
+h:{r::x;r}
+
+/ r :: x = to the global variable r, assign value x
+/ essentially, r is a global variable and assign it x
+
+h[100]
+100
+
+/ by calling 100 = implicit argument x
+/ r = 100
+/ function returns LAST statement = r
 ```
 
 <a name="projected_func"></a>
 ### 🔵 10.5 Projected Functions
+
+
 ```q
+/ create one function
+/ create another function, which is a PROJECTION of first function
+/ allows for one variable to be set as a CONSTANT
+/ allows us to apply functions to a list of variables
+```
+
+```q
+/ create first function called raise
+
 raise: {x xexp y}
 raise [10; 2 3 4]
 100 1000 1000f
@@ -3074,12 +3158,33 @@ raise [10; 2 3 4]
 ```
 
 ```q
+/ create second function called g, which projects function raise
+/ keeps x constant @ 10
+
 g: raise [10; ]
 g 1 2 3
 10 100 1000
 
-/ creates a projection of the original raise function
+/ you've already created function raise previously
+/ so g is a PROJECTION of the original function RAISE
+/ so x = constant 10
+/ y becomes arguments you call in (1 2 3)
 ```
+
+```q
+/ create another function square, which projects function raise
+
+square: raise[ ;2]
+square 1 2 3
+1 4 9
+
+/ in this case, leaves first argument blank (x)
+/ and keeps second argument constant at 2
+/ calls in 1 2 3 for x xexp 2
+```
+
+Example 2
+
 ```q
 f:{x*y}
 f[4;5]
@@ -9648,6 +9753,38 @@ i   | 3
 <a name="functional_form"></a>
 ## 🔴 27. Functional Form
 [Top](#top)
+
+```q
+/ functional form allows FUNCTIONS to be used as nouns
+
+@[square; 3 4 5]
+9 16 25
+
+/ apply square function to 3 4 5
+
+@[cube;3 4 5]
+27 64 125
+
+/ apply cube function to 3 4 5
+```
+
+```q
+/ functional form allows you to pass a function as an noun
+
+{@[x;3 4 5]}cube
+27 64 125
+
+/ here we have a function that accepts a function (cube) as its argument
+/ @ = used for SINGLE arguments (x)
+/ apply function cube as argument x
+```
+
+```q
+.[raise; (2 2 2 3;3)]
+8 8 8 27
+
+/ dot operator used for multipe arguments
+```
 
 ### Functional Select
 
