@@ -91,10 +91,12 @@
 5. [Projected Functions](#projected_func)
 6. [If True Statements](#iftrue_state)
 7. [If True/Else Statements](#iftrue_else_state)
-9. [Adding Conditional Branch Pair](#add_cond_branch)
-10. [Do Loops](#do_loop)
-11. [While_Loops](#while_loop)
-12. [Multi Condition While Loops](#multi_cond_while_loop)
+8. [Adding Conditional Branch Pair](#add_cond_branch)
+9. [Do Loops](#do_loop)
+10. [While_Loops](#while_loop)
+11. [Multi Condition While Loops](#multi_cond_while_loop)
+12. [Prime Numbers Function Case Study](#prime_func)
+13. [Function within a Function Lambda](#func_lambda)
 
 ## 11. [Functions Problem Set](#func_problem_set)
 
@@ -3515,7 +3517,8 @@ min sum d where d>50
 avg sum d where d>50
 ```
 
-Example 2 - FIND PRIME NUMBERS FUNCTION
+<a name="prime_func"></a>
+### 🔵 10.12 PRIME NUMBERS FUNCTION CASE STUDY
 
 ```q
 / 
@@ -3587,8 +3590,8 @@ Component 3 (number > 3)
 / goes to end, returns 1b (True) 
 ```
 
-
-### 🔵 10.12 Function within a Function LAMBDA 
+<a name="func_lambda"></a>
+### 🔵 10.13 Function within a Function LAMBDA 
 
 ```q
 
