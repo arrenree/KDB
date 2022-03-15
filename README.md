@@ -2955,10 +2955,18 @@ t[1;2;3]
 
 / semi colon in front of 2nd expression so it will force that output
 / colon halts everything after 
+```
 
-/ built in plus operator
+Special Built in Functions
+
+```q
+/ plus function
 
 +[1;2]
+3
+
+f:+
+f[1;2]
 3
 ```
 
@@ -2970,6 +2978,14 @@ t[1;2;3]
 f:{[] 1+2+3}
 f[]
 6
+
+/ call func by passing empty [ ] 
+/ if you call func with arg, it will be ignored
+
+f:{[] 1+2+3}
+f[3]
+6
+/ argument 3 is ignored
 
 / monadic (accepts 1 argument)
 
@@ -3141,13 +3157,14 @@ h[100]
 <a name="projected_func"></a>
 ### 🔵 10.5 Projected Functions
 
-
 ```q
 / create one function
 / create another function, which is a PROJECTION of first function
 / allows for one variable to be set as a CONSTANT
 / allows us to apply functions to a list of variables
 ```
+
+Example 1
 
 ```q
 / create first function called raise
@@ -3731,7 +3748,6 @@ findprimesB 10
 ### 🔵 10.13 Function within a Function LAMBDA 
 
 ```q
-
 f:{x*x}
 g:{10+f[x]}
 g[2]
