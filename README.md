@@ -3211,15 +3211,19 @@ g
 
 ```q
 / if[test_condition; do_this]
-/ if first condition true = execute all statements that follow
+/ if first condition TRUE, execute all statements that follow
 ```
 
+Example 1
+
 ```q
-if [10>3; a:11; show a*10]
+if[10>3; a:11; show a*10]
 110
 
 / since the first condition is true, execute all statements that follow
 ```
+
+Example 2
 
 ```q
 if[10>3; a:11; show a*10; show "hello"]
@@ -3229,9 +3233,11 @@ if[10>3; a:11; show a*10; show "hello"]
 / as long as the first condition is true, execute all following statements
 ```
 
+Boolean Promotion
+
 ```q
-/ boolean promotion
-/ booleans can only be TRUE(1b) or FALSE(0b)
+/ Any number = boolean TRUE 
+/ 0 = defaults to boolean FALSE (0b)
 / Combine booleans + IF statements
 
 if[10; show "true"]
@@ -3252,76 +3258,141 @@ if[count(); show "true"]
 ### 🔵 10.7 If/Else Statements
 
 ```q
+/ IF/ELSE statements use $ syntax
+```
+
+Example 1
+
+```q
 $[1b; show "true"; show "false"]
 true
 
 / always starts with $[ ] 
-/ if first condition true, then show second condition. else, show third condition
-/ here the first condition is the false boolean
+/ IF first condition TRUE, then execute second condition. ELSE, execute third condition
+/ First condition = 1B = false boolean
 ```
+
+Example 2
 
 ```q
 $[100>1; [show "message"; `a];`b]
 "message"
 `a
 
-/ since true, show everythign  in the [ ]
+/ first condition = TRUE
+/ executes second statement (everything in the [ ] )
+```
+
+Example 3
+
+```q
+{ $ [x<0; `negative;`positive]} -2
+`negative
+
+/ first condition TRUE
+/ so returns second statement
+```
+
+Example 4
+
+```q
+/ vector condition examines a list of booleans
+
+l: 1 2 3 4 5
+l>2
+00111b
+
+/ you have a list of atoms
+/ l > 2 returns a list of booleans
+
+? [ l>2;`TRUE;`FALSE]
+`FALSE`FALSE`TRUE`TRUE`TRUE
+
+/ first condition = pass the list of booleans
+/ where TRUE, return first statement
+/ where FALSE, return second statement
+
+/ IF/ELSE only operates in atoms
+/ but vector conditional takes a LIST of booleans
 ```
 
 <a name="add_cond_branch"></a>
 ### 🔵 10.8 Adding Conditional Branch Pair
+
 ```q
+/ by adding an expression (x=0), and another statement (`positive)
+/ you create an if/else branch
+/ if first condition = TRUE, execute first statement
+/ if first condition = FALSE, move onto second Condition
+```
 
-/ $[condition1; expr1;[cond2;expr2; ..];...;falseexpr
+Example 1
 
+```q
+{$[x<0; `negative; x=0; `zero; `positive]} -2
+`negative
+
+/ first condition is TRUE, so executes first Statement
+```
+
+```q
+{$[x<0; `negative; x=0; `zero; `positive]} 0
+`zero
+
+/ first condition FALSE
+/ move onto second condition = TRUE
+/ returns second statement = `zero
+```
+
+```q
+{$[x<0; `negative; x=0; `zero; `positive]} 3
+`positive
+
+/ first condition = FALSE
+/ moves onto second condition = FALSE
+/ moves onto third condition = TRUE
+/ returns 3rd statement
+```
+
+```q
 / if condition is true, evaluate all the following expressions
 / finishes with condition to be executed if all conditions are false
-
 / if true condition encountered, no further condition evaluated
+```
 
+Example 2
+
+```q
 a:5
 $[a<2; 1; a<4; 2; a<6; 3; a<8; 4; 20]
 3
 
-/ once 5 < 6; returns 3, then stops evaluating rest of function
-
-/ multiple expressions
-
-$[a<2; [b:10; c:11]; [b:98; c:99]]
-
-/ if cond true, then evaluate first expression
-/ otherwlse evaluate last condition
-```
-
-```q
-{$[x < 0; `negative; x=0; `zero; `positive]}0
-`zero
-
-/ using implicit argument x =0
-/ 0 doesnt equal 0, so false. goes to 2nd condition, x=0
-/ x = 0 this begins another conditional branch
-/ since x-0 is true, returns first condition (zero)
-```
-
-```q
-{$[x < 0; `negative; x=0; `zero; `positive]}2
-`posititve
-
-/ 2 = x and since 2 isnt less than 0, false. 
-/ 2 does NOT equal x=0, so false again
-/ skips first condition, returns second condition (positive)
+/ first condition = FALSE
+/ moves onto second condition = FALSE
+/ moves onto third condition = TRUE (5<6)
+/ returns 3rd statement = 3
 ```
 
 <a name="do_loop"></a>
 ### 🔵 10.9 Do Loops
+
+```q
+/ do loops repeat the function x number of times
+/ useful to time how long it takes to run your function
+```
+
 ```q
 do[3;show "hi"]
 hi
 hi
 hi
 
-/ repeats loop x number of times
+/ first statement = how many times to loop
+/ second statement = what to execute
+/ loop this 3x
 ```
+
+Time your do Loop
 
 ```q
 f:{avg x xexp 1000?2}
@@ -3329,13 +3400,19 @@ f:{avg x xexp 1000?2}
 0
 
 / time the loop 1000x on function f
+/ x to the power of 1000 random numbers 
+1000? = 1000 random numbers from 0-1
 ```
 
 <a name="while_loop"></a>
 ### 🔵 10.10 While Loops
+
 ```q
 / while will execute a statement x number of times until statement is no longer true
 ```
+
+Example 1
+
 ```q
 a:1
 while[a<3; show a; a:a+1]
@@ -3349,13 +3426,17 @@ while[a<3; show a; a:a+1]
 / 3 not less than 3, so stop executing
 ```
 
+Example 2
+
 ```q
+/ while loop keeps running until no longer true
+
 a:1
 b:2
-while[(a<10); a:a+1; b:b+1; show enlist b,a]
+while[a<10; a:a+1; b:b+1; show enlist b,a]
 
-key|value
-----------
+b  | a
+--------
 3  | 2
 4  | 3
 5  | 4
@@ -3367,8 +3448,41 @@ key|value
 / stop running this loop when first condition becomes false
 ```
 
+Example 3
+
+```q
+/ warning! be careful with this
+/ functions run RIGHT to LEFT
+
+a:1
+b:2
+while[a<100 and b<5; a:a+1; b:b+1; show enlist b,a]
+nothing happens!
+
+/ RIGHT TO LEFT
+/ 1<5 = TRUE
+/ 100 and TRUE = TRUE
+/ a < TRUE = FALSE (since a = 1)
+/ since the first condition is false, the function doesn't run
+```
+
+```q
+/ to make it run correctly, add in parathesis!
+
+a:1
+b:2
+while[(a<100) and b<5; a:a+1; b:b+1; show enlist b,a]
+3 2
+4 3
+5 4
+
+/ now it works 
+```
+
 <a name="multi_cond_while_loop"></a>
 ### 🔵 10.11 Multi Condition While Loops
+
+Example 1
 
 ```q
 / sum all values > 100 using while loop
@@ -3399,46 +3513,80 @@ r2: sum d where d > 50
 max sum d where d>50
 min sum d where d>50
 avg sum d where d>50
-
 ```
 
-```q
-a:1
-b:2
-while[(a<10) and (b<3); a:a+1; b:b+1; show enlist b,a]
-
-/ if you have 2 conditions, must use ( ) as KDB reads right to left
-/ 2 < 3, yes. 1< 10, yes
-/ so a = 1+1 = 2 and b=2+1 = 3
-/ shows 3 2
-/ 3 is not < 3, so false. stops running
-```
+Example 2 - FIND PRIME NUMBERS FUNCTION
 
 ```q
-isprime:{if[x<2; 0b]; a:2; while[a<x; if[(x mod a)=0;0b]; a+:1]; 1b}
+/ 
 
-/ if x = 1
-/ x(1) < (2) (TRUE) so returns 0b (not prime)\
 
-/ if x = 4
-/ x(4)< 2 (FALSE), skip 0b statement, moves onto a:2
-/ a(2) < x(4)? (TRUE), x mod a = 4 mod 2 = 0 (no remainders if you divide 4 by 2). (TRUE), so returns 0b (not prime)\
-
-/ if x = 7
-/ x(7) < 2 (FALSE), skip 0b
-/ a(2) < x(7) (TRUE), x mod a = 7 mod 2 = 1 (FALSE), so returns 1b (TRUE)
-```
-
-```q
 findprime: { [n] r:(); a:1; while [a<n; if[isprime[a];r,:a]; a:a+1];r}
 findprime 10 
-
 2 3 5 7
+
 / n = single argument
-/ r () = empty list
-/ a starts from 1, if a (1) < n (10) TRUE, append a to list r
-/ go through every value of a, and add to list r
+/ r () = empty list thats gonna contain our result
+/ a starts from 1, if a (1) < n (10) TRUE, if its a prime number,
+/ append a to list r
+/ go through every value of a (a+:1)
+/ finally, return our list r
+
+/ in other words..
+/ starting from 1, look up to our argument
+/ checking if each number is a prime number
+/ and if it is, append it to our list (r)
+/ finally, return the list of primes
+/ still need to write the isPrime function
 ```
+
+```q
+/ isPrime function
+
+/ prime = any num can only % itself and 1
+/ prime numbers begin on 2
+/ so you need 3 components
+/ 1. number < 2 (not prime)
+/ 2. number = 2 (prime)
+/ 3. number > 2 (could be prime)
+
+isprime:{if[x<2; :0b]; a:2; while[a<x; if[(x mod a)=0; :0b]; a+:1]; 1b}
+
+Componennt 1 (number < 2)
+/ if argument less than 2, return FALSE 0b (not prime)
+/ since primes cannot be less than 2
+/ single colon : means return. nothing after gets executed
+/ if x = 1
+/ x(1) < (2) (TRUE) so returns 0b (not prime)
+
+Component 2 (number = 2)
+/ Create variable a, which begins on 2
+/ while condition a < x is FALSE
+/ skip ENTIRE while loop
+/ and go straight to the end, return TRUE 1B (prime)
+/ if x = 2
+/ x(2) < a(2) = FALSE. Skip while loop
+/ goes to end, returns 1b (True)
+
+Component 3 (number > 3)
+/ while condition a < x is TRUE
+/ lets check if x mod a = 0 (ie, even number = NOT PRIME)
+/ return false :0b
+/ otherwise, return True 1b
+/ while we loop through every iteration of a+1
+/ if x = 5
+/ a(2) < x(5) = TRUE
+/ x(5) mod a(2) = 0 = FALSE = skips :0b
+/ a:a+1 so 2 + 1 = 3
+/ a(3) < x(5) = TRUE
+/ x(5) mod a(3) = 0 = FALSE = skips :0b
+/ a:a+1 so 3+1 = 4
+/ a(4) < x(5) = TRUE
+/ x(5) mod a(4) = 0 = FALSE = skips :0b
+/ a(5) < x(5) = FALSE, SKIPS entire while loop
+/ goes to end, returns 1b (True) 
+```
+
 
 ### 🔵 10.12 Function within a Function LAMBDA 
 
