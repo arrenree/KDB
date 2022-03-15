@@ -3521,17 +3521,19 @@ avg sum d where d>50
 ### 🔵 10.12 PRIME NUMBERS FUNCTION CASE STUDY
 
 ```q
-/ 
+/ create function that finds primes up to argument x
+/ will first require a function to determine if num is prime (true) or not (false)
 
-
-findprime: { [n] r:(); a:1; while [a<n; if[isprime[a];r,:a]; a:a+1];r}
+findprime: {[n] r:(); a:1; while [a<n; if[isprime[a];r,:a]; a:a+1];r}
 findprime 10 
 2 3 5 7
 
 / n = single argument
 / r () = empty list thats gonna contain our result
-/ a starts from 1, if a (1) < n (10) TRUE, if its a prime number,
-/ append a to list r
+/ a starts from 1 
+/ while a(1) < n = TRUE
+/ if a = prime number,
+/ append a to list r (r,:a = append a to list r)
 / go through every value of a (a+:1)
 / finally, return our list r
 
@@ -3541,10 +3543,38 @@ findprime 10
 / and if it is, append it to our list (r)
 / finally, return the list of primes
 / still need to write the isPrime function
+
+/ a:1, n:5
+/ while a(1) < n(5) = TRUE
+/ if a(1) = prime = FALSE
+/ skip rest of while loop
+/ a:a+1 = 1+1 = 2
+
+/ while a(2) < n(5) = TRUE
+/ if a(2) = prime = TRUE
+/ append a(2) to r (2)
+/ a:a+1 = 2+1 = 3
+
+/ while a(3) < n(5) = TRUE
+/ if a(3) = prime = TRUE
+/ append a(3) to r (2,3)
+/ a:a+1 = 3+1 = 4
+
+/ while a(4) < n(5) = TRUE
+/ if a(4) = prime = FALSE
+/ skip rest of while loop
+/ a:a+1 = 4+1 = 5
+
+/ while a(5) < n(5) = FALSE
+/ skips entire while loop
+/ returns r (2, 3)
 ```
 
 ```q
 / isPrime function
+
+/ create function with 1 argument input
+/ and outputs whether argument is Prime (True) or Not (False)
 
 / prime = any num can only % itself and 1
 / prime numbers begin on 2
@@ -3588,6 +3618,113 @@ Component 3 (number > 3)
 / x(5) mod a(4) = 0 = FALSE = skips :0b
 / a(5) < x(5) = FALSE, SKIPS entire while loop
 / goes to end, returns 1b (True) 
+```
+
+Vector Based Solution
+
+```q
+/ the above function uses control statements and loops
+/ but this is very slow
+/ instead, can re-write without do or while loops 
+/ using a vector based solution
+```
+
+isprime Vector Solution
+
+```q
+/ re-write isprime function using vector based solution
+
+/ original function
+
+isprime:{if[x<2; :0b]; a:2; while[a<x; if[(x mod a)=0; :0b]; a+:1]; 1b}
+
+/ we can rewrite the while loop portion
+
+/ instead of looping through every iteration of argument x 
+/ we can simply use til to generate a list
+
+{til x} 10
+0 1 2 3 4 5 6 7 8 9
+
+/ removes first 2 elements (since not prime)
+
+{2_til x} 10
+2 3 4 5 6 7 8 9
+/ drops 0, 1 since not prime
+
+/ check each number if it is a factor of argument x(10)
+
+{x mod 2_til x} 10
+0 1 2 0 4 3 2 1
+
+/ 10 mod 2 = 0
+/ 10 mod 3 = 1
+/ 10 mod 4 = 2
+/ 0 means no remainder = factor of x = NOT PRIME
+
+/ show us factors of argument x
+
+{0=x mod 2_til x} 10
+10010000b
+/ shows us factors of argument 10
+/ 1 = true
+/ 0 = false
+
+/ are there ANY factors of 10? (mod = 0)
+
+{any 0=x mod 2_til x} 10
+1b
+/ TRUE, because list contains SOME factors of 10
+
+/ does the list NOT contain any factors of 10?
+
+{not any 0=x mod 2_til x} 10
+0b
+/ FALSE, because list DOES contain factors of 10
+/ hence, NOT prime
+
+/ still need component for numbers less than 2
+/ so re-use the x<2 IF/Else clause
+
+isprimeB: {if[x<2; :0b]; not any 0=x mod 2_til x}
+isprimeB 10
+0b
+
+/ x(10)<2 = FALSE, skips if statement
+/ goes onto second statement
+/ FALSE, 10 is NOT prime
+```
+
+findprimes Vector Solution
+
+```q
+/ re-write findprimes function using vector based solution
+
+/ original findprime function:
+
+findprime: {[n] r:(); a:1; while [a<n; if[isprime[a];r,:a]; a:a+1];r}
+
+/ use til instead of while loop
+
+{til x} 10
+0 1 2 3 4 5 6 7 8 9
+
+/ perform isprime function on EACH of the numbers
+{isprimeB each til x} 10
+0011010100b
+
+/ returns us a list of booleans
+/ does this list contain any prime?
+/ 0 = no
+/ 1 = yes
+
+/ convert booleans BACK into numbers
+/ want 1 (true) = prime turned back into numbers
+/ use WHERE function
+
+findprimesB: {where isprimeB each til x}
+findprimesB 10
+2 3 5 7
 ```
 
 <a name="func_lambda"></a>
