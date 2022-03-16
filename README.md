@@ -3229,8 +3229,9 @@ g
 ### 🔵 10.6 If Statements
 
 ```q
-/ if[test_condition; do_this]
-/ if first condition TRUE, execute all statements that follow
+/ if[condition_true; do_this]
+/ if condition TRUE, execute all statements that follow
+/ if condition FALSE, do nothing
 ```
 
 Example 1
@@ -3239,10 +3240,20 @@ Example 1
 if[10>3; a:11; show a*10]
 110
 
-/ since the first condition is true, execute all statements that follow
+/ since the first condition is TRUE, execute all statements that follow
+/ if FALSE, do nothing
 ```
 
 Example 2
+
+```q
+if[3<5; show 1+1]
+/nothing happens
+
+/ since first condition = FALSE, nothing gets executed
+```
+
+Example 3
 
 ```q
 if[10>3; a:11; show a*10; show "hello"]
@@ -3252,13 +3263,17 @@ if[10>3; a:11; show a*10; show "hello"]
 / as long as the first condition is true, execute all following statements
 ```
 
-Boolean Promotion
+If Statements - Booleans
 
 ```q
 / Any number = boolean TRUE 
 / 0 = defaults to boolean FALSE (0b)
 / Combine booleans + IF statements
+```
 
+True Example
+
+```q
 if[10; show "true"]
 "true"
 
@@ -3266,6 +3281,17 @@ if[10; show "true"]
 / 0 = defaults to boolean FALSE (0b)
 / since 10 is an int, and int will default to 1b (true)
 ```
+
+False Example
+
+```q
+if[0; show"false"]
+/ nothing happens
+
+/ 0b=false, so nothing happens
+```
+
+False Example 2
 
 ```q
 if[count(); show "true"]
@@ -3277,7 +3303,10 @@ if[count(); show "true"]
 ### 🔵 10.7 If/Else Statements
 
 ```q
-/ IF/ELSE statements use $ syntax
+/ IF/ELSE statements use $[ ] syntax
+/ $[cond_true; do_this; else_do_this]
+/ IF first condition TRUE, execute first statement
+/ ELSE, execute last statement
 ```
 
 Example 1
@@ -3427,7 +3456,9 @@ f:{avg x xexp 1000?2}
 ### 🔵 10.10 While Loops
 
 ```q
+/ while condition = True, keep executing until condition = False
 / while will execute a statement x number of times until statement is no longer true
+/ usually involves some sort of iterator (x:x+1)
 ```
 
 Example 1
@@ -3504,24 +3535,32 @@ while[(a<100) and b<5; a:a+1; b:b+1; show enlist b,a]
 Example 1
 
 ```q
-/ sum all values > 100 using while loop
+/ generate list of 100 random numbers from 0-99
+/ sum all values in list > 50 using while loop
 
 d: 100?100
 i: 0
 r1: 0
 
-/ d = list of 100 random numbers
-/ i = iterative counter (goes from 0-100)
+while [i < count d; if [d[i]>50; r1+:d[i] ]; i+:1]
+
+/ d = list of 100 random numbers from 0-99
+/ i = iterative counter (goes from 0-99). Counts through every element of list d
 / r1 = result of while loop
 
-while [i<count d; if [d[i]>50;r1+:d[i]]; i+:1]
-
-/ while i is less than the count of the list (d)
-/ if value of list at index i is greater than 100
-/ then add this to the value of the result (r1)
+/ while i is less than total number of items in list d (99)
+/ if value of list d at index position i is less than 50
+/ add this value to results list (r1)
 / then go onto next iteration (i+1)
-/ remember, WHILE LOOPS -> if first argument is TRUE, execute all arguments that follow
 
+/ remember, WHILE LOOPS -> if first argument is TRUE, execute all arguments that follow
+/ WHILE LOOP = used as iterative counter through all elements of list d (0-99)
+/ IF STATEMENT = tests IF condition true, add to list
+```
+
+Vector Operation Solution
+
+```
 HOWEVER, much faster using vector operations:
 
 r2: sum d where d > 50
