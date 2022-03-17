@@ -3055,6 +3055,112 @@ f[d]
 36
 ```
 
+Multiple ways to CALL anonymous function
+
+```q
+{x+y} [3;4]
+7
+
+{x+y} [3;] 4
+7
+
+{x+y} [3] 4
+7
+
+{x+y} [;4] 10
+7
+```
+
+<a name="anon_function"></a>
+### 🔵 10.2 Anonymous String Function Problem Set (AQ)
+
+```q
+/ create a function that uses SSR (string search replace)
+/ to convert sym `welcome to string "welcoME"
+
+/ quick reminder on SSR
+
+ssr["hello ryan where is ryan";"ryan";"john"]
+hello johhn where is john
+```
+
+Part 1: Pass single sym through function
+
+```q
+f: {ssr[(string x);y;z] }
+f[`welcome;"me";"ME"]
+"welcoME"
+
+/ so x gets converted from `sym to string
+/ then SSR is run on string "welcome"
+/ and replaces "me" with "ME"
+```
+
+re-written as lambda function
+
+```q
+/ alternative syntax (lambda function)
+
+{ssr[string x;y;z]} [`welcome; "me";"ME"]
+"welcoME"
+
+/ did not define function (lambda)
+/ uses implicit arguments x, y, z
+/ passes arguments immediately after function
+/ string x = ONLY applies to argument x
+```
+
+Alternative method to call arguments 
+
+```q
+/ alternative syntax (lambda + alt method to call argument)
+
+{ssr[string x;y;z]} [ ; "me";"ME"] `welcome
+"welcoME"
+
+/ so sym `welcome is implicit argument x
+/ since arguments y and z are already defined as "me" and "ME"
+/ this is useful when iterating through a LIST of syms
+```
+
+PART 2: re-write function to pass a LIST of syms
+
+```q
+/ instead of converting one sym
+/ need to iterate function through list of syms
+
+f:{ssr [string x;y;z]} 
+f[ ;"me";"ME"] each `welcome`home`mermaid
+"welcoME"
+"hoME"
+"MErmaid"
+
+/ function remains the same
+/ but when you CALL the function, need adverb EACH
+/ this iterates through each sym
+/ the list of syms `welcome`home`mermaid gets passed through x
+/ REQUIRES x to be left blank inside [ ] 
+/ while locking in arguments y and z as constants
+```
+
+re-written as lambda function
+
+```q
+/ lambda notation
+
+{ssr [string x;y;z]} [ ;"me";"ME"] each `welcome`home`mermaid
+"welcoME"
+"hoME"
+"MErmaid"
+
+/ function remains the same
+/ but when you CALL the function, need adverb EACH
+/ this iterates through each sym
+/ the list of syms `welcome`home`mermaid gets passed through x
+/ REQUIRES x to be left blank inside [ ] 
+/ while locking in arguments y and z as constants```
+```
+
 <a name="implicit_argu"></a>
 ### 🔵 10.3 Implicit Arguments
 
@@ -3830,7 +3936,7 @@ findprimesB 10
 ```
 
 <a name="func_lambda"></a>
-### 🔵 10.13 Function within a Function (Projected Functions)_ 
+### 🔵 10.13 Function within a Function (Projected Functions)
 
 ```q
 f:{x*x}
@@ -3874,46 +3980,6 @@ Can be anonymous / lambda
 7
 ```
 
-String Function Case Study (AQ)
-
-```q
-/ create a function that converts sym `welcome to a string and replaces me with ME
-/ this uses PROJECTIONS
-
-{ssr[string x;y;z]} [;"me";"ME"] `welcome
-"welcoME"
-
-/ anonymous function
-/ with 3 implicit variables (x, y, z)
-/ `welcome is a sym
-/ SSR is performed on x, y, z
-/ y, and z are CONSTANT (locked as "me" and "ME")
-/ that way, sym `welcome gets passed as x
-/ converted to a string
-/ then SSR replaces the "me" with "ME"
-```
-
-```q
-
-/ maybe more obvious with this:
-
-/ do the same with list of syms
-
-{ssr[string x;y;z]}[;"me";"ME"] each `welcome`home`mermaid
-"welcoME"
-"hoME"
-"MErmaid"
-
-/ need the adverb EACH to iterate through each sym
-
-/ can also be done by defining function
-
-f:{ssr[string x;y;z]}
-f[;"me";"ME"] each `welcome`home`mermaid
-"welcoME"
-"hoME"
-"MErmaid"
-```
 
 <hr>
 
