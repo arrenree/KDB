@@ -3334,6 +3334,9 @@ $[100>1; [show "message"; `a];`b]
 Example 3
 
 ```q
+/ if you want to pass an argument to IF/ELSE statement
+/ need to encase with { }
+
 { $ [x<0; `negative;`positive]} -2
 `negative
 
@@ -3381,14 +3384,16 @@ Example 1
 `negative
 
 / first condition is TRUE, so executes first Statement
+/ pass implicit argument -2
+/ so need to wrap in { }
 ```
 
 ```q
 {$[x<0; `negative; x=0; `zero; `positive]} 0
 `zero
 
-/ first condition FALSE
-/ move onto second condition = TRUE
+/ first condition FALSE (0 < 0)
+/ move onto second condition (0 =0) = TRUE
 / returns second statement = `zero
 ```
 
