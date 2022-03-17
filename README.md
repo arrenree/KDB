@@ -3207,17 +3207,37 @@ Example 2
 ```q
 f:{x*y}
 f[4;5]
+20
+```
 
-/ let's assume y will always stay as 5 and only x will change
+```q
+/ let's assume y will stay constant @ 5 and only x will change
 
-g:f[;5]
+f:{x*y}
+
+g:f[ ;5]
 g[3]
 15
 
-/ set y = 5
+/ g is a projected function of f
+/ f[x;y] = y is set constant @ 5
 / now when you call g[3], x=3 while y stays the same
 / g becomes a nomaic parameter
+```
 
+```q
+f:{x*y}
+
+h:f[10; ]
+h[2]
+20
+
+/ so this time, we set x as constant 10
+/ when we call 2 for function h
+/ that automatically gets passed as the y argument
+```
+
+```q
 g
 {x*y}[;5]
 
@@ -3583,15 +3603,23 @@ avg sum d where d>50
 
 ```q
 / create function that finds primes up to argument x
-/ will first require a function to determine if num is prime (true) or not (false)
+/ since you are returning list of numbers
+/ will require an 1) empty list
+/ and 2) an iterator to check every number up to x
+
+/ iterator starts from 1
+/ if iterator is prime, append to list r (need to use ,: NOT sum)
+/ then go onto next number
+/ keep checking until WHILE condition is no longer true (a<n)
+/ then return list r
 
 findprime: {[n] r:(); a:1; while [a<n; if[isprime[a];r,:a]; a:a+1];r}
 findprime 10 
 2 3 5 7
 
 / n = single argument
-/ r () = empty list thats gonna contain our result
-/ a starts from 1 
+/ r() = empty list thats gonna contain our result
+/ a starts from 1 (iterator)
 / while a(1) < n = TRUE
 / if a = prime number,
 / append a to list r (r,:a = append a to list r)
@@ -3635,26 +3663,38 @@ findprime 10
 / isPrime function
 
 / create function with 1 argument input
-/ and outputs whether argument is Prime (True) or Not (False)
+/ and checks whether argument is Prime (True) or not (False)
 
-/ prime = any num can only % itself and 1
+/ prime = any num can only % by itself and 1
 / prime numbers begin on 2
-/ so you need 3 components
+/ will need 3 components:
 / 1. number < 2 (not prime)
 / 2. number = 2 (prime)
 / 3. number > 2 (could be prime)
 
+/ the outcomes for component 1 and 2 are quite binary. 
+/ component 3 -> requires you to check if number has any factors
+/ which means dividing by every number up to x number
+
+/ general reminder:
+/ IF brackets [contain condition + statement to execute if true]
+/ WHILE brackets [contain condition + statement to execute if true]
+
 isprime:{if[x<2; :0b]; a:2; while[a<x; if[(x mod a)=0; :0b]; a+:1]; 1b}
 
-Componennt 1 (number < 2)
+Component 1 (number < 2)
 / if argument less than 2, return FALSE 0b (not prime)
 / since primes cannot be less than 2
+/ if[x<2; :0b]
 / single colon : means return. nothing after gets executed
 / if x = 1
 / x(1) < (2) (TRUE) so returns 0b (not prime)
+/ if FALSE, then moves onto NEXT statement
 
 Component 2 (number = 2)
 / Create variable a, which begins on 2
+/ a is your iterator (will check every number up to x number)
+/ while[a<x; if_false_skip_this_entire_while_loop]; 1b
 / while condition a < x is FALSE
 / skip ENTIRE while loop
 / and go straight to the end, return TRUE 1B (prime)
@@ -3663,11 +3703,12 @@ Component 2 (number = 2)
 / goes to end, returns 1b (True)
 
 Component 3 (number > 3)
-/ while condition a < x is TRUE
-/ lets check if x mod a = 0 (ie, even number = NOT PRIME)
-/ return false :0b
-/ otherwise, return True 1b
-/ while we loop through every iteration of a+1
+/ while condition a < x is TRUE (iterator < x number)
+/ check if a is a factor of x number
+/ this check is done by x mod a = 0 (even number/factor exists = NOT PRIME)
+/ if TRUE, return false :0b
+/ otherwise, iterate through until WHILE condition (a<i) is no longer true
+
 / if x = 5
 / a(2) < x(5) = TRUE
 / x(5) mod a(2) = 0 = FALSE = skips :0b
@@ -3789,29 +3830,35 @@ findprimesB 10
 ```
 
 <a name="func_lambda"></a>
-### 🔵 10.13 Function within a Function LAMBDA 
+### 🔵 10.13 Function within a Function (Projected Functions)_ 
 
 ```q
 f:{x*x}
-g:{10+f[x]}
+g:{10 + f[x] }
 g[2]
 14
 
 / 2 becomes x, 10 + 4 = 14
+```
 
-/ can define a function within a function inline
+Can define a function within a function inline
 
-z:{f:{x*x};f[x] + 10}
+```q
+z:{f:{x*x}; f[x] + 10}
 z[2]
 14
 
-/ but doesn't need to be defined
+/ on the same line, can call function f into another function body
+/ function f = 2 *2 = 4
+/ f[x] = the output of function f{x*x} = 4
+```
+
+Can be anonymous / lambda
+
+```q
+/ this is weird syntax, dont know if useful
 
 {{x*x}[x] + 10}
-
-/ this is called a lambda
-/ lambda = a pair of curly brackets enclosing optional argument expressions separated by semicolons
-
 {x+y} [3;4]
 7
 
@@ -3826,14 +3873,29 @@ z[2]
 {x+y} [;4] 3
 7
 ```
+
+String Function Case Study (AQ)
+
 ```q
 / create a function that converts sym `welcome to a string and replaces me with ME
+/ this uses PROJECTIONS
 
-{ssr[string x;y;z]}[;"me";"ME"] `welcome
+{ssr[string x;y;z]} [;"me";"ME"] `welcome
 "welcoME"
 
-/ this function converts all syms to strings 
-/ then ssr string search replace the "me" with capital "ME"
+/ anonymous function
+/ with 3 implicit variables (x, y, z)
+/ `welcome is a sym
+/ SSR is performed on x, y, z
+/ y, and z are CONSTANT (locked as "me" and "ME")
+/ that way, sym `welcome gets passed as x
+/ converted to a string
+/ then SSR replaces the "me" with "ME"
+```
+
+```q
+
+/ maybe more obvious with this:
 
 / do the same with list of syms
 
