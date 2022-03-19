@@ -3358,6 +3358,7 @@ g
 / if[condition_true; do_this]
 / if condition TRUE, execute all statements that follow
 / if condition FALSE, do nothing
+/ if statements do NOT return a value
 ```
 
 Example 1
@@ -3387,6 +3388,17 @@ if[10>3; a:11; show a*10; show "hello"]
 "hello"
 
 / as long as the first condition is true, execute all following statements
+```
+
+IF Statements DON'T return value
+
+```q
+r: if [2>1; 10]
+r
+/ r returns nothing
+
+/ even though IF statement is true
+/ r doesn't get assigned a value
 ```
 
 If Statements - Booleans
@@ -3433,6 +3445,7 @@ if[count(); show "true"]
 / $[cond_true; do_this; else_do_this]
 / IF first condition TRUE, execute first statement
 / ELSE, execute last statement
+/ IF/ELSE statements DOES return a value
 ```
 
 Example 1
@@ -3457,7 +3470,32 @@ $[100>1; [show "message"; `a];`b]
 / executes second statement (everything in the [ ] )
 ```
 
-Example 3
+Example 3 (Returns Value)
+
+```q
+/ IF ELSE statements return value!
+
+r: $[2>1; 10; 20]
+r
+10
+
+/ since the first condition is TRUE
+/ the first expression gets executed
+/ and r gets assigned 10
+/ when you call r, you get 10
+```
+
+```q
+r: $[10<1; 10; 20]
+r
+20
+
+/ since the condition is FALSE
+/ r gets assigned 20
+/ when you call r, you get 20
+```
+
+Example 4
 
 ```q
 / if you want to pass an argument to IF/ELSE statement
@@ -3470,19 +3508,26 @@ Example 3
 / so returns second statement
 ```
 
-Example 4
+Example 5 - Vector Conditional
 
 ```q
-/ vector condition examines a list of booleans
+/ vector conditional examines a list of booleans
 
+? [vector_condition; true_expression; false_expression]
+
+/ the condition will be a list of booleans
+/ be careful about inconsistent lengths!
+```
+
+```q
 l: 1 2 3 4 5
-l>2
+l > 2
 00111b
 
 / you have a list of atoms
 / l > 2 returns a list of booleans
 
-? [ l>2;`TRUE;`FALSE]
+? [l>2; `TRUE; `FALSE]
 `FALSE`FALSE`TRUE`TRUE`TRUE
 
 / first condition = pass the list of booleans
@@ -3551,6 +3596,33 @@ $[a<2; 1; a<4; 2; a<6; 3; a<8; 4; 20]
 / moves onto third condition = TRUE (5<6)
 / returns 3rd statement = 3
 ```
+
+IF/ELSE Statement with Multiple Expressions
+
+```q
+/ if you want to execute more than 1 expression
+/ need to make it a statement block
+/ and enclose your expressions in square brackets [ ]
+
+$ [a>10; [b:10; c:11]; [b:98; c:99]]
+
+/ if condition TRUE
+/ then b gets 10 AND c gets 11
+/ if condition FALSE
+/ then b gets 98 AND c get 99
+
+
+a:20
+$ [a>10; [b:10; c:11]; [b:98; c:99]]
+b
+10
+c
+11
+
+/ since condition true, when you call b, you get 10
+/ and when you call c, you get 11
+```
+
 
 <a name="do_loop"></a>
 ### 🔵 10.9 Do Loops
