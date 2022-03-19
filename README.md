@@ -68,7 +68,7 @@
 ## 7. [Primitive Operations Problem Set](#primitive_problemset)
 
 ## 8. [Dictionary](#dict_header)
-1. [Constructing a Dictionary from Lists](#dict_from_list)
+1. [Ways to Construct Dictionaries](#dict_from_list)
 2. [Retrieving values](#retrieve_dict)
 3. [Index Retrieve](#index_retrieve_dict)
 4. [Take](#take_dict)
@@ -2195,16 +2195,68 @@ count p where a=`int$a
 ```
 
 <a name="dict_from_list"></a>
-### 🔵 8.1 Constructing a Dictionary from Lists
+### 🔵 8.1 Different Ways to Construct Dictionaries
+
+Construct Dictionary using 2 Lists
+
 ```q
 k:`apple`plum
 v:`green`purple
 d:k!v
 
+key   | value
+--------------
+apple | green
+plum  | purple
+```
+
+Construct Dictionary using atoms
+
+```q
+
+d: `a`b`c!1 2 3
+
+key | values
+------------
+a   | 1
+b   | 2
+c   | 3
+```
+Construct Dictionary using atoms and variables (strings)
+
+```q
+/ atom ! string
+
+a: "yes, its red"
+b: "yes, its blue"
+
+d: `red`blue ! (a;b) 
+
 key  | value
 --------------
-apple| green
-plum | purple
+red  | yes, its red
+blue | yes, its blue
+
+/ a and b are simply strings stored as a variable
+/ VALUES for variables have to be encased by ( ) and separated by ; 
+```
+
+Construct Dictionary using atoms and variables (ints)
+
+```q
+c: 1
+d: 2
+
+d2: `one`two ! (c;d)
+d2
+
+key | value
+------------
+one | 1
+two | 2
+
+/ c and d are ints stored as a variable
+/ VALUES for variables have to be encased by ( ) and separated by ; 
 ```
 
 <a name="retrieve_dict"></a>
@@ -4052,16 +4104,17 @@ Can be anonymous / lambda
 7
 ```
 
-
 <hr>
 
 <a name="func_problem_set"></a>
 ## 🔴 11. Functions Problem Set
 [Top](#top)
 
-**🔵 11.1 Create a function volc that accepts 2 arguments (r and h), that returns the volume of the given volc [2;3]**
+**🔵 11.1 Volume of cone function**
 
 ```q
+/ create func called volc that accepts 2 arguments (r and h)
+/ returns volume of cone
 / vol of cone = 1/3 * pi * r^2 * h
 / pi = -4 * atan -1
 
@@ -4075,58 +4128,80 @@ volc[2;3]
 / no space for volc[2;3]
 ```
 
-**🔵 11.2 Write function sph that takes radius and returns the area and volume**
+**🔵 11.2 Area and Volume of cone function**
 
 ```q
-/ v = 4/3 * pi * r^3
-/ a = 4 * pi * r^2
+/ create function, called sph, that accepts argument radius
+/ and returns the area and volume of a cone as a dict
 
-sph: { [r] pi:-4*atan -1; a:(4%3)*pi*r xexp 3; v:4*pi*r xexp 2; `area`volume ! (a;v)}
+/ volume = 4/3 * pi * r^3
+/ area = 4 * pi * r^2
+/ pi = -4 * atan -1
+
+sph:{[r] pi:-4 * atan -1; v:(4%3)*pi*r xexp 3; a:4* pi * r xexp 2; `area`volume!(a;v)}
 sph[1]
 
 key    | value
 ----------------
-area   | 4.18
-volume | 12.56
+area   | 12.56
+volume | 4.188
 
 / define argument [r]
+/ you can define variables with functions inside your function!
 / define variable pi with formula
 / define variable a with formula
 / define variable v with formula
-/ show dictionary with symbols `area `volume against values a and v
+/ then you can create dictionary using the variables you defined
+/ show dictionary with keys `area `volume against values a and v
+/ create keys as syms (`area`volume) mapped to values defined by your variables (a;v)
 ```
 
-**🔵 11.3 Create function setc that takes one argument and sets the global value c to that argument**
-```q
-setc: {c::x}
-setc[10]
-c
+**🔵 11.3 Implicit Arguments and Global Variables**
 
+```q
+/ create function, setc, that takes 1 implicit argument
+/ and sets the value of global variable c to that argument
+
+c:10
+
+setc: {x::c}
+setc[15]
 10
-/ setc 10 = setting x = 10 (implicit variable)
-/ since x = 10, and you've set c as the global variable to x, then c = 10
 
-setc `hi
-c
-`hi
-
-/ you set setc = `hi, so c = x = `hi
+/ set global variable c to 10
+/ x is your implicit variable
+/ you assign x the value of global variable c
+/ so WHATEVER value you call using setc, it assigns
+/ that value to the global value of q
+/ so even though you call func with 15
+/ the output is 10 (global variable)
 ```
 
-**🔵 11.4 Given raise:{x xexp y}, create function that is projection of the raise. Ex, root[9] = 3**
+**🔵 11.4 Projected Functions**
+
 ```q
+/ raise:{x xexp y}
+/ create projection of raise called root
+/ which calculates the square root of argument 
+/ ie, root[9] = 3
+
 raise: {x xexp y}
 root: raise[ ; 0.5]
 root[9]
 3
 
-/ an embedded function is a function within another function
-/ root function sets y as 0.5
-/ so root 9 =x
+/ first define function raise
+/ then we take a PROJECTION of that function, rename as root
+/ and we set the y variable CONSTANT as 0.5
+/ this allows the projected function ROOT to only allow 1 input as x
+/ so the projected function will always be x xexp 0.5
 ```
 
-**🔵 11.5 Convert all entries of list L to a string**
+**🔵 11.5 Casting Mixed List to Strings**
+
 ```q
+/ convert all elements of list l to a string
+
 l: (100;`price;1b)
 string l
 "100"
@@ -4134,80 +4209,125 @@ string l
 "1b"
 
 / l is a list of long, sym, and boolean
-/ remember, mixed lists have to be contained in parathesis ( )
+/ simply using the "string" function, converts all elements to strings
+/ mixed lists have to be contained in parathesis ( )
 ```
 
-**🔵 11.6 Given the string, find and replace "cow" with "kangaroo"**
+**🔵 11.6 SSR Function **
 
 ```q
+/ given string st, replace "cow" with "kangaroo"
+/ st: "the cow jumped over the moon"
+
 st: "the cow jumped over the moon"
 ssr [st; "cow";"kangaroo"]
 "the kangaroo jumped over the moon"
 
 / ssr = string search replace.
-/ syntax = ssr [listname + find this + replace with this]
+/ first condition = string
+/ second condition = what to target
+/ third condition = what to replace with
 ```
 
-**🔵 11.7 Create function sayHi that takes 2 arguments, first one name, second one age and behaves as follows:**
+**🔵 11.7 Multi Argument Functions**
+
 ```q
-/ sayHi["joe";90]
-/ "hello 90 year old joe"
+/ create function, sayHi, that takes 2 arguments: name and age
+/ and returns "hello age year old name"
 ```
+
 ```q
-sayHi:{[name;age] "hello ", string[age]," year old ", name}
+sayHi:{[name;age] "hello " , string[age] , " year old " , name}
 sayHi["joe";90]
 hello 90 year old joe
 
 / name and age are your arguments
-/ "hello" and "year old" are simply lists of characters
-/ you have to convert raw data values into strings, use , to concatenate the strings together
-/ need to convert [age] to string
+/ name is a string
+/ age is an int
+/ the output is a list of chars (or one long string)
+/ so you have to convert your [age] argument to a string
+/ and join them together using string concatenation
+/ string concatenation simply done with a comma ,
 / when you define argument "joe" have to use parathesis otherwise wont work
 ```
 
-**🔵 11.8 I have a box of 7 eggs, find the median and average weight**
+**🔵 11.8 Arithmetic on Lists **
+
 ```q
-eggs: 10 20 30 40 50 60 70
+/ I have a box of 7 eggs, and the weights are
+/ eggs: 10 20 30 40 50 60 70
+/ find the median and average weight of these eggs
 
 med eggs
-40
+40f
 
 avg eggs
-40
-```
-<hr>
+40f
 
-**🔵 11.9 I sold 2 boxes of eggs. 1 box had 10 eggs and i sold it for 50 each. the other box had 20 eggs and sold it for 100 each. find the average price paid per egg**
+/ note, division will always return a float
+/ apparently same with med and avg functions
+```
+
+**🔵 11.9 Weighted Averaged WAVG Function **
 
 ```q
+/ I sold 2 boxes of eggs
+/ one box had 10 eggs and i sold each egg for 50 each
+/ the other box had 20 eggs and i sold each for 100 each
+/ find the average price paid per egg
+
 10 20 wavg 50 100
 83.3
 
-/ wavg = weight average function
-/ num1 num2 wavg value1 value2
-
+/ to find the average price per egg
+/ you want to find the weighted average of the 2 lists
+/ wavg = weighted average function
+/ qty1 qty2 wavg value1 value2
 ```
 
-**🔵 11.10 Generate list k of 10 random integers. Find the moving average with window size of 3**
+**🔵 11.10 Moving Average Window Functions **
+
 ```
+/ generate list k with 10 random ints
+/ find moving average with window size of 3
+
 k: 10?10
-mavg[3;k]
-8 4.5 6 5 6 5 5.33 4.33 5 4.67
+8 7 9 9 7 7 1 9 1 0
 
+mavg[3;k]
+8 7.5 8 8.3 8.3 7.6 5 5.6 3.6 3.3
+```
+
+```q
 / Find the 3 largest numbers in list k
 
+desc k
+9 9 9 8 7 7 7 1 1 0
+
 3#desc k
-9 8 8 
+9 9 9 
 
 / take 3 of the largest from k, sort by desc
+```
 
+```q
 / Find the difference between the successive elements of k
 
+k
+8 7 9 9 7 7 1 9 1 0
+
 deltas k
-8 -7 8 -4 -1 2 0 -5 7 -3
+8 -1 2 0 -2 0 -6 8 -8 -1
+
+/ the deltas functions returns the difference (delta) of each element
+/ 8-0 = 8
+/ 7-8 = -1
+/ 9-7 = 2
+/ etc
 ```
 
 **🔵 11.11 Create function factw, using a loop to write a factorial function**
+
 ```q
 factw:{r:i:1; while[i<=x; r*:i; i+:1];r}
 factw 3
