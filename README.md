@@ -4405,8 +4405,14 @@ factp 4
 / since til only generates list up to, but not including x
 ```
 
-**🔵 11.13 Demonstrate which calculation is faster, factorial using loops or via KDB**
+**🔵 11.13 Timing Calculations**
+
 ```q
+/ Demonstrate which calculation is faster,
+/ factorial using loops or via KDB (vector conditional)
+/ use \ts to time
+/ do function useful (do x number times)
+
 \ts do[1000;factw 12]
 4 1008
 
@@ -4418,38 +4424,87 @@ factp 4
 / 0 miliseconds 1008 bytes of memory
 ```
 
-**🔵 11.14 Create function safefact that wraps factp with protected evaluation to return null On instead of error when calling on a negattive number**
+**🔵 11.14 Protetcted Evaluations on Functions**
+
 ```q
+/ Create function called safefact
+/ that wraps factp with protected evaluation
+/ to return null On instead of error 
+/ when calling on a negative number
+
 safefact:{@[factp; x; 0N]}
 safefact -10
 0N
 
-/ apply factp, if true, return x, if false, return 0N
+/ you "wrap" your function using the @ operator ("apply")
+/ @ = apply 
+/ first condition = factp function
+/ if TRUE, return x
+/ if FALSE, return ON
 ```
 
+**🔵 11.15 If/Else Statements (w reverse operator)
 
-**🔵 11.15 Write function isPalindrome that returns `yes if single argument is a palindrome list. Otherwise return `no**
 ```q
+/ Write a function called isPalindrome 
+/ that accepts single argument as a list of ints 
+/ returns `yes if list of ints is a palindrome
+/ otherwise return `no
+
+/ palindrome = same forwards + backwards
+/ example = 1 2 3 3 2 1
+
 isPalindrome:{$[x~reverse x;`yes;`no]}
 isPalindrome 1 2 2 1
 yes
 
-/ $ means if/else statement
-/ if x is the reverse of x, return yes. otherwise, no
-/ remember, ~ is the match function
-/ x = list of numbers
+/ since we are taking in 1 argument
+/ with a binary outcome (true vs false)
+/ need to use if/else statement $ [ ]
+/ implicit argument x is a list of integers
+/ need to utilize REVERSE function 
+/ to compare if x = reverse x
 ```
 
 **🔵 11.16 Find the sum of all multiples of 3 or 5 below 1000**
-```q
-sum where {(0 =x mod 3) or (0 = x mod 5)}[til 1000]
 
+```q
+/ check every number up to 1000
+/ if its a factor of 3 or 5
+/ x mod 3 = 0
+/ x mod 5 = 0
+
+/1. generate list of ints from 0-999
+
+til 1000
+0 1 2 3...999
+
+/2. check if number is a factor of 3 or 5
+
+{(0=x mod 3) or (0=x mod 5)} [til 1000]
+1001011
+
+/ you get a list of booleans
+/ ie, true, the number is a factor of 3 or 5
+/ IMPORTANT! the 0 = has to come in FRONT of (0=x mod 5)
+/ (x mod 5 = 0) does NOT work
+
+/3. CONVERT list of booleans to their numbers, use WHERE
+
+where {(0=x mod 3) or (0=x mod 5)} [til 1000]
+0 3 5 6 9 10 12 15 18 20 21 
+
+/4. lastly, use sum to add up all numbers in the list
+
+sum where {(0 = x mod 3) or (0 = x mod 5)} [til 1000]
 233168
 
-/ sum where = adds everything together
-/ 0 = x mod 3/5 = no remainders when x is divdied by 3 or 5 = multiples of 3 or 5
-/ x = implicit variable
-/ til 1000 = implicit variable (runs through 0...999)
+/ by using anonymous function, you can perform QSQL (sum where)
+/ as well as call argument x as a list (til 1000) in place
+/ x mod 3 and x mod 5 = search for any multiples of 3 or 5
+/ since dividing by a factor will be 0
+/ oddly enough, the 0 = in (0 = x mod 3) HAS TO come first
+/ (x mod 3 = 0) doesn't work for some reason
 ```
 
 
