@@ -4213,7 +4213,7 @@ string l
 / mixed lists have to be contained in parathesis ( )
 ```
 
-**🔵 11.6 SSR Function **
+**🔵 11.6 SSR Function**
 
 ```q
 / given string st, replace "cow" with "kangaroo"
@@ -4251,7 +4251,7 @@ hello 90 year old joe
 / when you define argument "joe" have to use parathesis otherwise wont work
 ```
 
-**🔵 11.8 Arithmetic on Lists **
+**🔵 11.8 Arithmetic on Lists**
 
 ```q
 / I have a box of 7 eggs, and the weights are
@@ -4268,7 +4268,7 @@ avg eggs
 / apparently same with med and avg functions
 ```
 
-**🔵 11.9 Weighted Averaged WAVG Function **
+**🔵 11.9 Weighted Averaged WAVG Function**
 
 ```q
 / I sold 2 boxes of eggs
@@ -4285,7 +4285,7 @@ avg eggs
 / qty1 qty2 wavg value1 value2
 ```
 
-**🔵 11.10 Moving Average Window Functions **
+**🔵 11.10 Moving Average Window Functions**
 
 ```
 / generate list k with 10 random ints
@@ -4326,9 +4326,31 @@ deltas k
 / etc
 ```
 
-**🔵 11.11 Create function factw, using a loop to write a factorial function**
+**🔵 11.11 Factorial Function using While Loops**
 
 ```q
+/ Create function factw, which uses a loop to write a factorial function
+/ factorial = multiply every iteration up to number x
+
+factw:{i:1; r:1; while[i<x; r*:i; i+:1];:r*x}
+factw 4
+24
+
+/ while loop, so need some sort of iterative counter (i)
+/ want to mutiply every iteration of x, up to x 
+/ so also need an empty list to store these iterations (r) 
+/ first define i:1 (no point starting at 0)
+/ and define r:1 (this is the list of numbers you want to multiply)
+/ while i is less than implicit argument x (your input number)
+/ multiply i with r, and r becomes that new number (r*:i mean r: r*i)
+/ then move onto next iteration (i+:1 means i:i+1)
+/ keep running this while loop until x-1, then stop executing
+/ finally, return r * x (your original input)
+```
+
+```q
+/ alternative syntax (shorter)
+
 factw:{r:i:1; while[i<=x; r*:i; i+:1];r}
 factw 3
 
@@ -4349,16 +4371,39 @@ i(3) <= x(3) TRUE
 i(4) <= x(3) FALSE, so returns r = 6
 ```
 
-**🔵 11.12 Re-create the factorial function as factp without using loops**
+**🔵 11.12 Factorial Function using Vector Conditional**
+
 ```q
-factp:{prd 1+til x}
-factp 3
-6
+/ re-write the factorial function as factp WITHOUT using loops
+/ must use vector conditional approach
 
-/ x = implicit variable. 
-/ right to left (til 6 = 0 1 2...5) + 1, multiplie together
+/ to replace WHILE loop using vector conditional
+/ usually replaces with til function
+
+til 4
+0 1 2 3
+
+1_til 4
+1 2 3
+
+prd 1_til 4
+1*2*3
+
+4 * prd 1_til 4
+1*2*3*4
+
+/ so putting it all together, replacing variable with x
+
+factp:{x*prd 1_til x}
+factp 4
+24
+
+/ KEY TAKEAWAY
+/ prds = multiplies all elements together
+/ must remember to drop first element 0 (otherwise will all be 0)
+/ must multiple original x back in
+/ since til only generates list up to, but not including x
 ```
-
 
 **🔵 11.13 Demonstrate which calculation is faster, factorial using loops or via KDB**
 ```q
