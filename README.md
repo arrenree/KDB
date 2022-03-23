@@ -7165,34 +7165,79 @@ Evaluated in the following order:
 ### 🔵 19.1) Select
 
 ```q
-/ result of a select is a table
+/ load sample trades file
+
+\l trades.q
+
+\a
+`book`company`employee`office`quote`stock`trade
+
+/ this shows all available tables within the script
 ```
 
 ```q
+/1. retrieve entire trade table
+
 select from trade
 
-/ this will select the whole table
+date       time         sym  price    size  cond
+------------------------------------------------
+2022.03.19 09:30:02.558 MS   109.1931 56600 C   
+2022.03.19 09:30:02.596 AAPL 97.30796 98700 A   
+2022.03.19 09:30:02.638 RBS  99.65561 6300      
+
+/ select always results in a table
+/ select from trade = select whole table
 ```
 
 ```q
+/2. retrieve only the sym and price columns from trade table
+
 select sym, price from trade
 
-/ this will select the sym and price columns only
+sym  | price
+--------------
+MS   | 109.19
+AAPL | 97.307
+RBS  | 99.655
+
+/ select + column names = will retrieve columns
 ```
 
 ```q
-t:([] sym:`a`b`c`d; price: 1 2 3 4)
-2 sublist t
+/3. retrieve only first 2 rows of trade 
 
-/ returns the first 2 rows of t
+2 sublist trade
+
+date	   | time	  | sym | price  | size	 | cond
+--------------------------------------------------------
+2022-03-19 | 09:30:02.558 | MS	| 109.19 | 56600 | C
+2022-03-19 | 09:30:02.596 | AAPL| 97.307 | 98700 | A
+
+/ sublist returns the first xx rows of table
 ```
 
 ```q
-/ Given a table, select the high, low, open, and close price by sym
+/4. select the high, low, open, and close price by sym from trade table
 
 select high: max price, low: min price, open: first price, close: last price by sym from trade
+
+sym  | high  | low  | open | close
+----------------------------------
+A    | 109.9 | 50.0 | 83.7 | 1.0
+AA   | 109.9 | 50.0 | 97.1 | 70.7
+AAPL | 109.9 | 50.0 | 97.3 | 98.0
+
+/ grouped by sym
+/ select a new column name will add it to your table
 ```
+
+Sorting Columns
+
 ```q
+/1. sort [grocer column] from [sales] by descending
+
+sales: ([] fruit:`apple`orange`pear`banana; grocer: `mark`mark`allen`tom; price: 1 2 3 4; quantity: 10 20 30 40)
 
 fruit   grocer  price   quantity
 --------------------------------
@@ -7200,7 +7245,6 @@ apple	mark	1	10
 orange	mark	2	20
 pear	allen	3	30
 banana	tom	4	40
-
 
 select [>grocer] from sales
 
@@ -7211,32 +7255,32 @@ apple	mark	1	10
 orange	mark	2	20
 pear	allen	3	30
 
-/ order our table in descending according to grocer
-
-fruit   grocer  price   quantity
---------------------------------
-banana	tom	4	40
-apple	mark	1	10
-orange	mark	2	20
-pear	allen	3	30
+/ [grocer column] is now sorted by descending
 ```
+
 ```q
+/2. retrieve banana and pear, along with their prices
+
 select fruit, price from sales where fruit in `banana`pear
 
-fruit   pear
------------
-pear	3
-banana	4
+fruit  | price
+--------------
+pear   | 3
+banana | 4
+
+/ use the in keyword to filter values within a column
 ```
 
 ```q
-/ only return 1 row for select
+/3. only return 1 row of results from previous query
 
 select [1;]fruit, price from sales where fruit in `banana`pear
 
-fruit   pear
------------
+fruit  | price
+--------------
 pear	3
+
+/ select [1;] returns only first row
 ```
 
 
@@ -7248,29 +7292,57 @@ ungroup select price by sym from trade
 ```
 
 <a name="multipleselect_template"></a>
-### 🔵 19.1A) Multiple Select
+### 🔵 19.1A) Case Study: Grouping Data into Buckets
 
 ```q
-/ let's say you want to bucket trade sizes based on sym into small, med, big
-/ you could do this:
+/ load trades.q script
+
+/ 1. retrieve the number of small trades for each sym
+/ small trades = size less than 999
+/ add column called tradesize = small for each sym
+
+select num:count i by sym, sizegroup:`small from trade where size within 0 999
+
+`sym` | `sizegroup` | num
+--------------------------
+`A`   |   `small`   | 454
+`AA`  |   `small`   | 521
+`AAPL`|   `small`   | 493
+`B`   |   `small`   | 499
+
+/ num = number of trades which sizes are less than 999
+/ use COUNT to return NUMBER of trades
+/ since you're aggregating BY sym, the sym + sizegroup cols are keyed
+/ use WHERE within x y = range of values to be selected
+```
+
+```q
+/2. now retrieve the number of med and large trades for each sym
+/ med = 1000 to 8999
+/ large = greater than 8999
+
+/ consolidate into same table
 
 (select count i by sym, sizegroup:`small from trade where size within 0 999),
 (select count i by sym, sizegroup:`medium from trade where size within 1000 8999),
 (select count i by sym, sizegroup:`big from trade where size > 8999)
 
-sym | sizegroup  | x
+`sym | `sizegroup` | num
 -------------------------
-A   | large      | 45645
-A   | med        | 4009
-A   | small      | 480
-AA  | large      | 45425
+`A`   | `large`    | 45645
+`A`   | `med`      | 4009
+`A`   | `small`    | 480
 
-/ can use multiple select queries, but this is inefficient
-/ instead, you can write a function using BIN to help classify your buckets
+/ we have successfully grouped each sym into "buckets"
+/ of either small, med, or large
+/ depending on the number of trades (from size)
+/ there is a better way retrieve this, by writing function called BIN
 ```
 
+BIN Function
+
 ```q
-/ slight detour example:
+/ for list of sizes, group into buckets of 0, 1000, or 9000
 
 sizes: 2000 100 6000 11000
 0 1000 9000 bin sizes
@@ -7285,39 +7357,51 @@ sizes: 2000 100 6000 11000
 ```
 
 ```q
-/ test out the bin using the sizes list you just created
+/ name the buckets as small, med, or big
+/ based on the buckets of 0, 1000, and 9000
 
 `small`med`big 0 1000 9000 bin sizes
 `med`small`med`big
+
+/ syntax: 
+/ `name1`name2`name3 size1 size2 size 3 bin LIST
+/ still returns the index position based on the sizes
+/ but now has a "name" associated to it (small, med, big)
 ```
 
 ```q
-/ back to original problem, you can name your bins small med big
-/ this will bin your size list into the sym named buckets
-/ create function that sorts into bins, taking argument x as sizes
+/1. create function called tradesize
+/ that accepts a list of trade sizes as argument x
+/ and bucket those sizes into bins of small, med, big
 
 tradesize:{`small`med`big 0 1000 9000 bin x}
 
-/ testing out the function with sizes, returns same as above
+/ test out the function with sizes (from above)
+
+sizes: sizes: 2000 100 6000 11000
+
 tradesize sizes
 `med`small`med`big
+
+/ it works!
 ```
 
 ```q
 / now loop this back into the original query:
 
-select count i by sym, sizebucket:(tradesize;size) fby sym from trade
+select num:count i by sym, sizebucket:(tradesize;size) fby sym from trade
 
-sym | sizebucket | x
+sym | sizebucket | num
 -------------------------
 A   | large      | 45645
 A   | med        | 4009
 A   | small      | 480
 AA  | large      | 45425
 
-/ sizebucket becomes tradesize function with size as x
-/ the tradesize function becomes an aggregator for fby
-/ and returns the number of trades (count i), sorted by sym and its size bucket
+/ [sizebucket column] -> insert [tradesize function] you created
+/ [size column] from [trade table] becomes argument x for [tradesize function]
+/ [tradesize function] becomes an AGGREGATOR for fby
+/ returns the number of trades (count i), sorted by sym and its size bucket
 ```
 
 <a name="selectadd_template"></a>
