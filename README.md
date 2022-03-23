@@ -7408,28 +7408,56 @@ AA  | large      | 45425
 ### 🔵 19.2) Adding a new column using select
 
 ```q
+/ if you select a column name that doesnt exist, it will append it
+
 select sym, price, size, total:price*size from trade
 
-/ if you select a column name that doesnt exist, it will append it
-/ in this case, total will be returned
+sym  | price | size  |  total   
+-------------------------------
+C    | 107.2 | 63500 | 6807314 
+MSFT |  96.8 | 1700  |  164687
+RBS  |  97.1 | 80700 | 7837050 
+
+/ new column named total is returned
 ```
 
 <a name="qsqlvirtuali_template"></a>
 ### 🔵 19.3) Virtual Column i
 
 ```q
+/ q provides a virtual column i
+/ which represents the "offset" of each record
+/ useful for counting how many rows
+
 select i, sym, price from trade
 
-/ q provides a virtual column i which represents the offset of each record
+x | sym  | price   
+-----------------
+0 | C    | 107.2
+1 | MSFT |  96.8
+2 | RBS  |  97.1
+3 | A    | 100.35  
+4 | B    |  55.8
+
+/ column x = virtual column i 
 ```
 
-x | sym | price   
---|-------|-------
-0 | C    |107.2018
-1 | MSFT |96.87488
-2 | RBS  |97.11338
-3 | A    |100.35  
-4 | B    |55.82187
+```q
+/ example 2
+
+/ how many of each sym is there with cond = A from trade table?
+
+select count i by sym from trade where cond="A"
+
+`sym`  |  x
+--------------
+`A`    | 12525
+`AA`   | 12648
+`AAPL` | 12451
+
+/ since you are grouping by sym
+/ the sym column becomes keyed
+```
 
 <a name="qsqlselectmaxmin_template"></a>
 ### 🔵 19.4) Select using [ ]
@@ -7440,11 +7468,24 @@ x | sym | price
 
 select [4] from trade
 
+date       | time	  | sym  | price | size | cond
+-------------------------------------------------------
+2022-03-19 | 09:30:02.553 | C	 | 107.2 |63500 | B
+2022-03-19 | 09:30:02.701 | MSFT | 96.8	 | 1700	| B
+2022-03-19 | 09:30:02.743 | RBS	 | 97.1	 |80700	| C
+2022-03-19 | 09:30:02.758 | A	 | 100.3 |50300 | B
+
 / selects the first 4 records
 ```
 
 ```q
 select [-3] from trade
+
+date       | time	  | sym  | price | size | cond
+-------------------------------------------------------
+2022-03-19 | 09:30:02.553 | C	 | 107.2 |63500 | B
+2022-03-19 | 09:30:02.701 | MSFT | 96.8	 | 1700	| B
+2022-03-19 | 09:30:02.743 | RBS	 | 97.1	 |80700	| C
 
 / selects the last 3 records
 ```
@@ -7458,23 +7499,30 @@ select [1 4] from trade
 <a name="select_from_where"></a>
 ### 🔵 19.5) Where
 
+```q
+/ the where clause allows for filtering your query
+/ operates left to right, so put most restrictive clause first
+/ use commas for multiple where expressions
+```
 
 ```q
-/ where clause operates left to right, so put most restrictive clause first
+/ 1. retrieve trades for sym A on 2021.05.29
 
-select from trade where date=20121.05.29, sym=`A
-
-/ where colname = xxx
-/ use commas for multiple where expressions
-/ put most restrictive clause first, starting from left (saves time)
+select from trade where date=2021.05.29, sym=`A
 
 date      | time        | sym |price| size | cond
 --------------------------------------------------
 2021-05-29| 09:30:02.758|  A |100.35| 50300| B
 2021-05-29| 09:30:17.997|  A |57.81 | 65600| C
 2021-05-29| 09:30:21.507|  A |97.85 | 51800| B
+
+/ where filters use = to specify value
+/ notice commas separate where clauses
 ```
+
 ```q
+/2. retrieve prices on 2021.05.29 for sym A
+
 select price from trade where date=2021.05.29, sym=`A
 
 price
@@ -7482,36 +7530,58 @@ price
 100.3
 57.8
 97.8
+
+/ since you only selected price column
+/ only a single column returned
 ```
+
 ```q
+/3. retrieve max price on 2021.05.29 for sym A
+
 select max price from trade where date=2021.05.29, sym=`A
 
 price
 ------
 109.99
+
+/ can perform "functions" on select clauses
+/ max price
+/ min price
+/ avg price
+/ etc
 ```
 
 ```q
+/4. count how many trades have condition A
+
 count select from trade where cond="A"
 211597
+
+/ the count function tallies the number of rows
+/ from your query
 ```
 
 ```q
+/5. retrieve all trades from today, aggregated by sym
+
 select by sym from trade where date=.z.d
 
-sym |  date    |   time     |price|size |cond
+sym  |  date    |   time     |price|size |cond
 ----------------------------------------------
-A   |2021-06-02|17:29:57.306|87.54|49100|B
-AA  |2021-06-02|17:29:58.789|68.09|88100|A
-AAPL|2021-06-02|17:29:58.262|76.18|22500|A
+A    |2021-06-02|17:29:57.306|87.54|49100|B
+AA   |2021-06-02|17:29:58.789|68.09|88100|A
+AAPL |2021-06-02|17:29:58.262|76.18|22500|A
 
-/ by sym = will set sym as the key and agg all dates with the same sym
-/ since select + blank , KDB will auto select last entry in column
+/ the BY CLAUSE is used for aggregations
+/ groups all trades by sym and sets column as key
 ```
 
-### Where clause from 2 different Tables
+### Where Clause Table Filter - Example 1
 
 ```q
+/ you can apply the WHERE clause filter
+/ based on values from in another table
+
 t1: ([] date: 2021.10.21 2021.10.21 2021.10.21 2021.10.21; sym: `GOOG`MSFT`FB`AMZN; exch: `nyse`nyse`nasdaq`nasdaq)
 t2: ([] sym: `GOOG`FB; exch: `nyse`nasdaq)
 
@@ -7528,32 +7598,38 @@ sym  | ex
 ------------
 GOOG | nyse
 FB   | nasdaq
+```
 
-select from t1 where date=2021.10.21,([]sym;exch) in t2
+```q
+/1. retrieve values from t1 where date is 2021.10.21
+/ AND values from [sym] + [exch] columns are found in t2
+
+select from t1 where date=2021.10.21, ( [] sym; exch) in t2
 
 date       | sym  | exch
 ----------------------------
 2021-10-21 | GOOG | nyse
 2021-10-21 | FB	  | nasdaq
 
-/ this will filter date = 2021.10.21 in t1
-/ and filter = sym + exch columns appear in t2
+/ first filters date = 2021.10.21 in t1
+/ then it filters a TABLE with column names = [sym;exch] in t2
+/ so ONLY the values in t1 that meet ALL criteria are returned
+```
 
+### Where Clause Table Filter - Example 2
+
+```q
+/ load trades.q script
+
+/ from the trade table, retrieve the following:
+/ IBM from cond A
+/ CSCO from cond A or B
+/ MSFT from cond C 
+/ date = 2021.11.17
 ```
 
 ```q
-/ case study: Retrieve IBM from cond A, CSCO from cond A or B, and MSFT from cond C with date = 2021.11.17
-
-trade
-date       time         sym  price    size  cond
-------------------------------------------------
-2021.11.17 09:30:01.663 MS   92.84566 31500 A   
-2021.11.17 09:30:01.788 D    73.02565 17500 A   
-2021.11.17 09:30:01.819 RBS  90.76262 29100 B   
-2021.11.17 09:30:01.961 RBS  97.44952 70200 B   
-2021.11.17 09:30:02.007 RBS  60.16924 88100 B   
-
-/1 first, check the meta of the trade table
+/1. first, check the meta of the trade table
 
 meta trade
 
@@ -7566,11 +7642,19 @@ price|f| |
 size |i| |		
 cond |c| |		
 
-/ notice sym datatype = sym and cond datatype = char
+/ reveals correct datatype to retrieve properly
+/ sym = sym 
+/ cond = char
+```
 
-/2 create new table, toget, with the target parameters
+```q
+/ since you have multiple parameters, 
+/ it's easier to create a table of these parameters,
+/ then use this table as part of your WHERE filter
 
-toget:([] sym:`IBM`CSCO`CSCO`MSFT; cond:"AABC")
+/2. create new table, toget, with the target parameters
+
+toget:( [] sym:`IBM`CSCO`CSCO`MSFT; cond:"AABC")
 
 sym   cond
 ----------
@@ -7579,9 +7663,14 @@ CSCO   A
 CSCO   B
 MSFT   C
 
-/3 then write a select statement using WHERE to retrieve from 2 tables
+/ notice you had to dupe the CSCO
+/ since its parameter is A or B
+```
 
-select from trade where date=2021.11.17, ([]sym;cond) in toget
+```q
+/3. Use QSQL to filter the table of parameters
+
+select from trade where date=2021.11.17, ( [] sym; cond) in toget
 
 date       sym  price size cond
 -------------------------------
@@ -7591,24 +7680,27 @@ date       sym  price size cond
 2021-10-30 IBM	89.19 86600 A
 2021-10-30 IBM	84.13 46600 A
 
-/ first filters by date
-/ then filters by the sym + cond columns in toget table
-
+/ first filters by date 2021.11.17
+/ then filters by the values in the [sym] and [cond] columns
+/ from the [toget] table
 ```
+
 ### Where Clause Ordering
 
 ```q
 / be careful about how you order the where filters
 / can change your output
 
-trade:([] price: 50 60 70; size: 300 200 100)
+trade:( [] price: 50 60 70; size: 300 200 100)
 
 price   size
 ------------
 50	300
 60	200
 70	100
+```
 
+```q
 / find largest price and size > 200
 
 select from trade where size > 200, price = max price
@@ -7617,25 +7709,25 @@ price   size
 ------------
 50	300
 
-/ however, this is not correct as 50 is NOT the max price
+/ however, this is NOT correct as 50 is NOT the max price
+```
+
+```q
+/ correct query
 
 select from trade where price = max price, size > 200
 
 price   size
 ------------
 
-
 / this is correct. 
 / no max price (70) that is greater than 200 (300)
 ```
 
-```q
-/ extract all the following results:
-/ gender - male and grade - A
-/ gender - female and grade - B
-/ gender - female and grade - A
+### Where Clause Table Filter - Example 3
 
-results:([]name:`John`Paul`Rachel`Jane`Emma;gender:"MMFFF";grade:"ABBAC")
+```q
+results:( []name:`John`Paul`Rachel`Jane`Emma;gender:"MMFFF";grade:"ABBAC")
 
 name  |gender|grade
 --------------------
@@ -7645,23 +7737,47 @@ Rachel|   F  |	B
 Jane  |   F  |	A
 Emma  |   F  | 	C
 
-/ individually this would be the syntax for each query
+/ 1. from the results table, extract all the following:
+/ gender - male and grade - A
+/ gender - female and grade - B
+/ gender - female and grade - A
+```
+
+```q
+/ 1a. show the syntax individually for each query
 
 select from results where gender="M", grade="A"
 select from results where gender="F", grade="B"
 select from results where gender="F", grade="A"
 
-/ however, can use a table search function
-/ usually it goes: where col_name in value (where gender = "A")
-/ so you can go where (table of col names) in (table of values)
+name  |gender|grade
+--------------------
+John  |   M  | 	A
 
-select from results where ([]gender;grade) in ([] gender:"MFF";grade:"ABA")
+name  |gender|grade
+--------------------
+Rachel|   F  |	B
+
+name  |gender|grade
+--------------------
+Jane  |   F  |	A
+```
+
+```q
+/ 2. run the same query, instead running a table filter
+/ (which probably cleaner outcome)
+
+select from results where ( [] gender; grade) in ( [] gender:"MFF"; grade:"ABA")
 
 name  |gender|grade
 --------------------
 John  |   M  | 	A
 Rachel|   F  |	B
 Jane  |   F  |	A
+
+/ so instead of "creating" a separate table
+/ you construct the table of possible outcomes in place
+/ then you simply filter using table with column names = [gender]; [grade]
 ```
 
 ### Sample Where Clauses
@@ -7675,26 +7791,39 @@ select from trade where (price>100) and size>300
 select from trade where (price>100) or size> 300
 select i, sym, price from trade where i>5
 select price, i by sym from trade
+select price by date from trade where sym=`AAPL, price < avg price
+select {x % max x} price by date from trade where sym=`AAPL, price < avg price, date=.z.d
+select from trade where sym in `AAPL`RBS
+
+
 ```
 
 <a name="select_by"></a>
 ### 🔵 19.6) By
 
 ```q
-/ find the first price and time for AAPL by date
-
-select first price, first time by date from trade where sym=`AAPL
-
-date        |price|time
--------------------------------
-`2021-05-29`|78.6 |09:30:03.025
-`2021-05-30`|60.8 |09:30:02.686
-`2021-05-31`|55.1 |09:30:18.274
-
-/ by date = groups date as the key column
+/ the BY CLAUSE aggregates data together
+/ keys the resulting table
 ```
 
 ```q
+/1. find the first price and time for AAPL by date
+
+select first price, first time by date from trade where sym=`AAPL
+
+`date`       | price |    time
+-----------------------------------
+`2021-05-29` | 78.6  | 09:30:03.025
+`2021-05-30` | 60.8  | 09:30:02.686
+`2021-05-31` | 55.1  | 09:30:18.274
+
+/ by date = aggregates data by date
+/ and keys the date column 
+```
+
+```q
+/2. find the open, high, low, and close price by date for AAPL
+
 select open:first price, high:max price, low:min price, close:last price by date from trade where sym=`AAPL
 
 date        |open |high  |low |close
@@ -7704,6 +7833,7 @@ date        |open |high  |low |close
 
 / open: renames the column
 ```
+
 ### tickdirection case study!
 
 ```q
@@ -7832,7 +7962,7 @@ date        |hh   | x   | price
 ### 🔵 19.8) Using Operations and Functions 
 
 ```q
-/ find all AAPL prices that are less than the avg price grouped by date
+/1. find all AAPL prices that are less than the avg price grouped by date
 
 select price by date from trade where sym=`AAPL, price < avg price
 
@@ -7843,7 +7973,7 @@ date        | price
 ```
 
 ```q
-/ retrieve prices, keyed by TODAY, where AAPL's price is less than the avg price
+/2. retrieve prices, keyed by TODAY, where AAPL's price is less than the avg price
 
 select price by date=.z.d from trade where sym=`AAPL, price < avg price
 
@@ -7853,28 +7983,56 @@ d   | price
 `1` | 23 66 12
 
 / grouped by today; 0 = false, 1 = true
+
+/ alternative syntax
+/ (i think this is better)
+
+select price by date from trade where sym=`AAPL, price < avg price, date=.z.d
+
+date       | price
+-------------------------------------
+2022.03.23 | 62.4 84.4 29.2 49.4 28.2
 ```
 
 ```q
-/ retrieve price / max price, keyed by today, where the price is less than the avg price
+/3. retrieve price divide by max price, keyed by today, where the price is less than the avg price
 
-select {x % max x} price by date = .z.d from trade where sym=`AApl, price < avg price
+select price by date from trade where sym=`AAPL, price < avg price, date=.z.d
 
-d    | price
--------------------
-`0b` | 0.98 0.7 0.8
-`1b` | 0.12 0.43 0.32
+date       | price
+--------------------------------
+2022.03.23 | 0.77 0.73 0.99 0.94
+
+/ alternative syntax:
+
+select {x % max x} price by date from trade where sym=`AAPL, price < avg price, date=.z.d
+
+date       | price
+--------------------------------
+2022.03.23 | 0.77 0.73 0.99 0.94
+
+/ this is pretty cool 
+/ i haven't seen this before
+/ {x % max x} allows you to perform functions
+/ on individual columns
 ```
 
 <a name="in_function"></a>
 ### 🔵 19.9) In Function
 
 ```q
-/ retrieve data for AAPL and RBS
+/ the IN function allows you to query if LHS arg is anywhere in RHS arg
+/ a faster way of checking "or" arguments
+/ useful when you have multiple filters PER single column
+/ filtering for multiple syms or multiple conditions
+```
+
+```q
+/1. retrieve data for AAPL and RBS from trade
 
 select from trade where sym in `AAPL`RBS
 
-date      | time         | sym |price   |size   | cond
+date      | time         | sym | price  | size  | cond
 ------------------------------------------------------
 2021-05-30| 09:30:02.743 | RBS | 97.113	| 80700 | C
 2021-05-30| 09:30:03.025 | AAPL| 78.66  | 19000	| A
@@ -7883,12 +8041,16 @@ date      | time         | sym |price   |size   | cond
 / a faster way of checking "or" arguments
 ```
 
-
 <a name="within_function"></a>
 ### 🔵 19.10) Within Function
 
 ```q
-/ retrieve trades for RBS where price is between 95 and 100
+/ WITHIN checks if LHS argument is within the range on RHS argument
+/ has to have lower + upper bind
+```
+
+```q
+/1. retrieve trades for RBS where price is between 95 and 100
 
 select from trade where sym=`RBS, price within 95 100
 
@@ -7896,13 +8058,10 @@ date      |time          |sym   |price  | size | cond
 ------------------------------------------------------
 2021-05-30| 09:30:02.743 | RBS  | 97.113| 80700 | C
 2021-05-30| 09:30:03.025 | AAPL | 98.66 | 19000	| A
-
-/ checks if LHS argument is within the range on RHS argument
-/ has to have lower + upper bind
 ```
 
 ```q
-/ retrieve trades for RBS within 95 and 100 and between 11:30 - 12:00
+/2. retrieve trades for RBS within 95 and 100 and between 11:30 - 12:00
 
 select from trade where sym=`RBS, price within 95 100, time within 11:30 12:00
 
@@ -7916,6 +8075,7 @@ date      | time          |sym   | price  | size | cond
 
 <a name="xbar_function"></a>
 ### 🔵 19.11) Xbar Function
+
 ```q
 / grouping for temporal data buckets (time)
 
@@ -7936,24 +8096,30 @@ x bar time.ss / x second buckets
 x xbar price
 x xbar cond
 x xbar source
+```
 
-select sum size, cnt:count i by sym, 1 xbar price from trades
+```q
+/1. retrieve the total size and total number of trades
+/ for each sym and each $1 price buckets
 
-sym|price|  size  |cnt
-----------------------
- A |50.0 |44191500|838
- A |51.0 |42318700|842
- A |52.0 |41432200|832
+select sum size, cnt:count i by sym, 1 xbar price from trade
+
+`sym` |`price`|   size   | cnt
+-----------------------------
+ `A`  |  `50` | 44191500 | 838
+ `A`  |  `51` | 42318700 | 842
+ `A`  |  `52` | 41432200 | 832
+ `A`  |  `53` | 30434493 | 832
 
 / groups the data by sym and 1 dollar price buckets
-/ cnt = tallies virtual column i; how many trades were executed by sym for that price bucket
+/ cnt = tallies virtual column i
+/ ie, how many total trades were executed by sym for that price bucket
 ```
 
 ### xbar time
 
-
 ```q
-/ find the max price and total size of trades during 5 min window
+/1. find the max price and total size of trades during 5 min window
 
 select max price, sum size by sym, 5 xbar time.minute from trades
 
@@ -7969,6 +8135,8 @@ AAPL | 08:10 | 28.2 | 300
 ```
 
 ```q
+/2. find the max price by sym for each 45 min window
+
 select max price by sym, 45 xbar time.minute from trade
 
 sym |minute | price
@@ -7979,6 +8147,8 @@ sym |minute | price
 
 / group by sym, set xbar as 45 minute time buckets
 ```
+
+Amending xbar time buckets
 
 ```q
 / notice how in the above example, the time bucket starts at 9:00
@@ -8080,31 +8250,52 @@ select avg price by sym, 240 xbar time.minute from trade
 ```
 
 ```q
-a: ([] c1: 1 2 3; c2: `a`b`c)
+a: ( [] c1: 1 2 3; c2: `a`b`c)
+
+c1 | c2
+-------
+ 1 | a
+ 2 | b
+ 3 | c
+```
+
+```q
+/ 1. Exec on a single column
 
 exec c1 from a
 1 2 3
 
 / exec single column returns a list
+```
+
+```q
+2. exec on multiple columns
 
 exec c1, c2 from a
 c1 | 1 2 3
 c2 | `a`b`c
 
 / exec multi columns returns a dictionary
-
-1#exec from a
-c1 | 3
-
-/ take the first row from a
-
-1#exec c2 from a
-`a
-
-/ take the first row and return the value in c2
 ```
 
 ```q
+/3. exec full table
+
+exec from a
+
+key | value
+-------
+ c1 | 3
+ c2 | c
+
+/ returns a dictionary of LAST values in columns c1 and c2
+```
+
+### More Exec Examples
+
+```q
+/1. return list of prices for AAPL on today
+
 exec price from trade where date=.z.d, sym=`AAPL
 62 59 13
 
@@ -8112,9 +8303,9 @@ exec price from trade where date=.z.d, sym=`AAPL
 ```
 
 ```q
-select price from trade where date=.z.d, sym=`AAPL
+2. return column of values for AAPL on today
 
-/ select = single column returned
+select price from trade where date=.z.d, sym=`AAPL
 
 price
 ------
@@ -8122,53 +8313,95 @@ price
 59
 13
 
+/ select = single column returned
 ```
 
 ```q
+/3. return the first price of AAPL today
+
 exec first price from trade where date=.z.d, sym=`AAPL
 62
+
+/ exec returns single value
+/ select ALWAYS returns a table
 ```
 
 ```q
+/4. return ALL prices of AAPL from today as a dictionary
+
 exec price by sym from trade where date=.z.d, sym=`AAPL
 AAPL | 62 59 13
+
+/ exec + by sym
+/ groups the data by sym
+/ and returns a dictionary
 ```
 
 ```q
+/5. return all prices from today by sym as a dictionary
+
 exec price by sym from trade where date=.z.d
 
-sym   | price
+`sym`  | price
 ----------------
-`A`   | 108 77 88
-`AA`  | 33 45 23
-`AAPL`| 34 56 23
+`A`    | 108 77 88
+`AA`   | 33 45 23
+`AAPL` | 34 56 23
+
+/ exec + by sym returns a dictionary
 ```
 
 ```q
+/6. retrieve first price, cond from today for KX and AAPL as a dictionary
+
 exec first price by sym, cond from trade where date=.z.d, sym in `KX`AAPL
 
-sym    |cond | price
-------------------
-`AAPL` |     | 95
-`AAPL` | `A` | 43
-`KX`   | `C` | 32
+`sym`  |`cond`| price
+---------------------
+`AAPL` |      | 95
+`AAPL` |  `A` | 43
+`KX`   |  `C` | 32
+
+/ exec + by sym = returns a dictionary
+/ sym in `KX`AAPL allows multi filters for 1 column (2 syms)
 ```
 
 ```q
-a: ([] c1: 1 2 3 1 2; c2: `a`b`c`a`b)
+/7. retrieve the distinct values from column c1
+
+a: ( [] c1: 1 2 3 1 2; c2: `a`b`c`a`b)
+
+c1 | c2
+--------
+1  |  a
+2  |  b
+3  |  c
+1  |  a
+2  |  b
+
 exec distinct c1 from a
 1 2 3
 
-/ returns only distinct values in col c1
+/ returns only distinct values in column c1
+/ exec on a column returns a list
+```
+
+```q
+/8. retrieve the distinct values from column c1 and c2
 
 exec distinct c1, distinct c2 from a
-c1 | 1 2 3
-c2 | `a`b`c
+
+`key` | value
+--------------
+`c1`  | 1 2 3
+`c2`  | `a`b`c
 
 / exec allows distinct on multiple columns
+/ return a dictionary
 ```
 
 ### Select vs Exec
+
 ```q
 cnc: ([] city:`toronto`london`ny`vancouver; country:`canada`england`usa`canada)
 
