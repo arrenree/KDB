@@ -6763,12 +6763,18 @@ attr lp
 ## 🔴 17. Foreign Key Restrictions
 [Top](#top)
 
-* Foreign keys restrict the values that are allowed in a column
+```q
+/ foreign keys RESTRICT the values that are allowed in a column
+/ domain table has to be keyed!
+```
 
 <a name="single_fkey"></a>
 ### 🔵 17.1 Single Foreign Keys
 
 ```q
+/ company table = domain table
+/ column sym is KEYED
+
 company:([sym:`TS`KX`C`AAPL`GOOG`MS] advice: 6?`HOLD`BUY`SELL; level: 6?100)
 company
 sym   |advice| level
@@ -6780,8 +6786,6 @@ sym   |advice| level
 `GOOG`|	SELL | 73
 `MS`  |	SELL | 90
 
-/ column sym is keyed
-
 employee:( [] name:`ryan`charlie`arthur`greg; employer:`TS`KX`KX`MS)
 
 employee 
@@ -6791,14 +6795,21 @@ ryan   | TS
 charlie| KX
 arthur | KX
 greg   | MS
+```
+
+```q
+/ set an FKEY for the [employer column] from [employee table] 
+/ to the domain of [company table]
 
 update `company$employer from `employee
 
+/ syntax: update `DOMAIN_TABLE $ COLUMN_NAME from `TABLE_NAME
+
 / similar syntax to casting
-/ you limit the employer column to the domain in company table (keyed column)
-/ limits the values in employer column to the domain in the company table (sym column)
+/ limits the VALUES in [employer column] 
+/ to the DOMAIN in [company table] (KEYED sym column)
 / the domain table HAS to be keyed
-/ the values in employer column must exist in domain company table
+/ the values in [employer column] MUST EXIST in domain [company table]
 ```
 
 <a name="check_fkey"></a>
@@ -6808,6 +6819,7 @@ update `company$employer from `employee
 / use meta
 
 meta employee
+
 c       |t|f      |a
 ----------------------
 name    |s|       |		
@@ -6816,6 +6828,7 @@ employer|s|company|
 / c = column
 / f = foreign key
 / confirms the employer column is linked to the company table (last example)
+```
 
 ```q
 fkeys employee
@@ -6829,18 +6842,23 @@ employer|company
 
 <a name="upsert_fkey"></a>
 ### 🔵 17.3 Upserting with Foreign Keys
+
 ```q
+/ upsert name:`james`claire and employer:`RBS`RBS into the [employee table]
+
 upsert[employee; ( [] name:`james`claire; employer:`RBS`RBS)]
 `cast
 
-/ prev set employer column as fkey to company table domain (**sym**)
-/ error because RBS is NOT a sym in the company table
-/ fkey restricts us from adding what's not in the domain  
+/ `cast error because RBS is NOT a sym in the company table
+/ prev set [employer column] as fkey to [company table] domain (keyed sym column)
+/ fkey restricts us from adding what's NOT in the domain  
+```
+
+```q
+/ need to FIRST add RBS into the company domain (as a keyed sym)
+/ remember  need to use enlist when adding single rows
 
 insert[`company; ([sym:enlist `RBS] advice:enlist `SELL; level: enlist 20)]
-
-/ need to first add RBS into the company domain (as a keyed sym)
-/ remember  need to use enlist when adding single rows
 
 company
 sym   |advice| level
@@ -6852,6 +6870,10 @@ sym   |advice| level
 `GOOG`|	SELL | 73
 `MS`  |	SELL | 90
 `RBS` | SELL | 20
+```
+
+```q
+/ now you can append james and claire
 
 upsert[employee; ( [] name:`james`claire; employer:`RBS`RBS)]
 
@@ -6864,12 +6886,17 @@ arthur | KX
 greg   | MS
 james  | RBS
 claire | RBS
-
-/ now you can append james and claire
 ```
 
 <a name="retrieve_fkey"></a>
 ### 🔵 17.4 Retrieving Columns via fkey
+
+```q
+/ if TABLE A is our domain table (keyed)
+/ and we set a column in TABLE B to the fkey of TABLE A
+/ we can PULL any columns from TABLE A to TABLE B
+/ since the 2 tables are linked via the fkey
+```
 
 ```q
 company
@@ -6899,11 +6926,15 @@ c       |t|   f   |a
 name    |s|       |		
 employer|s|company| 	
 
-update employer.advice, employer.level from employee
+/ meta tell us the [employer column] from [employee table]
+/ has an fkey linked to the domain of [company table]
+```
 
-/ prev you keyed the employer column to domain of company table (linking the 2 tables)
-/ from the employee table, retrieve the value (advice column) linked from employer column to company table
-/ pulls in advice and level from the company table
+```q
+/ from the [employee table], retrieve the values from the [advice column]
+/ and the [level column] from the [company table]
+
+update employer.advice, employer.level from employee
 
 name   |employer|advice|level
 ---------------------------
@@ -6911,20 +6942,27 @@ ryan   |TS	|SELL  |12
 charlie|KX      |BUY   |10
 arthur |KX      |BUY   |10
 greg   |MS      |SELL  |90
+
+/ prev you keyed the [employer column] to domain of [company table]
+/ so the [employer column] is your LINK to the [company table]
+/ update a new column will ADD the new column to the table
+/ pulls in VALUES from [advice column] and [level column] from [company table]
 ```
 
 <a name="multi_fkey"></a>
-### 🔵 17.5 Multiple Foreign Keys
+### 🔵 17.5 Multiple Foreign Key Problem Set
+
 ```q
 office: ([sym:`TS`KX`C; loc:`LDN`NY`LDN] employees:10+3?1000)
 
-sym |loc  |employees
--------------------
-`TS`|`LDN`|875
-`KX`|`NY` |354
-`C` |`LDN`|1007
+office
+`sym` | `loc`  | employees
+---------------------------
+`TS`  | `LDN`  | 875
+`KX`  | `NY`   | 354
+`C`   | `LDN`  | 1007
 
-/ sym and loc columns are keyed
+/ columns SYM and LOC are KEYED
 
 employee: ([] name:`ryan`charlie`arthur; employer:`TS`KX`KX; city:`LDN`NY`NY)
 
@@ -6934,19 +6972,36 @@ name   |employer|city
 ryan   |TS      |LDN
 charlie|KX      |NY
 arthur |KX      |NY
+```
+
+Set the fkey for employee table
+
+```q
+/ fkey the [employer] and [city] columns from [employee]
+/ to the domain of [office] table
 
 exec `office$flip (employer;city) from employee
 0 1 1
 
-/ since the office table has 2 keyed columns, you have to "cast" 2 columns as fkey
-/ ignore the flip syntax 
-/ setting fkey by linking columns employer and city to the domain of company table (keyed columns)
+/ since the [office table] has 2 keyed columns
+/ you have to "cast" the 2 columns as fkey
+/ ignore the flip syntax
+/ set fkey by linking the [EMPLOYER column] and [CITY] from [employee table]
+/ to the domain of [office table] (keyed columns)
+
 / ryan    -> look for TS and LDN in office table, found on row 0
 / charlie -> look for KX and NY in office table, found on row 1
 / arthur  -> look for KX and NY in office table, found on row 1
 ```
 
+Add new column to employee table
+
 ```q
+/ from [employee table]
+/ add new column called [empOffice]
+/ which returns the INDEX LOCATION of fkey [employer] and [city] columns
+/ from the [office table]
+
 update empOffice:`office$flip(employer;city) from `employee
 
 employee
@@ -6956,7 +7011,17 @@ ryan   |TS      |LDN |	0
 charlie|KX      |NY  |	1
 arthur |KX      |NY  |	1
 
-/ adds new column empOffice, and sets fkey to domain of office table
+/ adds new column [empOffice], and sets fkey to domain of [office table]
+
+/ ryan    -> look for TS and LDN in office table, found on row 0
+/ charlie -> look for KX and NY in office table, found on row 1
+/ arthur  -> look for KX and NY in office table, found on row 1
+```
+
+Check meta of employee table
+
+```q
+/ check if the new column empOffice has an fkey
 
 meta employee
 c        |t|  f   | a
@@ -6966,18 +7031,28 @@ employer |s|	  |
 city     |s|	  |
 empOffice|j|office|
 
-/ meta shows us empOffice has an foreign key referencing the office table
+/ meta shows us [empOffice] has an foreign key 
+/ referencing the [office table]
+```
+
+Retrieve fkey values
+
+```q
+/ add to the [employee table]
+/ new columns [sym] and [loc] from the [office table]
+/ using the fkey from the [empOffice column]
 
 update empOffice.sym, empOffice.loc from employee
 
 name   |employer|city|empOffice| sym| loc
----------------------------------------------------
+-------------------------------------------
 ryan   |   TS   |LDN |	 0     | TS | LDN
 charlie|   KX   |NY  |   1     | KX | NY
 arthur |   KX   |NY  |   1     | KX | NY
 
-/ employee table doesnt have columns for sym or loc
-/ but since you set the empOffice as foreign key, it pulls in the values from the company table
+/ prev set [empOffice column] as foreign key
+/ to the domain of [office table]
+/ so you can pull in values from [office table]
 ```
 
 <hr>
@@ -6986,59 +7061,91 @@ arthur |   KX   |NY  |   1     | KX | NY
 ## 🔴 18. Foreign Key Problem Set
 [Top](#top)
 
-**🔵 18.1. Given the following table**
 
-book table
-
-id|name
--|-
-fmgoh|jim
-fddig|allen
-lefhe|bob
-bfjnf|sherman
-
-trade table
-
-date|time|sym|price|size|cond|bookId
--|-|-|-|-|-|-
-2021.01.01 | 09:00|D| 109|100| |fmgoh
-2021.01.01|09:00|AA|93|100| B | fddig
-2021.01.01|09:00|UPS|34|100| A| lefhe
-2021.01.01|09:00|A|56|100| C| bfjnf
-
-**🔵 18.1. Insert a foreign key column into the trade table called owner, linking trade and book table, using bookID**
 ```q
-update owner: `book$bookId from `trade
-```
-* from trade table, insert a new column **owner**, take column **bookId** and limit to domain in book table
+book: ([id:`fmgoh`fddig`lefhe`bfjnf] name:`jim`allen`bob`sherman)
 
-date|time|sym|price|size|cond|bookId | owner
--|-|-|-|-|-|-|-
-2021.01.01 | 09:00|D| 109|100| |fmgoh|fmgoh 
-2021.01.01|09:00|AA|93|100| B | fddig| fddig
-2021.01.01|09:00|UPS|34|100| A| lefhe| lefhe
-2021.01.01|09:00|A|56|100| C| bfjnf| bfjnf
+book
+`id`    | name
+----------------
+`fmgoh` | jim
+`fddig` | allen
+`lefhe` | bob
+`bfjnf` | sherman
+
+trade:([] date:2021.01.01; time: 09:00; sym:`D`AA`UPS`A; price:109 93 34 56; size: 100; cond: " ","B","A","C"; bookID:`fmgoh`fddig`lefhe`bfjnf)
+
+trade
+date      |  time | sym |price| size|cond|bookId
+-------------------------------------------------
+2021.01.01| 09:00 |   D | 109 | 100 |    | fmgoh
+2021.01.01| 09:00 |  AA |  93 | 100 | B  | fddig
+2021.01.01| 09:00 | UPS |  34 | 100 | A  | lefhe
+2021.01.01| 09:00 |   A |  56 | 100 | C  | bfjnf
+```
+
+1. Insert new fkey column into trade table
+
+```q
+/ Insert new fkey column into [trade table]
+/ called [owner], linking the [trade] and [book] table
+/ using [bookID]
+
+update owner: `book$bookId from `trade
+
+date      |  time | sym |price| size|cond|bookId | owner
+---------------------------------------------------------
+2021.01.01| 09:00 |   D | 109 | 100 |    | fmgoh | fmgoh
+2021.01.01| 09:00 |  AA |  93 | 100 | B  | fddig | fddig
+2021.01.01| 09:00 | UPS |  34 | 100 | A  | lefhe | lefhe
+2021.01.01| 09:00 |   A |  56 | 100 | C  | bfjnf | bfjnf
+
+/ so if you ADD the column set as an fkey (bookID)
+/ it returns the DOMAIN of the keyed table (keyed columns)
+/ [bookID] from [trade] was set as fkey to [book]
+/ adding the column returns the keyed column from [book]
+```
+
+2. Check the meta to confirm fkey
 
 ```q
 meta trade
-```
-c | t|f|a
--|-|-|-
-owner | | book|
 
-**🔵 18.2 Join the book table onto the trade table and add the name of person who did trade**
+c      | t |   f  | a
+-----------------------
+date   | d |	  |	
+time   | u |	  |	
+sym    | s |	  |	
+price  | j |	  |	
+size   | j |	  |	
+cond   | c |	  |	
+bookID | s |	  |	
+owner  | s | book |	
+
+
+/ [owner column] from [trade] has an fkey
+/ to [book table]
+```
+
+3. Retrieving fkey values
+
 ```q
-update owner.name from trade
-```
-date|time|sym|price|size|cond|bookId | owner|name
--|-|-|-|-|-|-|-|-
-2021.01.01 | 09:00|D| 109|100| |fmgoh|fmgoh |jim
-2021.01.01|09:00|AA|93|100| B | fddig| fddig|allen
-2021.01.01|09:00|UPS|34|100| A| lefhe| lefhe|bob
-2021.01.01|09:00|A|56|100| C| bfjnf| bfjnf|sherman
+/ Join the [book table] onto the [trade table]
+/ and add the name of the person who did trade
 
-* the book table only has id and name columns, so you are really only joining the name column onto trade
-* since owner is linked to book table, you can use that as a link to reference the name colum* 
+update owner.name from `trade
+
+date      |  time | sym |price| size|cond|bookId | owner | name
+---------------------------------------------------------------
+2021.01.01| 09:00 |   D | 109 | 100 |    | fmgoh | fmgoh | jim
+2021.01.01| 09:00 |  AA |  93 | 100 | B  | fddig | fddig | allen
+2021.01.01| 09:00 | UPS |  34 | 100 | A  | lefhe | lefhe | bob
+2021.01.01| 09:00 |   A |  56 | 100 | C  | bfjnf | bfjnf | sherman
+
+/ [owner column] has an fkey set to [book table]
+/ so you use that column to pull values from [book table]
+/ name = column name from book you want to retrieve values from
+```
 
 <hr>
 
