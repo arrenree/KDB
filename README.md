@@ -8420,12 +8420,17 @@ key    | value
 -----------------------------------
 city   | toronto london ny vancouver
 country| canada england usa
+
+
+/ exec on multiple columns returns a dictionary
+/ more flexible in terms of structure
 ```
 
 ```q
 select city, distinct country from cnc
 
 / error because select expects the columns to have the same length
+/ select always returns a table
 ```
 
 <a name="update_statement"></a>
@@ -8437,13 +8442,15 @@ select city, distinct country from cnc
 ```
 
 ```q
-/1 update all prices to 10
+\ load trades.q script
+
+/1. update all prices in table to 10
 
 update price: 10.0 from trade
 ```
 
 ```q
-/2 update a single where condition:
+/2. update every price of C to 10
 
 update price:10.0 from trade where sym=`C
 
@@ -8453,7 +8460,7 @@ date       | time         | sym | price| size  | cond
 ```
 
 ```q
-/3 update multiple where conditions:
+/3. update all prices of AAPL and GOOG to 10
 
 update price:10.0 from trade where sym in `AAPL`GOOG
 
@@ -8468,19 +8475,30 @@ date       | time         | sym  | price| size  | cond
 ```
 
 ```q
-/4 add new column vol, which is price x size
+/4. add new column vol, which is price x size for AAPL and GOOG
 
 update vol:price*size from trade where sym in `AAPL`GOOG
+
+date       | time         | sym  | price | size  | cond | vol          
+------------------------------------------------------------------
+2022.03.22 | 17:07:26.062 | GOOG | 109.9 | 99900 |   A  | 1098012
+2022.03.24 | 11:13:08.106 | GOOG | 109.9 | 99700 |      | 1096486
+2022.03.21 | 14:10:45.998 | GOOG | 109.7 | 99800 |   C  | 1094924
+2022.03.20 | 13:55:32.398 | AAPL | 109.4 | 99900 |   A  | 1093780 
+2022.03.23 | 11:35:12.474 | GOOG | 109.9 | 99500 |   B  | 1093587
 ```
 
 ```q
-/5 updates price to average price, grouped by sym 
+/5. updates prices for AAPL and GOOG to average price, grouped by sym 
 
 update price:avg price by sym from trade where sym in `AAPL`GOOG
+
 ```
 
+### UPDATE Problem Set 2
+
 ```q
-/6 randomly select 100 rows
+/1. randomly select 100 rows from trade, call this tt
 
 tt:100?trade
 
@@ -8491,7 +8509,7 @@ date       |  time   | sym |price|size| cond
 ```
 
 ```q
-/7 update all cond to "D"
+/2. update all cond to "D"
 
 update cond: "D" from tt
 
@@ -8502,7 +8520,7 @@ date       |  time   | sym |price|size| cond
 ```
 
 ```q
-/8 divide all size values by 100
+/3. divide all size values by 100
 
 update size%100 from tt
 
@@ -8516,7 +8534,7 @@ date       |  time   | sym |price|size| cond
 ```
 
 ```q
-/9 add a new column called advice and populate with sell
+/4. add a new column to tt called advice and populate with sell
 
 update advice:`sell from tt
 
@@ -8527,12 +8545,11 @@ date       |  time   | sym |price|size|cond|advice
 2021.03.01 | 15:09:01| UBS |  41 |31.2|D   | sell
 
 / if you update a column that doesnt exist, it will add the column
-/ new column added called advice and populates with sell
 / notice it has to be backtick sell
 ```
 
 ```q
-/10 update advice to buy if price less than 70
+/5. update advice to buy if price less than 70
 
 update advice: `buy from tt where price < 70
 
@@ -8547,7 +8564,7 @@ date       |  time   | sym |price|size|cond|advice
 ```
 
 ```q
-/11 add new column maxprice populated with max prices by sym
+/6. add new column maxprice populated with max prices by sym
 
 update maxprice: max price by sym from tt
 
@@ -8558,20 +8575,26 @@ date       |   time  | sym |price|size|cond|maxprice
 2021.03.01 | 15:09:01| UBS |  41 |31.2|  D | 91
 
 / since maxprice doesnt exist, adds new column to end
+/ by sym = groups by sym
 ```
 
 <a name="delete_columns"></a>
 ### 🔵 19.14) Delete Columns
+
 ```q
-/ cannot have BY or WHERE clause
+/ DELETE function cannot have BY or WHERE clause!!
+
+/ using our old tt table:
 
 date       |   time  | sym |price|size|cond|maxprice
 ----------------------------------------------------
 2021.01.01 | 15:10:01| BAC |  70 |42.2|  D | 104
 2021.03.01 | 15:09:01| JPM |  74 |41.2|  D | 102
 2021.03.01 | 15:09:01| UBS |  41 |31.2|  D | 91
+```
 
-delete maxprice from tt
+```q
+/1. delete maxprice from tt
 
 date       |   time  | sym |price|size|cond
 --------------------------------------------
@@ -8579,10 +8602,11 @@ date       |   time  | sym |price|size|cond
 2021.03.01 | 15:09:01| JPM |  74 |41.2| D 
 2021.03.01 | 15:09:01| UBS |  41 |31.2| D 
 
-/ removes maxprice column
+/ deleted the maxprice column
 ```
+
 ```q
-delete date, time from tt
+/2. delete the date and time columns from tt
 
 sym |price|size|cond
 --------------------
@@ -8592,11 +8616,14 @@ UBS |  41 |31.2| D
 
 / deletes multiple columns from the table
 ```
+
 ```q
-/ if you try to delete rows + columns together, doesn't work
+/3. What happens if you use delete + where clause filter?
 
 delete price from trade where sym=`BAC
 error
+
+/ delete cannot contain where or by clauses!
 ```
 
 <a name="delete_rows"></a>
