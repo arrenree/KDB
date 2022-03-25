@@ -8777,31 +8777,31 @@ price > (avgs;price) fby sym
 price > (mavg[10];price) fby sym / moving avg 10 of price by sym
 ```
 
-### fby Example 1
+### fby on 2 lists 
 
 ```q
 city:`NY`NY`LA`SF`LA`SF`NY
 temp:32 31 75 69 70 68 12
 
+/ 1. retrieve the lowest temperature by city
+
 (min;temp) fby city
 12 12 70 68 12
 
-/ so this calculates the min temp for every city (12 for NYC)
-
+/ this calculates the min temp for every city (12 for NYC)
+/ min = agg function
+/ temp = column to agg
+/ city = what you are filtering by
 ```
 
-### fby Example 2
+### fby on a table
+
 ```q
-/ find the max price per symbol
+/ 1. find the max price per symbol
 
-time       |sym  |src|price | size
------------------------------------
-2019-03-11 |GOOG | L |36.01 | 1427
-2019-03-11 |GOOG | O |36.01 | 708
-2019-03-11 |MSFT | N |35.5  | 7810
-2019-03-11 |MSFT | O |31.1  | 1100
+/ load trades.q script
 
-select from t where price=(max;price) fby sym
+select from trade where price=(max;price) fby sym
 
 time       |sym  |src| price | size
 -----------------------------------
@@ -8809,8 +8809,12 @@ time       |sym  |src| price | size
 2019-03-11 |GOOG | O | 36.01 | 708
 2019-03-11 |MSFT | N | 35.5  | 7810
 
-/ this is not correct, since there are still 2 GOOG (since both same "max" price)
+/ notice there are 2 GOOG (both same "max" price)
 / you can add another fby filter for time
+```
+
+```q
+/ 2. find the latest max price by sym
 
 select from t where price=(max;price) fby sym, time=(max;time) fby sym
 
@@ -8819,19 +8823,25 @@ time      |sym  |src| price | size
 2019-03-11|GOOG	| O | 36.01 | 708
 2019-03-11|MSFT | N | 35.01 | 7810
 
-/ in this case, you filtered max price by sym, and max time by sym
+/ first filtered max price by sym
+/ then filtered max time by sym
+/ can do multiple fby filters
 ```
+
 ### fby Example 3
+
 ```q
-/1 find the max price on this date
+/ 1. find the highest price on 2021.10.31
 
 select from trade where date=2021.10.31, price=max price
 
+/ you are looking for the SINGLE highest price on date
 / filter by date, then the max price from this date
+/ don't need fby since you're not aggregating anything
 ```
 
 ```q
-/2 find max price by sym on this date
+/ 2. find the max price by sym on this 2021.10.31
 
 select from trade where date=2021.10.31, price=(max;price) fby sym
 
@@ -8841,9 +8851,9 @@ date       | time         | sym | price | size | cond
 2021-11-26 | 10:25:22.268 | MSFT| 109.9	| 49100| C
 2021-11-26 | 11:49:11.143 | D	| 109.9 |  5600| A
 
-/ filter by date, then find max price by sym
-/ groups the aggregation by sym
-/ notice this returns the whole table (max price by sym)
+/ since you need to find max price BY sym (aggr by sym)
+/ you need to use fby function
+/ first filters by date, then finds max price aggr by sym
 
 / if you did this instead:
 
@@ -8855,16 +8865,18 @@ A    | 109.9
 AA   | 113.2
 AAPL | 339.1
 
-/ this will ONLY return the max price column
+/ this will ONLY return the sym + max price column
 ```
 
-```q
-/3 find max price by sym AND cond on this date
+fby 2 aggregators
 
-select from trade where date=2021.10.31, price=(max;price) fby ([]sym;cond)
+```q
+/ 3. find the max price by sym AND cond on 2021.10.31
+
+select from trade where date=2021.10.31, price=(max;price) fby ( [] sym; cond)
 
 / aggregate by more than one field using a table
-/ filter by date, then max price by sym and cond
+/ filter by date, then max price by sym AND cond
 ```
 
 ### fby Example 4: VWAP
@@ -8884,19 +8896,19 @@ select from trade where date=2021.10.31, price>({x[`size] wavg x`price}; ([]size
 ### 🔵 19.19) xgroup
 
 ```q
+/ load trade.q script
+
+/ 1. group the trade table by the sym column
 
 `sym xgroup trade
 
 sym | date
 ----| -----
-C   | 2021.10.19 
-MSFT| 2021.10.19 
-RBS | 2021.10.19
+C   | 2021.10.19... 
+MSFT| 2021.10.19... 
+RBS | 2021.10.19...
 
 / group by column `sym
-/ the same as saying:
-
-select time by sym from trade
 
 / to flatten this out, use ungroup
 
