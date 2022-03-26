@@ -8996,6 +8996,7 @@ date       time         sym  price    size  cond duration
 2021.10.19 09:30:02.743 RBS  97.11338 80700 C    00:00:00.042
 2021.10.19 09:30:02.758 A    100.35   50300 B    00:00:00.015
 ```
+
 ```q
 / xprev - moves each element of list n spaces to the right
 
@@ -9214,173 +9215,201 @@ bucket Min Max Count
 **🔵 20.1 Extract from trade table, trades for MS greater than 1,000 in size**
 
 ```q
-select from trade where sym=`MS, size >1000
+/ load the trades.q script
 ```
 
-dt|sym|price|size
--|-|-|-
-2021.01.01 | MS |225 | 200
-2021.01.01 | MS |234 | 400
+```q
+select from trade where sym=`MS, size >1000
 
-* multiple where expressions separated by commas
-* sym has to be back tick MS
-<hr>
+dt         | sym | price| size
+------------------------------
+2021.01.01 |  MS |  225 | 200
+2021.01.01 |  MS |  234 | 400
+
+/ multiple WHERE expressions separated by commas
+/ sym has to be back tick MS
+```
 
 **🔵 20.2 From the trade table, find the total size of all trades and the average price paid per sym**
 
 ```q
 select total: sum size, avg price by sym from trade
+
+`sym`  | total | price
+-----------------------
+`AAPL` |  320  | 1015
+`C`    |  310  | 100
+`MS`   |  740  | 234
+
+/ "price paid per sym" = we need to set sym as a keyed colummn (by sym)
+/ total: renames column, sum size = sums sizes together
+/ avg price = retains the price column header, just averages prices
 ```
-
-sym|total | price
--|-|-
-`AAPL` | 320 | 1015
-`C` | 310 | 100
-`MS` | 740 | 234
-
-* "price paid per sym" = we need to set sym as a keyed colummn (by sym)
-* select + conditions = columns retrieved
-* total: renames column, sum size = sums sizes together
-* avg price = retains the price column header, just averages prices
-
-<hr>
 
 **🔵 20.3 From the trade table, find the trade that was largest size for each sym**
 
 ```q
-select from (update mx:max size by sym from trade) where size = mx
+select from trade where size=(max;size) fby sym
+
+date      | time         | sym | price | size|cond
+----------------------------------------------------
+2021-05-30| 09:30:21.256 | B   |100.04 |99900|	 
+2021-05-30| 09:31:20.975 | AA  |67.30  |99900|	C
+2021-05-30| 09:43:47.816 | GOOG|72.42  |99900|	A
+2021-05-30| 09:46:44.690 | F   |73.22  |99900|	B
+
+/ uses fby to perform filters on aggregate queries
+/ fby has to go at the END of your query
 ```
 
-date|time|sym|price|size|cond|mx
--|-|-|-|-|-|-
-2021-05-30|	09:30:21.256|	B	|100.04|	99900	| 	|99900
-2021-05-30|	09:31:20.975	|AA|	67.30|	99900|	C|	99900
-2021-05-30|	09:43:47.816	|GOOG|	72.42|	99900|	A|	99900
-
-* add new column mx which is the max size by sym
-* where size = filter size to max size
-* this is using a nested query to filter only the max size for their sym
-
-Alternative solution
+alternative syntax:
 
 ```q
-select from trade where size=(max;size) fby sym
+select from (update mx:max size by sym from trade) where size = mx
+
+date      |     time     | sym | price | size |cond|  mx
+-----------------------------------------------------------
+2021-05-30| 09:30:21.256 | B   | 100.04| 99900|    | 99900
+2021-05-30| 09:31:20.975 | AA  | 67.30 | 99900|	 C | 99900
+2021-05-30| 09:43:47.816 | GOOG| 72.42 | 99900|	 A | 99900
+
+/ add new column mx which is the max size by sym
+/ where size = filter size to max size
+/ this is using a nested query to filter only the max size for their sym
 ```
-
-date|time|sym|price|size|cond
--|-|-|-|-|-
-2021-05-30|	09:30:21.256|	B|	100.04 |	99900|	 
-2021-05-30|	09:31:20.975|	AA|	67.30	|99900|	C
-2021-05-30|	09:43:47.816|	GOOG|	72.42	|99900|	A
-2021-05-30|	09:46:44.690|	F	|73.22	|99900|	B
-
-* fby = allows performing filters on agg queries
-* fby has to go at the end of your query
-
-<hr>
 
 **🔵 20.4 From the trade table, select the latest trade for each sym, and include all details**
 
 ```q
-select last date, last price, last size by sym from trade
-```
-sym|date|price|size
--|-|-|-
-`A`|	2021-06-03|	87.54| 49100
-`AA`|	2021-06-03|	68.09| 88100
+select from trade where time=(last;time) fby sym
 
-Alternative Solution
+date       | time         | sym  | price | size  | cond
+--------------------------------------------------------
+2022-03-26 | 17:29:57.306 | A	 | 87.5	 | 49100 |  B
+2022-03-26 | 17:29:58.789 | AA	 | 68.0  | 88100 |  A
+2022-03-26 | 17:29:58.262 | AAPL | 76.1	 | 22500 |  A
+```
+
+alternative syntax:
 
 ```q
-select by sym from trade
+/ altho this one is less ideal:
+
+select last date, last price, last size by sym from trade
+
+sym |   date    | price | size
+--------------------------------
+`A` | 2021-06-03| 87.54 | 49100
+`AA`| 2021-06-03| 68.09 | 88100
 ```
-sym|date|price|size|cond
--|-|-|-|-
-AMZN|	2021-06-03|	87.54| 49100 | B
-AAPL|	2021-06-03|	87.54| 49100 | C
-
-* table is already sorted by time, KDB is based on ordered lists
-
-<hr>
 
 **🔵 20.5 Find all trades that have sym GOOG**
 
 ```q
 select from trade where sym=`GOOG
-```
-sym|date|price|size|cond
--|-|-|-|-
-GOOG|	2021-06-03|	87.54| 49100 | B
-GOOG|	2021-06-03|	87.54| 49100 | C
 
-<hr>
+sym |   date    | price | size  | cond
+---------------------------------------
+GOOG| 2021-06-03| 87.54 | 49100 |  B
+GOOG| 2021-06-03| 87.54 | 49100 |  C
+```
 
 **🔵 20.6 Find all trades that have sym GOOG or RBS or A**
 
 ```q
 select from trade where sym in `GOOG`RBS`A
-```
-sym|date|price|size|cond
--|-|-|-|-
-GOOG|	2021-06-03|	87.54| 49100 | B
-RBS|	2021-06-03|	87.54| 49100 | C
-A|	2021-06-03|	87.54| 49100 | C
 
-<hr>
+sym |   date    | price | size  | cond
+---------------------------------------
+GOOG| 2021-06-03| 87.54 | 49100 |  B
+RBS | 2021-06-03| 87.54 | 49100 |  C
+A   | 2021-06-03| 87.54 | 49100 |  C
+```
 
 **🔵 20.7 Find all trades for google that had a price between 70 and 80**
 
 ```q
 select from trade where sym=`GOOG, price within 70 80
+
+sym |   date    | price | size  | cond
+--------------------------------------
+GOOG| 2021-06-03|   72  | 49100 |  B
+GOOG| 2021-06-03|   75  | 49100 |  C
+GOOG| 2021-06-03|   78  | 49100 |  C
 ```
-
-sym|date|price|size|cond
--|-|-|-|-
-GOOG|	2021-06-03|	72 | 49100 | B
-GOOG|	2021-06-03|	75| 49100 | C
-GOOG|	2021-06-03|	78 | 49100 | C
-
-<hr>
 
 **🔵 20.8 Count the number of trades and total size of trades per hour for sym RBS**
 
 ```q
-select NumberTrades: count i, totalSize: sum size by time.hh from trade where sym=`RBS
+select num_trades:count i, total_size: sum size by sym, 1 xbar time.hh from trade where sym=`RBS
+
+`sym` | `hh` | num_trades |	total_size
+-----------------------------------
+`RBS` |  `9` |     3186   |	159063500
+`RBS` | `10` |     6544   |	321195100
+`RBS` | `11` |     6280   |	315284200
+`RBS` | `12` |     6141   |	306898200
+`RBS` | `13` |     6086   |	305154900
+
+/ you need to group BY SYM, since you're aggregating
+/ the total num trades + total size
+/ use count i = count virtual column
+/ notice xbar comes AFTER the by sym, but BEFORE the where
+/ both sym + xbar are aggregators
+/ so both columns are keyed
 ```
-hh|NumberTrades|totalSize
--|-|-
-`9`|	3186|	159063500
-`10`|	6544|	321195100
-`11`|	6280|	315284200
 
-* NumberTrades + TotalSize = new column names
-* count i = virtual column. Counts agg number of horizontal rows
-* by time.hh = sets hour as the key column and groups results by hour
-* sum size = gives you total size
+```q
+/ notice what happens if instead of group BY SYM
+/ you group BY XBAR
 
-<hr>
+select num_trades:count i, total_size: sum size by 1 xbar time.hh from trade where sym=`RBS
+
+`hh` | num_trades | total_size
+----------------------------
+`9`  |    3186   | 159063500
+`10` |    6544   | 321195100
+`11` |    6280   | 315284200
+`12` |    6141   | 306898200
+`13` |    6086   | 305154900
+
+/ the sym column is removed
+/ but the underlying answer is still correct
+```
 
 **🔵 20.9 Select the number of trades and total size of trades every 30 mins for the sym RBS**
 
 ```q
-select numbertrades: count i, totalsize: sum size by 30 xbar time.minute from trade where sym=`RBS
+select num_trades: count i, tot_size:sum size by sym, 30 xbar time.minute from trade where sym=`RBS
+
+`sym` | `minute` | num_trades | tot_size
+---------------------------------------
+`RBS` |  `09:30` |    3186    | 159063500
+`RBS` |  `10:00` |    3271    | 162197000
+`RBS` |  `10:30` |    3273    | 158998100
+`RBS` |  `11:00` |    3110    | 157994800
+`RBS` |  `11:30` |    3170    | 157289400
+`RBS` |  `12:00` |    3120    | 156311100
+
+/ 30 xbar time.minute = groups minutes by 30
 ```
 
-minute|numbertrades|totalsize
--|-|-
-`09:30`|	3186|	159063500
-`10:00`|	3271|	162197000
-`10:30`|	3273|	158998100
-
-* 30 xbar time.minute = rounds minutes by 30; groups together and is set as key
-
-<hr>
-
-**🔵 20.10 Find all trades for `A where the price was cheaper than the average for that day**
+**🔵 20.10 Find all trades for A where price is cheaper than the average for that day**
 
 ```q
-a: update avgPrice: avg price by date from select from trade where sym=`A
+select by date from trade where sym=`A, price < avg price
+
+date       |     time	  | sym	| price | size | cond
+------------------------------------------------------
+2022-03-22 | 17:29:55.778 |  A	| 53.5	| 79400	| C
+2022-03-23 | 17:29:46.639 |  A	| 66.5	| 97900	| C
+2022-03-24 | 17:29:58.310 |  A	| 73.9	| 30300	| C
+2022-03-25 | 17:29:58.323 |  A	| 58.3	| 41000	| B
+2022-03-26 | 17:29:57.072 |  A  | 60.0	| 88800	| 
 ```
+
+
+
 
 <hr>
 
