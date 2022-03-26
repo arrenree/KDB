@@ -7232,176 +7232,11 @@ AAPL | 109.9 | 50.0 | 97.3 | 98.0
 / select a new column name will add it to your table
 ```
 
-Sorting Columns
-
-```q
-/1. sort [grocer column] from [sales] by descending
-
-sales: ([] fruit:`apple`orange`pear`banana; grocer: `mark`mark`allen`tom; price: 1 2 3 4; quantity: 10 20 30 40)
-
-fruit   grocer  price   quantity
---------------------------------
-apple	mark	1	10
-orange	mark	2	20
-pear	allen	3	30
-banana	tom	4	40
-
-select [>grocer] from sales
-
-fruit   grocer  price   quantity
---------------------------------
-banana	tom	4	40
-apple	mark	1	10
-orange	mark	2	20
-pear	allen	3	30
-
-/ [grocer column] is now sorted by descending
-```
-
-```q
-/2. retrieve banana and pear, along with their prices
-
-select fruit, price from sales where fruit in `banana`pear
-
-fruit  | price
---------------
-pear   | 3
-banana | 4
-
-/ use the in keyword to filter values within a column
-```
-
-```q
-/3. only return 1 row of results from previous query
-
-select [1;]fruit, price from sales where fruit in `banana`pear
-
-fruit  | price
---------------
-pear	3
-
-/ select [1;] returns only first row
-```
-
-
 ### Analytics on Grouped Data
 ```q
 select max price by sym from trade
 select price by sym from trade
 ungroup select price by sym from trade
-```
-
-<a name="multipleselect_template"></a>
-### 🔵 19.1A) Case Study: Grouping Data into Buckets
-
-```q
-/ load trades.q script
-
-/ 1. retrieve the number of small trades for each sym
-/ small trades = size less than 999
-/ add column called tradesize = small for each sym
-
-select num:count i by sym, sizegroup:`small from trade where size within 0 999
-
-`sym` | `sizegroup` | num
---------------------------
-`A`   |   `small`   | 454
-`AA`  |   `small`   | 521
-`AAPL`|   `small`   | 493
-`B`   |   `small`   | 499
-
-/ num = number of trades which sizes are less than 999
-/ use COUNT to return NUMBER of trades
-/ since you're aggregating BY sym, the sym + sizegroup cols are keyed
-/ use WHERE within x y = range of values to be selected
-```
-
-```q
-/2. now retrieve the number of med and large trades for each sym
-/ med = 1000 to 8999
-/ large = greater than 8999
-
-/ consolidate into same table
-
-(select count i by sym, sizegroup:`small from trade where size within 0 999),
-(select count i by sym, sizegroup:`medium from trade where size within 1000 8999),
-(select count i by sym, sizegroup:`big from trade where size > 8999)
-
-`sym | `sizegroup` | num
--------------------------
-`A`   | `large`    | 45645
-`A`   | `med`      | 4009
-`A`   | `small`    | 480
-
-/ we have successfully grouped each sym into "buckets"
-/ of either small, med, or large
-/ depending on the number of trades (from size)
-/ there is a better way retrieve this, by writing function called BIN
-```
-
-BIN Function
-
-```q
-/ for list of sizes, group into buckets of 0, 1000, or 9000
-
-sizes: 2000 100 6000 11000
-0 1000 9000 bin sizes
-1 0 1 2
-
-/ bin takes its LEFT hand buckets, and sorts index position of RIGHT argument
-/ so sizes = 4 elements, will return index position of bin
-/ 2000 = index position 1 bin
-/ 100 = index position 0 bin
-/ 6000 = index position 1 bin
-/ 11000 = index position 2 bin
-```
-
-```q
-/ name the buckets as small, med, or big
-/ based on the buckets of 0, 1000, and 9000
-
-`small`med`big 0 1000 9000 bin sizes
-`med`small`med`big
-
-/ syntax: 
-/ `name1`name2`name3 size1 size2 size 3 bin LIST
-/ still returns the index position based on the sizes
-/ but now has a "name" associated to it (small, med, big)
-```
-
-```q
-/1. create function called tradesize
-/ that accepts a list of trade sizes as argument x
-/ and bucket those sizes into bins of small, med, big
-
-tradesize:{`small`med`big 0 1000 9000 bin x}
-
-/ test out the function with sizes (from above)
-
-sizes: sizes: 2000 100 6000 11000
-
-tradesize sizes
-`med`small`med`big
-
-/ it works!
-```
-
-```q
-/ now loop this back into the original query:
-
-select num:count i by sym, sizebucket:(tradesize;size) fby sym from trade
-
-sym | sizebucket | num
--------------------------
-A   | large      | 45645
-A   | med        | 4009
-A   | small      | 480
-AA  | large      | 45425
-
-/ [sizebucket column] -> insert [tradesize function] you created
-/ [size column] from [trade table] becomes argument x for [tradesize function]
-/ [tradesize function] becomes an AGGREGATOR for fby
-/ returns the number of trades (count i), sorted by sym and its size bucket
 ```
 
 <a name="selectadd_template"></a>
@@ -7500,9 +7335,25 @@ select [1 4] from trade
 ### 🔵 19.5) Where
 
 ```q
-/ the where clause allows for filtering your query
+/ the WHERE clause allows for filtering your query
 / operates left to right, so put most restrictive clause first
 / use commas for multiple where expressions
+```
+
+### Sample Where Clauses
+
+```q
+select from trade where size>300, price>100
+select from trade where sym in `AAPL`GOOG
+select from trade where grade = "ABC"
+select from trade where price within (200:300)
+select from trade where (price>100) and size>300
+select from trade where (price>100) or size> 300
+select i, sym, price from trade where i>5
+select price, i by sym from trade
+select price by date from trade where sym=`AAPL, price < avg price
+select {x % max x} price by date from trade where sym=`AAPL, price < avg price, date=.z.d
+select from trade where sym in `AAPL`RBS
 ```
 
 ```q
@@ -7780,24 +7631,6 @@ Jane  |   F  |	A
 / then you simply filter using table with column names = [gender]; [grade]
 ```
 
-### Sample Where Clauses
-
-```q
-select from trade where size>300, price>100
-select from trade where sym in `AAPL`GOOG
-select from trade where grade = "ABC"
-select from trade where price within (200:300)
-select from trade where (price>100) and size>300
-select from trade where (price>100) or size> 300
-select i, sym, price from trade where i>5
-select price, i by sym from trade
-select price by date from trade where sym=`AAPL, price < avg price
-select {x % max x} price by date from trade where sym=`AAPL, price < avg price, date=.z.d
-select from trade where sym in `AAPL`RBS
-
-
-```
-
 <a name="select_by"></a>
 ### 🔵 19.6) By
 
@@ -7834,114 +7667,6 @@ date        |open |high  |low |close
 / open: renames the column
 ```
 
-### tickdirection case study!
-
-```q
-/1 lets say you want to check if the latest value was an uptick, downtick, or unch
-/ can make use of the deltas + signum function
-
-select from trade
-update dir: signum deltas price from trade
-
-sym| price|size |cond|dir
---------------------------
-C  |  59  |18400|C   | 1  
-F  |  104 |62600|    | 1  
-IBM|  73  |77500|B   |-1 
-A  |  63  |73000|B   |-1 
-
-/ this will add a new column, dir, which will be +1, 0, or -1
-/ deltas will calculate the change between subsequence elements
-/ signum will tell you if the element is positive, negative, or 0
-/ for example:
-
-deltas 3 2 2 1 5
-3 -1 0 -1 4
-
-signum deltas prices
-1 -1 0 -1 1
-```
-
-```q
-/2 create function for signum deltas
-
-tickdirection:{signum delta x}
-
-/ should start from 0, indicating no movement for first element
-
-tickdirection:{signum deltas [first x;x]}
-
-/ use dyadic form each prior adverb
-
-tickdir:{0i,1 _signum deltas x}
-
-/ apparently this syntax works too ?
-
-update dir: tickdirection price from trade
-
-sym| price|size |cond|dir
---------------------------
-C  |  59  |18400|C   | 1  
-F  |  104 |62600|    | 1  
-IBM|  73  |77500|B   |-1 
-A  |  63  |73000|B   |-1 
-
-/ same result as above
-```
-
-```q
-/3 now lets say you want to group it by sym and see total size traded by direction (uptick, downtick, etc)
-
-select sum size by sym, dir from update dir:tickdir price by sym from trades
-
-sym|dir|size
--------------------
- A |-1 |1258345400
- A | 0 |7100
- A | 1 |1252317500
-
-/ anything past the first from = table you created above
-/ group by sym and dir (which you previously calculated)
-/ but it looks funny as it has 2 froms. Can try to clean up
-
-/ you cannot simply do this:
-
-select sum size by sym, dir:signum deltas price by sym from trades
-
-/ error, as tickdir is calculated on the price column as a whole
-/ you cannot group by a column calculation on entire column
-/ instead of splititng on sym first
-
-/ so you have to use an fby instead
-
-select sum size by sym, dir:(tickdir; price) fby sym from trades
-
-sym|dir|size
--------------------
- A |-1 |1258345400
- A | 0 |7100
- A | 1 |1252317500
- 
-/ this will now work and returns same table as above
-/ uses function tickdir as aggregator for signums from price column
-/ the fby aggregates the tickdir from price column by sym
-```
-
-```q
-/ find total size of trades where size > 10 tick moving average
-/ 10 tick moving average requires a price calculation 
-/ so you can't can't by a column (price) that is doing calculations
-/ instead need to use fby
-
-select sum size by sym, price > (mavg[10];price) fby sym from trade
-
- sym  |sym1|size
--------------------
- A    | -1 |1258345400
- AAPL |  0 |1237295400
- MSFT |  1 |1252317500
-```
-
 <a name="select_count"></a>
 ### 🔵 19.7) Select Count 
 
@@ -7975,6 +7700,14 @@ date        | price
 ```q
 /2. retrieve prices, keyed by TODAY, where AAPL's price is less than the avg price
 
+select price by date from trade where sym=`AAPL, price < avg price, date=.z.d
+
+date       | price
+-------------------------------------
+2022.03.23 | 62.4 84.4 29.2 49.4 28.2
+
+/ alternative syntax
+
 select price by date=.z.d from trade where sym=`AAPL, price < avg price
 
 d   | price
@@ -7983,15 +7716,6 @@ d   | price
 `1` | 23 66 12
 
 / grouped by today; 0 = false, 1 = true
-
-/ alternative syntax
-/ (i think this is better)
-
-select price by date from trade where sym=`AAPL, price < avg price, date=.z.d
-
-date       | price
--------------------------------------
-2022.03.23 | 62.4 84.4 29.2 49.4 28.2
 ```
 
 ```q
@@ -8073,21 +7797,216 @@ date      | time          |sym   | price  | size | cond
 / two within filters, price and time
 ```
 
+<a name="exec"></a>
+### 🔵 19.11b) Aggregating "buckets" using WITHIN
+
+```q
+/ another powerful to aggregate data into buckets
+/ is by first filtering your parameter using WITHIN
+/ then "naming" that "bucket" 
+
+/ load trades.q script
+```
+
+```q
+/ 1. retrieve the number of small trades for each sym
+/ small trades = size less than 999
+/ add column called tradesize = small for each sym
+
+select num:count i by sym, sizegroup:`small from trade where size within 0 999
+
+`sym` | `sizegroup` | num
+--------------------------
+`A`   |   `small`   | 454
+`AA`  |   `small`   | 521
+`AAPL`|   `small`   | 493
+`B`   |   `small`   | 499
+
+/ num = number of trades which sizes are less than 999
+/ use COUNT to return NUMBER of trades
+/ since you're aggregating BY sym, the sym + sizegroup cols are keyed
+/ use WHERE within x y = range of values to be selected
+```
+
+```q
+/2. now retrieve the number of med and large trades for each sym
+/ med = 1000 to 8999
+/ large = greater than 8999
+
+/ consolidate into same table
+
+(select count i by sym, sizegroup:`small from trade where size within 0 999),
+(select count i by sym, sizegroup:`medium from trade where size within 1000 8999),
+(select count i by sym, sizegroup:`big from trade where size > 8999)
+
+`sym | `sizegroup` | num
+---------------------------
+`A`   | `large`    | 45645
+`A`   | `med`      | 4009
+`A`   | `small`    | 480
+
+/ we have successfully grouped each sym into "buckets"
+/ of either small, med, or large
+/ depending on the number of trades (from size)
+/ there is a better way retrieve this, by writing function called BIN
+```
+
+<a name="bin"></a>
+### 🔵 19.11b) BIN function - Creating buckets of aggregation
+
+```q
+/ BIN takes LHS defined buckets, and returns index position of RHS list
+/ syntax is: size1 size2 size3 bin x
+/ x = list
+
+/ 1. Group each element of list size into buckets of 100, 300, 500
+
+size: 100 200 300 400 500 600
+100 300 500 bin size
+0 0 1 1 2 2
+
+/ 100 = index position 0 (100)
+/ 200 = index position 0 (100)
+/ 300 = index position 1 (300)
+/ 400 = index position 1 (300)
+/ 500 = index position 2 (500)
+/ 600 = index position 2 (500)
+```
+
+```q
+/ 2. RENAME these buckets into small, medium, large
+
+`small`medium`large 100 300 500 bin size
+`small`small`medium`medium`large`large
+
+/ instead of returning the index position
+/ it now "categorizes" the bucket was either small, big, or large
+```
+
+```q
+/ 3. Create a function that accepts argument x as a list
+/ and returns "buckets" of aggregation for small, medium, large trades
+/ small = < 1000
+/ medium = 1000-8999
+/ large = > 9000
+
+f: {`small`medium`large 0 1000 9000 bin x}
+f [500 1000 100000]
+`small`medium`large
+```
+
+```q
+/ 4. use this f function to retrieve the total number of trades
+/ grouped by their size bucket (small, medium, large) for each sym
+
+select numtrades:count i by sym, sizebucket:(f;size) fby sym from trade
+
+sym | sizebucket | numtrades
+-----------------------------
+AA  |   large    | 45425
+AA  |   medium   | 3986
+AA  |   small    | 502
+AAPL|   large    | 45621
+AAPL|   medium   | 3974
+AAPL|   small    | 511
+BAC |   large    | 45551
+BAC |   medium   | 3958
+BAC |   small    | 3948
+
+/ the f function takes in list of numbers,
+/ and returns = small, medium, or large
+/ so you need to add a new column (sizebucket)
+/ for these outputs
+/ utilizes the f function as an aggregator for fby
+/ notice you're grouping the count i by sym
+/ since this needs to match the agg fby sym
+```
+
+BIN example 2:
+
+```q
+/ 1. for list of sizes, group into buckets of 0, 1000, or 9000
+
+sizes: 2000 100 6000 11000
+0 1000 9000 bin sizes
+1 0 1 2
+
+/ bin takes its LEFT hand buckets, and sorts index position of RIGHT argument
+/ so sizes = 4 elements, will return index position of bin
+/ 2000 = index position 1 bin
+/ 100 = index position 0 bin
+/ 6000 = index position 1 bin
+/ 11000 = index position 2 bin
+```
+
+```q
+/ 2. name the buckets as small, med, or big
+/ based on the buckets of 0, 1000, and 9000
+
+`small`med`big 0 1000 9000 bin sizes
+`med`small`med`big
+
+/ syntax: 
+/ `name1`name2`name3 size1 size2 size 3 bin LIST
+/ still returns the index position based on the sizes
+/ but now has a "name" associated to it (small, med, big)
+```
+
+```q
+/ 3. create function called tradesize
+/ that accepts a list of trade sizes as argument x
+/ and bucket those sizes into bins of small, med, big
+
+tradesize:{`small`med`big 0 1000 9000 bin x}
+
+/ test out the function with sizes (from above)
+
+sizes: sizes: 2000 100 6000 11000
+
+tradesize sizes
+`med`small`med`big
+
+/ it works!
+```
+
+```q
+/ 4. use this tradesize function to retrieve total number of trades grouped by size bucket
+
+select num:count i by sym, sizebucket:(tradesize;size) fby sym from trade
+
+sym | sizebucket | num
+-------------------------
+A   | large      | 45645
+A   | med        | 4009
+A   | small      | 480
+AA  | large      | 45425
+
+/ [sizebucket column] -> insert [tradesize function] you created
+/ [size column] from [trade table] becomes argument x for [tradesize function]
+/ [tradesize function] becomes an AGGREGATOR for fby
+/ returns the number of trades (count i), sorted by sym and its size bucket
+```
+
 <a name="xbar_function"></a>
 ### 🔵 19.11) Xbar Function
 
 ```q
-/ grouping for temporal data buckets (time)
-
-x xbar time.minute / x mins buckets
-x xbar time.hh / x hour buckets
-x bar time.ss / x second buckets
-
-20 xbar time.ss / same thing
-0d00:00:20 xbar time / same thing
+/ xbar is a powerful function that allows groupings for data
+/ generally used for bucketing by TIME
+/ but can also be used for price, cond, etc.
 ```
 
-### xbar price
+xbar examples:
+
+```q
+select sum size, num_count:count i by sym, 1 xbar price from trade
+select max price, sum size by sym, 5 xbar time.minute from trades
+select max price by sym, 45 xbar time.minute from trade
+select price by sym, 240 xbar time.minute from trade
+select avg price by sym, 1 xbar time.hour from trade
+```
+
+xbar price
 
 ```q
 / grouping for other data buckets (price)
@@ -8097,6 +8016,8 @@ x xbar price
 x xbar cond
 x xbar source
 ```
+
+xbar price - problem set
 
 ```q
 /1. retrieve the total size and total number of trades
@@ -8116,7 +8037,20 @@ select sum size, cnt:count i by sym, 1 xbar price from trade
 / ie, how many total trades were executed by sym for that price bucket
 ```
 
-### xbar time
+xbar time
+
+```q
+/ grouping for temporal data buckets (time)
+
+x xbar time.minute / x mins buckets
+x xbar time.hh / x hour buckets
+x bar time.ss / x second buckets
+
+20 xbar time.ss / same thing
+0d00:00:20 xbar time / same thing
+```
+
+xbar time - problem set
 
 ```q
 /1. find the max price and total size of trades during 5 min window
@@ -8148,7 +8082,7 @@ sym |minute | price
 / group by sym, set xbar as 45 minute time buckets
 ```
 
-Amending xbar time buckets
+Amending xbar time buckets (advanced)
 
 ```q
 / notice how in the above example, the time bucket starts at 9:00
@@ -8233,10 +8167,7 @@ select count i, max price by date, xbar [15*60*1000;time] from trade where sym=`
 / evaluates right to left (11:00 + 0 3 5 11), then 5 xbar
 / rounds down time to nearest 5 min intervals
 ```
-```q
-select price by sym, 240 xbar time.minute from trade
-select avg price by sym, 240 xbar time.minute from trade
-```
+
 
 <a name="exec"></a>
 ### 🔵 19.12) Exec
@@ -8630,6 +8561,9 @@ error
 ### 🔵 19.15) Delete Rows
 
 ```q
+/ tt = table of 100 random rows from trade
+
+tt
 date       |  time   | sym |price|size| cond| maxprice
 ------------------------------------------------------
 2021.01.01 | 15:10:01| BAC |  70 |42.2|  A  | 104
@@ -8653,10 +8587,22 @@ delete from tt
 ```
 
 <a name="sort_asc_desc"></a>
-### 🔵 19.16) Sort Ascending / Descending 
+### 🔵 19.16) Sort Columns Ascending / Descending 
 
 ```q
-`sym`price xasc tt
+/ 3 ways to sort columns in a table via QSQL:
+
+/ 1. xasc
+/ 2. xdesc
+/ 3. [> col_nam]
+```
+
+```q
+/ load trades.q script
+
+/ 1. sort by xasc
+
+`sym`price xasc trade
 
 date       |time     |sym|price|size | cond
 --------------------------------------------
@@ -8668,7 +8614,9 @@ date       |time     |sym|price|size | cond
 ```
 
 ```q
-`sym`price xdesc tt
+/ 2. sort by xdesc
+
+`sym`price xdesc trade
 
 date       | time    |sym|price| size| cond
 --------------------------------------------
@@ -8677,7 +8625,20 @@ date       | time    |sym|price| size| cond
 2021.03.01 | 15:09:01| A | 70  | 31.2| F
 
 / first sorts descending by sym, then by price
+```
 
+```q
+/3. sort by [< column_name]
+
+select [<sym] from trade
+
+date       time         sym price    size  cond
+-----------------------------------------------
+2022.03.22 09:30:02.758 A   100.35   50300 B   
+2022.03.22 09:30:17.997 A   57.81544 65600 C   
+2022.03.22 09:30:21.507 A   97.85913 51800 B 
+
+/ sorts the sym column in descending order
 ```
 
 <a name="rename_reorder_columns"></a>
@@ -9212,13 +9173,15 @@ bucket Min Max Count
 ## 🔴 20. qSQL Problem Set
 [Top](#top)
 
-**🔵 20.1 Extract from trade table, trades for MS greater than 1,000 in size**
+**🔵 QSQL Problem Set 1 (easy)**
 
 ```q
 / load the trades.q script
 ```
 
 ```q
+/ 1. Extract from trade table, trades for MS greater than 1,000 in size
+
 select from trade where sym=`MS, size >1000
 
 dt         | sym | price| size
@@ -9230,9 +9193,9 @@ dt         | sym | price| size
 / sym has to be back tick MS
 ```
 
-**🔵 20.2 From the trade table, find the total size of all trades and the average price paid per sym**
-
 ```q
+/ 2. from the trade table, find the total size of all trades and the average price paid per sym
+
 select total: sum size, avg price by sym from trade
 
 `sym`  | total | price
@@ -9246,9 +9209,9 @@ select total: sum size, avg price by sym from trade
 / avg price = retains the price column header, just averages prices
 ```
 
-**🔵 20.3 From the trade table, find the trade that was largest size for each sym**
-
 ```q
+/ 3. From the trade table, find the trade that was largest size for each sym
+
 select from trade where size=(max;size) fby sym
 
 date      | time         | sym | price | size|cond
@@ -9278,9 +9241,9 @@ date      |     time     | sym | price | size |cond|  mx
 / this is using a nested query to filter only the max size for their sym
 ```
 
-**🔵 20.4 From the trade table, select the latest trade for each sym, and include all details**
-
 ```q
+/ 4. From the trade table, select the latest trade for each sym, and include all details
+
 select from trade where time=(last;time) fby sym
 
 date       | time         | sym  | price | size  | cond
@@ -9303,9 +9266,9 @@ sym |   date    | price | size
 `AA`| 2021-06-03| 68.09 | 88100
 ```
 
-**🔵 20.5 Find all trades that have sym GOOG**
-
 ```q
+/ 5. Find all trades that have sym GOOG
+
 select from trade where sym=`GOOG
 
 sym |   date    | price | size  | cond
@@ -9314,9 +9277,9 @@ GOOG| 2021-06-03| 87.54 | 49100 |  B
 GOOG| 2021-06-03| 87.54 | 49100 |  C
 ```
 
-**🔵 20.6 Find all trades that have sym GOOG or RBS or A**
-
 ```q
+/ 6. Find all trades that have sym GOOG or RBS or A
+
 select from trade where sym in `GOOG`RBS`A
 
 sym |   date    | price | size  | cond
@@ -9326,9 +9289,9 @@ RBS | 2021-06-03| 87.54 | 49100 |  C
 A   | 2021-06-03| 87.54 | 49100 |  C
 ```
 
-**🔵 20.7 Find all trades for google that had a price between 70 and 80**
-
 ```q
+/ 7. Find all trades for google that had a price between 70 and 80
+
 select from trade where sym=`GOOG, price within 70 80
 
 sym |   date    | price | size  | cond
@@ -9338,9 +9301,9 @@ GOOG| 2021-06-03|   75  | 49100 |  C
 GOOG| 2021-06-03|   78  | 49100 |  C
 ```
 
-**🔵 20.8 Count the number of trades and total size of trades per hour for sym RBS**
-
 ```q
+/ 8. Count the number of trades and total size of trades per hour for sym RBS
+
 select num_trades:count i, total_size: sum size by sym, 1 xbar time.hh from trade where sym=`RBS
 
 `sym` | `hh` | num_trades |	total_size
@@ -9377,9 +9340,9 @@ select num_trades:count i, total_size: sum size by 1 xbar time.hh from trade whe
 / but the underlying answer is still correct
 ```
 
-**🔵 20.9 Select the number of trades and total size of trades every 30 mins for the sym RBS**
-
 ```q
+/ 9. Select the number of trades and total size of trades every 30 mins for the sym RBS
+
 select num_trades: count i, tot_size:sum size by sym, 30 xbar time.minute from trade where sym=`RBS
 
 `sym` | `minute` | num_trades | tot_size
@@ -9394,9 +9357,9 @@ select num_trades: count i, tot_size:sum size by sym, 30 xbar time.minute from t
 / 30 xbar time.minute = groups minutes by 30
 ```
 
-**🔵 20.10 Find all trades for A where price is cheaper than the average for that day**
-
 ```q
+/ 10. Find all trades for A where price is cheaper than the average for that day
+
 select by date from trade where sym=`A, price < avg price
 
 date       |     time	  | sym	| price | size | cond
@@ -9407,6 +9370,404 @@ date       |     time	  | sym	| price | size | cond
 2022-03-25 | 17:29:58.323 |  A	| 58.3	| 41000	| B
 2022-03-26 | 17:29:57.072 |  A  | 60.0	| 88800	| 
 ```
+
+**🔵 QSQL Problem Set 2 (easy)**
+
+```q
+/1. sort [grocer column] from [sales] by descending
+
+sales: ([] fruit:`apple`orange`pear`banana; grocer: `mark`mark`allen`tom; price: 1 2 3 4; quantity: 10 20 30 40)
+
+fruit   grocer  price   quantity
+--------------------------------
+apple	mark	1	10
+orange	mark	2	20
+pear	allen	3	30
+banana	tom	4	40
+
+select [>grocer] from sales
+
+fruit   grocer  price   quantity
+--------------------------------
+banana	tom	4	40
+apple	mark	1	10
+orange	mark	2	20
+pear	allen	3	30
+
+/ [grocer column] is now sorted by descending
+```
+
+```q
+/2. retrieve banana and pear, along with their prices
+
+select fruit, price from sales where fruit in `banana`pear
+
+fruit  | price
+--------------
+pear   | 3
+banana | 4
+
+/ use the in keyword to filter values within a column
+```
+
+**🔵 QSQL Problem Set 3 (Easy)**
+
+```q
+/ load trades.q script
+```
+
+```q
+/ 1. select the last 3 rows of trade table
+
+select [-3] from trade
+
+date       | time	  | sym  | price | size | cond
+-------------------------------------------------------
+2022-03-19 | 09:30:02.553 | C	 | 107.2 |63500 | B
+2022-03-19 | 09:30:02.701 | MSFT | 96.8	 | 1700	| B
+2022-03-19 | 09:30:02.743 | RBS	 | 97.1	 |80700	| C
+```
+
+```q
+/ 2. retrieve max price on 2021.05.29 for sym A
+
+select max price from trade where date=2021.05.29, sym=`A
+
+price
+------
+109.99
+```
+
+```q
+/ 3. count how many trades have condition A
+
+count select from trade where cond="A"
+211597
+
+/ the count function tallies the number of rows
+/ from your query
+```
+
+```q
+/ 4. retrieve all trades from today, aggregated by sym
+
+select by sym from trade where date=.z.d
+
+sym  |  date      |   time       | price | size | cond
+-------------------------------------------------------
+A    | 2021-06-02 | 17:29:57.306 | 87.54 | 49100 |  B
+AA   | 2021-06-02 | 17:29:58.789 | 68.09 | 88100 |  A
+AAPL | 2021-06-02 | 17:29:58.262 | 76.18 | 22500 |  A
+
+/ the BY CLAUSE is used for aggregations
+/ groups all trades by sym and sets column as key
+```
+
+```q
+/ 5. retrieve prices, keyed by TODAY, where AAPL's price is less than the avg price
+
+select price by date from trade where sym=`AAPL, price < avg price, date=.z.d
+
+date       | price
+-------------------------------------
+2022.03.23 | 62.4 84.4 29.2 49.4 28.2
+```
+
+```q
+/ 6. retrieve price divide by max price, keyed by today, where the price is less than the avg price
+
+select price by date from trade where sym=`AAPL, price < avg price, date=.z.d
+
+date       | price
+--------------------------------
+2022.03.23 | 0.77 0.73 0.99 0.94
+```
+
+```q
+/ 7. retrieve data for AAPL and RBS from trade
+
+select from trade where sym in `AAPL`RBS
+
+date      | time         | sym | price  | size  | cond
+------------------------------------------------------
+2021-05-30| 09:30:02.743 | RBS | 97.113	| 80700 | C
+2021-05-30| 09:30:03.025 | AAPL| 78.66  | 19000	| A
+
+/ in function checks if every LHS argument occurs anywhere in RHS argument (AAPL or RBS)
+/ a faster way of checking "or" arguments
+```
+
+```q
+/ 8. retrieve trades for RBS within 95 and 100 and between 11:30 - 12:00
+
+select from trade where sym=`RBS, price within 95 100, time within 11:30 12:00
+
+date      | time          |sym   | price  | size | cond
+-------------------------------------------------------
+2021-05-30| 11:40:02.743 | RBS   | 97.113 | 80700 | C
+2021-05-30| 11:44:03.025 | AAPL  | 98.66  | 19000 | A
+
+/ two within filters, price and time
+```
+
+**🔵 QSQL Problem Set 4 (Medium)**
+
+```q
+/ load trades.q script
+/ WHERE + table filter case study
+```
+
+```q
+/ 1. from the trade table, retrieve the following trades:
+
+/ IBM from cond A
+/ CSCO from cond A or B
+/ MSFT from cond C 
+/ date = 2021.11.17
+```
+
+```q
+/ first, check the meta of the trade table
+
+meta trade
+
+c    |t|f|a
+------------
+date |d| |s
+time |t| |		
+sym  |s| |		
+price|f| | 		
+size |i| |		
+cond |c| |		
+
+/ reveals correct datatype to retrieve properly
+/ sym = sym 
+/ cond = char
+```
+
+```q
+/ since you have multiple parameters, 
+/ it's easier to create a table of these parameters,
+/ then use this table as part of your WHERE filter
+
+/2. create new table, toget, with the target parameters
+
+toget:( [] sym:`IBM`CSCO`CSCO`MSFT; cond:"AABC")
+
+sym   cond
+----------
+IBM    A
+CSCO   A
+CSCO   B
+MSFT   C
+
+/ notice you had to dupe the CSCO
+/ since its parameter is A or B
+```
+
+```q
+/3. Use QSQL to filter the table of parameters
+
+select from trade where date=2021.11.17, ( [] sym; cond) in toget
+
+date       sym  price size cond
+-------------------------------
+2021-10-30 MSFT	60.66 48700 C
+2021-10-30 IBM	59.00 28300 A
+2021-10-30 MSFT	54.57 23700 C
+2021-10-30 IBM	89.19 86600 A
+2021-10-30 IBM	84.13 46600 A
+
+/ first filters by date 2021.11.17
+/ then filters by the values in the [sym] and [cond] columns
+/ from the [toget] table
+```
+
+**🔵 QSQL Problem Set 5 (Medium)**
+
+```q
+/ load trades.q script
+/ WHERE + table filter case study 2
+```
+
+```q
+results:( []name:`John`Paul`Rachel`Jane`Emma;gender:"MMFFF";grade:"ABBAC")
+
+name  |gender|grade
+--------------------
+John  |   M  | 	A
+Paul  |   M  |	B
+Rachel|   F  |	B
+Jane  |   F  |	A
+Emma  |   F  | 	C
+```
+
+```q
+/ 1. from the results table, extract all the following:
+
+/ gender - male and grade - A
+/ gender - female and grade - B
+/ gender - female and grade - A
+```
+
+```q
+/ 1a. show the syntax individually for each query
+
+select from results where gender="M", grade="A"
+select from results where gender="F", grade="B"
+select from results where gender="F", grade="A"
+
+name  |gender|grade
+--------------------
+John  |   M  | 	A
+
+name  |gender|grade
+--------------------
+Rachel|   F  |	B
+
+name  |gender|grade
+--------------------
+Jane  |   F  |	A
+```
+
+```q
+/ 2. run the same query, instead running a table filter
+/ (which probably cleaner outcome)
+
+select from results where ( [] gender; grade) in ( [] gender:"MFF"; grade:"ABA")
+
+name  |gender|grade
+--------------------
+John  |   M  | 	A
+Rachel|   F  |	B
+Jane  |   F  |	A
+
+/ so instead of "creating" a separate table
+/ you construct the table of possible outcomes in place
+/ then you simply filter using table with column names = [gender]; [grade]
+```
+
+
+
+
+
+**🔵 QSQL Problem Set  (HARD)**
+
+```q
+/ load the trades.q script
+/ tickdirection case study
+```
+
+```q
+/1 lets say you want to check if the latest value was an uptick, downtick, or unch
+/ can make use of the deltas + signum function
+
+select from trade
+update dir: signum deltas price from trade
+
+sym| price|size |cond|dir
+--------------------------
+C  |  59  |18400|C   | 1  
+F  |  104 |62600|    | 1  
+IBM|  73  |77500|B   |-1 
+A  |  63  |73000|B   |-1 
+
+/ this will add a new column, dir, which will be +1, 0, or -1
+/ deltas will calculate the change between subsequence elements
+/ signum will tell you if the element is positive, negative, or 0
+/ for example:
+
+deltas 3 2 2 1 5
+3 -1 0 -1 4
+
+signum deltas prices
+1 -1 0 -1 1
+```
+
+```q
+/2 create function for signum deltas
+
+tickdirection:{signum delta x}
+
+/ should start from 0, indicating no movement for first element
+
+tickdirection:{signum deltas [first x;x]}
+
+/ use dyadic form each prior adverb
+
+tickdir:{0i,1 _signum deltas x}
+
+/ apparently this syntax works too ?
+
+update dir: tickdirection price from trade
+
+sym| price|size |cond|dir
+--------------------------
+C  |  59  |18400|C   | 1  
+F  |  104 |62600|    | 1  
+IBM|  73  |77500|B   |-1 
+A  |  63  |73000|B   |-1 
+
+/ same result as above
+```
+
+```q
+/3 now lets say you want to group it by sym and see total size traded by direction (uptick, downtick, etc)
+
+select sum size by sym, dir from update dir:tickdir price by sym from trades
+
+sym|dir|size
+-------------------
+ A |-1 |1258345400
+ A | 0 |7100
+ A | 1 |1252317500
+
+/ anything past the first from = table you created above
+/ group by sym and dir (which you previously calculated)
+/ but it looks funny as it has 2 froms. Can try to clean up
+
+/ you cannot simply do this:
+
+select sum size by sym, dir:signum deltas price by sym from trades
+
+/ error, as tickdir is calculated on the price column as a whole
+/ you cannot group by a column calculation on entire column
+/ instead of splititng on sym first
+
+/ so you have to use an fby instead
+
+select sum size by sym, dir:(tickdir; price) fby sym from trades
+
+sym|dir|size
+-------------------
+ A |-1 |1258345400
+ A | 0 |7100
+ A | 1 |1252317500
+ 
+/ this will now work and returns same table as above
+/ uses function tickdir as aggregator for signums from price column
+/ the fby aggregates the tickdir from price column by sym
+```
+
+```q
+/ find total size of trades where size > 10 tick moving average
+/ 10 tick moving average requires a price calculation 
+/ so you can't can't by a column (price) that is doing calculations
+/ instead need to use fby
+
+select sum size by sym, price > (mavg[10];price) fby sym from trade
+
+ sym  |sym1|size
+-------------------
+ A    | -1 |1258345400
+ AAPL |  0 |1237295400
+ MSFT |  1 |1252317500
+```
+
+
+
+
+
 
 
 
@@ -9672,6 +10033,8 @@ minute| avgmid | avgprice
 09:45 |	 79.4  |  79.7
 09:50 |	 80.4  |  80.4
 ```
+
+
 
 
 <a name="qsqljoins_problem_set"></a>
