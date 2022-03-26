@@ -9856,18 +9856,20 @@ BAC |   small    | 3948
 ```
 
 ```q
-/1 lets say you want to check if the latest value was an uptick, downtick, or unch
+/ 1. add new column, dir, to check if the latest price change is positive, negative, or unch
+
+/ same as checking if price change is uptick, downtick, or unch
 / can make use of the deltas + signum function
 
 select from trade
 update dir: signum deltas price from trade
 
-sym| price|size |cond|dir
---------------------------
-C  |  59  |18400|C   | 1  
-F  |  104 |62600|    | 1  
-IBM|  73  |77500|B   |-1 
-A  |  63  |73000|B   |-1 
+sym | price | size  | cond | dir
+---------------------------------
+C   |   59  | 18400 |  C   |  1  
+F   |  104  | 62600 |      |  1  
+IBM |   73  | 77500 |  B   | -1 
+A  |    63  | 73000 |  B   | -1 
 
 / this will add a new column, dir, which will be +1, 0, or -1
 / deltas will calculate the change between subsequence elements
@@ -9882,89 +9884,138 @@ signum deltas prices
 ```
 
 ```q
-/2 create function for signum deltas
+/ 2. create function called tickdirection
+/ which takes in a list of numbers
+/ and returns whether the price change was positive, negative, or unch
+/ aka create a function for signum deltas
 
 tickdirection:{signum delta x}
+tickdirection 2 -2 4 -4 -4
+1 -1 1 -1 0
 
-/ should start from 0, indicating no movement for first element
+/ so this function calcs the whether the change in subsequent prices 
+/ is an uptick (1) downtick (-1) or unch (0)
+```
 
-tickdirection:{signum deltas [first x;x]}
+```q
+/ 3. Enhance your function such that the first output is 0
+/ indicating no change for first element
 
-/ use dyadic form each prior adverb
+tickdirection:{signum deltas [first x;x] }
+tickdirection 2 -2 4 -4 -4
+0 -1 1 -1 0
+```
 
-tickdir:{0i,1 _signum deltas x}
-
-/ apparently this syntax works too ?
+```q
+/ 4. update the dir column from trade with your tickdirection function
+/ which accepts price as argument x
 
 update dir: tickdirection price from trade
 
-sym| price|size |cond|dir
---------------------------
-C  |  59  |18400|C   | 1  
-F  |  104 |62600|    | 1  
-IBM|  73  |77500|B   |-1 
-A  |  63  |73000|B   |-1 
+sym | price | size  | cond | dir
+---------------------------------
+C   |   59  | 18400 |  C   |  1  
+F   |  104  | 62600 |      |  1  
+IBM |   73  | 77500 |  B   | -1 
+A  |    63  | 73000 |  B   | -1 
 
 / same result as above
 ```
 
 ```q
-/3 now lets say you want to group it by sym and see total size traded by direction (uptick, downtick, etc)
+/ 5. Aggregate the total size by sym and direction (uptick, downtick, etc)
 
-select sum size by sym, dir from update dir:tickdir price by sym from trades
+/ from earlier (make sure to `trade so the dir col saved)
 
-sym|dir|size
--------------------
- A |-1 |1258345400
- A | 0 |7100
- A | 1 |1252317500
+update dir:tickdirection price from `trade
 
-/ anything past the first from = table you created above
-/ group by sym and dir (which you previously calculated)
-/ but it looks funny as it has 2 froms. Can try to clean up
+select sum size by sym, dir, from trade
 
-/ you cannot simply do this:
+`sym`  | `dir` | size
+------------------------
+`AAPL` | `-1`  | 1252569500
+`AAPL` |  `1`  | 1252614200
+`BAC`  | `-1`  | 1267499100
+`BAC`  |  `1`  | 1236689700
+`C`    | `-1`  | 1258413600
+`C`    |  `0`  | 63500
+```
+
+```q
+/ worth noting, if you did NOT `trades earlier
+/ you CANNOT do this:
 
 select sum size by sym, dir:signum deltas price by sym from trades
+error
 
-/ error, as tickdir is calculated on the price column as a whole
-/ you cannot group by a column calculation on entire column
+/ error, as dir is calculated on the ENTIRE price column as a whole
+/ you cannot GROUP by a column calculation on entire column
 / instead of splititng on sym first
 
 / so you have to use an fby instead
+```
 
-select sum size by sym, dir:(tickdir; price) fby sym from trades
+```q
+/ 6. Aggregate the total size by sym and direction (uptick, downtick, etc) using fby
+/ assume earlier did NOT `trades to update table
 
-sym|dir|size
--------------------
- A |-1 |1258345400
- A | 0 |7100
- A | 1 |1252317500
+select sum size by sym, dir:(tickdirection; price) fby sym from trade
+
+`sym`  | `dir` | size
+------------------------
+`AAPL` | `-1`  | 1252569500
+`AAPL` |  `1`  | 1252614200
+`BAC`  | `-1`  | 1267499100
+`BAC`  |  `1`  | 1236689700
+`C`    | `-1`  | 1258413600
+`C`    |  `0`  | 63500
  
 / this will now work and returns same table as above
-/ uses function tickdir as aggregator for signums from price column
+/ uses function tickdirection as aggregator for signums from price column
 / the fby aggregates the tickdir from price column by sym
 ```
 
 ```q
-/ find total size of trades where size > 10 tick moving average
-/ 10 tick moving average requires a price calculation 
-/ so you can't can't by a column (price) that is doing calculations
-/ instead need to use fby
+/ least ideal syntax
 
-select sum size by sym, price > (mavg[10];price) fby sym from trade
+select sum size by sym, dir from update dir:tickdir price by sym from trades
+
+`sym`  | `dir` | size
+------------------------
+`AAPL` | `-1`  | 1252569500
+`AAPL` |  `1`  | 1252614200
+`BAC`  | `-1`  | 1267499100
+`BAC`  |  `1`  | 1236689700
+`C`    | `-1`  | 1258413600
+`C`    |  `0`  | 63500
+
+/ anything past the first from = table you created above
+/ group by sym and dir (which you previously calculated)
+/ but it looks funny as it has 2 froms
+```
+
+```q
+/ 7. find total size of trades where price > 10 tick moving average
+
+select sum size by sym, price > (mavg[10]; price) fby sym from trade
 
  sym  |sym1|size
 -------------------
  A    | -1 |1258345400
  AAPL |  0 |1237295400
  MSFT |  1 |1252317500
+
+/ 10 tick moving average requires a calculation on [price column] 
+/ you CANNOT group by a column (sym) from another column (price) that is doing calculations
+/ instead need to use fby
 ```
 
 **🔵 QSQL Problem Set  (HARD)**
 
 ```q
 / Case Study: Pull the best bid from orderbook
+
+/ how to create nested table like t?
 
 table t:
 t         bidPrices            bidSizes
