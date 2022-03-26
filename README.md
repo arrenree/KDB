@@ -7886,9 +7886,9 @@ size: 100 200 300 400 500 600
 ```q
 / 3. Create a function that accepts argument x as a list
 / and returns "buckets" of aggregation for small, medium, large trades
-/ small = < 1000
+/ small < 1000
 / medium = 1000-8999
-/ large = > 9000
+/ large > 9000
 
 f: {`small`medium`large 0 1000 9000 bin x}
 f [500 1000 100000]
@@ -8167,7 +8167,6 @@ select count i, max price by date, xbar [15*60*1000;time] from trade where sym=`
 / evaluates right to left (11:00 + 0 3 5 11), then 5 xbar
 / rounds down time to nearest 5 min intervals
 ```
-
 
 <a name="exec"></a>
 ### 🔵 19.12) Exec
@@ -9030,91 +9029,6 @@ m iasc count each m
 / order m by number of elements in each sublist
 ```
 
-```q
-/ Case Study: Pull the best bid from orderbook
-
-table t:
-t         bidPrices            bidSizes
-------------------------------------------------
-05:15:43  7.83 8.20 9.84 6.93  57 0 72 50 62 51
-00:59:05  0.97 7.44 9.33 2.93  97 99 27 31
-01:19:44  2.88 5.63 4.98 5.56  47 57 31 15 68 49
-```
-
-```q
-/1 create new column bidIndex, which shows the index position in descending values (large to small)
-
-update bidIndex:({idesc x} each bidPrices) from t
-
-t         bidPrices            bidSizes           bidIndex
-----------------------------------------------------------
-05:15:43  7.83 8.20 9.84 6.93  57 0 72 50 62      2 1 0 4 
-00:59:05  0.97 7.44 9.33 2.93  97 99 27 31        2 1 4 0
-01:19:44  2.88 5.63 4.98 5.56  47 57 31 15 68 49  1 4 3 0
-
-/ from col bidPrices, shows index position of descending values
-/ 2nd index position = 3rd value = 9.84 largest
-```
-
-```q
-/2 now isolate only the largest value
-
-update bidIndex:({first idesc x} each bidPrices) from t
-
-t         bidPrices            bidSizes           bidIndex
-----------------------------------------------------------
-05:15:43  7.83 8.20 9.84 6.93  57 0 72 50 62      2 
-00:59:05  0.97 7.44 9.33 2.93  97 99 27 31        2
-01:19:44  2.88 5.63 4.98 5.56  47 57 31 15 68 49  1
-
-/ adding first = only retrieves first value 
-/ largest bid since ordered by idesc
-```
-
-```q
-/3 add a new column, bestBid, and retrieve the bestBid from the index position in bidIndex
-
-update bestBid:bidPrices@'bidIndex from update bidIndex:({first idesc x} each bidPrices) from t
-
-t         bidPrices            bidSizes     bidIndex   bestBid
---------------------------------------------------------------
-05:15:43  7.83 8.20 9.84 6.93  0 72 50 62    2          9.84 
-00:59:05  0.97 7.44 9.33 2.93  23 99 27 31   2          9.33
-01:19:44  2.88 5.63 4.98 5.56  57 31 15 49   1          5.63
-
-/ bestbid = looks at bidIndex col, retrieves index position 2 from bidPrice col = 9.8
-/ everything after from is what we calculated above as the bidIndex col
-```
-
-```q
-/4 add new column, bestBidSize, and retrieve the largest bidsize based on the bidIndex column
-
-update bestBidSize:bidSizes@'bidIndex from update bidIndex:({first idesc x} each bidPrices) from t
-
-t         bidPrices            bidSizes     bidIndex   bestBidSize
-------------------------------------------------------------------
-05:15:43  7.83 8.20 9.84 6.93  0 72 50 62    2          50 
-00:59:05  0.97 7.44 9.33 2.93  23 99 27 31   2          27
-01:19:44  2.88 5.63 4.98 5.56  57 31 15 49   1          31
-
-/ bestBidSize = looks at bidIndex col, retrieves index position 2 from bidSizes col = 50
-```
-```q
-/5 Now combine all 3 queries into single one:
-
-update bestBid:bidPrices@'bidIndex, bestBidSize:bidSizes@'bidIndex from update bidIndex:({first idesc x}each bidPrices) from t
-
-t         bidPrices            bidSizes     bidIndex   bestBid  bestBidSize
----------------------------------------------------------------------------
-05:15:43  7.83 8.20 9.84 6.93  0 72 50 62    2          9.84       50
-00:59:05  0.97 7.44 9.33 2.93  23 99 27 31   2          9.33       27
-01:19:44  2.88 5.63 4.98 5.56  57 31 15 49   1          5.63       31
-
-/ useful to use index position to retrieve value in another column
-/ lookup colum @`source column
-/ you can have multiple update statements to add new columns
-/ the bestBid and bestBidSize columns actually retrieve from a new column called bidIndex
-```
 
 <a name="rank_sql"></a>
 ### 🔵 19.25) rank / xrank
@@ -9510,7 +9424,248 @@ date      | time          |sym   | price  | size | cond
 / two within filters, price and time
 ```
 
-**🔵 QSQL Problem Set 4 (Medium)**
+**🔵 QSQL Problem Set 4 (easy)**
+
+```q
+/ 1. retrieve the total size and total number of trades for each sym and each $1 price buckets
+
+select sum size, cnt:count i by sym, 1 xbar price from trade
+
+`sym` |`price`|   size   | cnt
+-----------------------------
+ `A`  |  `50` | 44191500 | 838
+ `A`  |  `51` | 42318700 | 842
+ `A`  |  `52` | 41432200 | 832
+ `A`  |  `53` | 30434493 | 832
+
+/ groups the data by sym and 1 dollar price buckets
+/ ie, how many total trades were executed by sym for that price bucket
+```
+
+```q
+/ 2. find the max price by sym for each 45 min window
+
+select max price by sym, 45 xbar time.minute from trade
+
+sym |minute | price
+----------------------
+ A  |09:00  | 109.94
+ A  |09:45  | 109.99
+ A  |10:30  | 109.96
+
+/ group by sym, set xbar as 45 minute time buckets
+```
+
+```q
+/ 3. return a list of all prices for AAPL for today
+
+exec price from trade where date=.z.d, sym=`AAPL
+62 59 13
+
+/ exec single column = single list returned
+```
+
+```q
+/ 4. return column of values for AAPL on today
+
+select price from trade where date=.z.d, sym=`AAPL
+
+price
+------
+62
+59
+13
+
+/ select = single column returned
+```
+
+```q
+/ 5. return ALL prices of AAPL from today as a dictionary
+
+exec price by sym from trade where date=.z.d, sym=`AAPL
+AAPL | 62 59 13
+
+/ exec + by sym
+/ groups the data by sym
+/ and returns a dictionary
+```
+
+```q
+/ 6. retrieve first price, cond from today for KX and AAPL as a dictionary
+
+exec first price by sym, cond from trade where date=.z.d, sym in `KX`AAPL
+
+`sym`  |`cond`| price
+---------------------
+`AAPL` |      | 95
+`AAPL` |  `A` | 43
+`KX`   |  `C` | 32
+
+/ exec + by sym = returns a dictionary
+/ sym in `KX`AAPL allows multi filters for 1 column (2 syms)
+```
+
+**🔵 QSQL Problem Set 5 (easy)**
+
+```q
+/ 1. update all prices of AAPL and GOOG to 10
+
+update price:10.0 from trade where sym in `AAPL`GOOG
+
+date       | time         | sym  | price| size  | cond
+-----------------------------------------------------
+2021.10.30 | 09:30:02.553 | C    | 10   | 63500 | B   
+2021.10.30 | 09:30:02.701 | MSFT | 10   | 1700  | B   
+2021.10.30 | 09:30:02.743 | RBS  | 10   | 80700 | C  
+
+/ this will update prices to 10 for AAPL and GOOG 
+/ the where clause updates only the filtered records
+```
+
+```q
+/ 2. update all cond to "D"
+
+update cond: "D" from tt
+
+date       |  time   | sym |price|size| cond
+---------------------------------------------
+2021.01.01 | 15:10:01| BAC | 70  |422 | D
+2021.03.01 | 15:09:01| JPM | 74  |412 | D
+```
+
+```q
+/ 3. divide all size values by 100
+
+update size%100 from tt
+
+date       |  time   | sym |price|size| cond
+---------------------------------------------
+2021.01.01 | 15:10:01| BAC | 70  |42.2| D
+2021.03.01 | 15:09:01| JPM | 74  |41.2| D
+2021.03.01 | 15:09:01| UBS | 41  |31.2| D
+
+/ can perform function on entire column. size divided by 100
+```
+
+```q
+/ 4. add a new column to tt called advice and populate with sell
+
+update advice:`sell from tt
+
+date       |  time   | sym |price|size|cond|advice
+---------------------------------------------------
+2021.01.01 | 15:10:01| BAC |  70 |42.2|D   | sell
+2021.03.01 | 15:09:01| JPM |  74 |41.2|D   | sell
+2021.03.01 | 15:09:01| UBS |  41 |31.2|D   | sell
+
+/ if you update a column that doesnt exist, it will add the column
+/ notice it has to be backtick sell
+```
+
+```q
+/ 5. update advice to buy if price less than 70
+
+update advice: `buy from tt where price < 70
+
+date       |  time   | sym |price|size|cond|advice
+---------------------------------------------------
+2021.01.01 | 15:10:01| BAC |  70 |42.2|  D | 
+2021.03.01 | 15:09:01| JPM |  74 |41.2|  D | 
+2021.03.01 | 15:09:01| UBS |  41 |31.2|  D | buy
+
+/ if price less than 70, advice becomes buy
+/ if not, then null value returned
+```
+
+```q
+/ 6. add new column maxprice populated with max prices by sym
+
+update maxprice: max price by sym from tt
+
+date       |   time  | sym |price|size|cond|maxprice
+----------------------------------------------------
+2021.01.01 | 15:10:01| BAC |  70 |42.2|  D | 104
+2021.03.01 | 15:09:01| JPM |  74 |41.2|  D | 102
+2021.03.01 | 15:09:01| UBS |  41 |31.2|  D | 91
+
+/ since maxprice doesnt exist, adds new column to end
+/ by sym = groups by sym
+```
+
+```q
+/ 7. remove the maxprice column from trade
+
+delete maxprice from trade
+
+date       |   time  | sym |price|size|cond
+--------------------------------------------
+2021.01.01 | 15:10:01| BAC |  70 |42.2| D 
+2021.03.01 | 15:09:01| JPM |  74 |41.2| D 
+2021.03.01 | 15:09:01| UBS |  41 |31.2| D 
+```
+
+```q
+/ 8. remove any trades where condition is A
+
+delete from trade where cond="A"
+
+date       |  time   | sym |price|size| cond| maxprice
+------------------------------------------------------
+2021.03.01 | 15:09:01| JPM |  74 |41.2|  B  | 102
+2021.03.01 | 15:09:01| UBS |  41 |31.2|  C  | 91
+
+/ since you are adding a WHERE clause, delete will remove the entire row 
+/ WHERE cond = A
+```
+
+```q
+/ 9. find the highest price on 2021.10.31
+
+select from trade where date=2021.10.31, price=max price
+
+/ you are looking for the SINGLE highest price on date
+/ filter by date, then the max price from this date
+/ don't need fby since you're not aggregating anything
+```
+
+```q
+/ 10. find the max price by sym on 2021.10.31
+
+select from trade where date=2021.10.31, price=(max;price) fby sym
+
+date       | time         | sym | price | size | cond
+------------------------------------------------------
+2021-11-26 | 10:17:09.373 | A	| 109.9	| 94300| C
+2021-11-26 | 10:25:22.268 | MSFT| 109.9	| 49100| C
+2021-11-26 | 11:49:11.143 | D	| 109.9 |  5600| A
+
+/ since you need to find max price BY sym (aggr by sym)
+/ you need to use fby function
+/ first filters by date, then finds max price aggr by sym
+
+/ if you did this instead:
+
+select max price by sym from trade where date = 2021.11.26
+
+sym  | price
+-------------
+A    | 109.9
+AA   | 113.2
+AAPL | 339.1
+
+/ this will ONLY return the sym + max price column
+```
+
+```q
+/ 11. find the max price by sym AND cond on 2021.10.31
+
+select from trade where date=2021.10.31, price=(max;price) fby ( [] sym; cond)
+
+/ aggregate by more than one field using a table
+/ filter by date, then max price by sym AND cond
+```
+
+**🔵 QSQL Problem Set 6 (Medium)**
 
 ```q
 / load trades.q script
@@ -9583,7 +9738,7 @@ date       sym  price size cond
 / from the [toget] table
 ```
 
-**🔵 QSQL Problem Set 5 (Medium)**
+**🔵 QSQL Problem Set 7 (Medium)**
 
 ```q
 / load trades.q script
@@ -9647,9 +9802,51 @@ Jane  |   F  |	A
 / then you simply filter using table with column names = [gender]; [grade]
 ```
 
+**🔵 QSQL Problem Set 8 (Medium)**
 
+```q
+/ load the trades.q script
+/ bin function case study
+```
 
+```q
+/ 1. Create a function that accepts argument x as a list
+/ and returns "buckets" of aggregation for small, medium, large trades
+/ small < 1000
+/ medium = 1000-8999
+/ large > 9000
 
+f: {`small`medium`large 0 1000 9000 bin x}
+f [500 1000 100000]
+`small`medium`large
+```
+
+```q
+/ 2. use this f function to retrieve the total number of trades
+/ grouped by their size bucket (small, medium, large) for each sym
+
+select numtrades:count i by sym, sizebucket:(f;size) fby sym from trade
+
+sym | sizebucket | numtrades
+-----------------------------
+AA  |   large    | 45425
+AA  |   medium   | 3986
+AA  |   small    | 502
+AAPL|   large    | 45621
+AAPL|   medium   | 3974
+AAPL|   small    | 511
+BAC |   large    | 45551
+BAC |   medium   | 3958
+BAC |   small    | 3948
+
+/ the f function takes in list of numbers,
+/ and returns = small, medium, or large
+/ so you need to add a new column (sizebucket)
+/ for these outputs
+/ utilizes the f function as an aggregator for fby
+/ notice you're grouping the count i by sym
+/ since this needs to match the agg fby sym
+```
 
 **🔵 QSQL Problem Set  (HARD)**
 
@@ -9764,13 +9961,93 @@ select sum size by sym, price > (mavg[10];price) fby sym from trade
  MSFT |  1 |1252317500
 ```
 
+**🔵 QSQL Problem Set  (HARD)**
 
+```q
+/ Case Study: Pull the best bid from orderbook
 
+table t:
+t         bidPrices            bidSizes
+------------------------------------------------
+05:15:43  7.83 8.20 9.84 6.93  57 0 72 50 62 51
+00:59:05  0.97 7.44 9.33 2.93  97 99 27 31
+01:19:44  2.88 5.63 4.98 5.56  47 57 31 15 68 49
+```
 
+```q
+/1 create new column bidIndex, which shows the index position in descending values (large to small)
 
+update bidIndex:({idesc x} each bidPrices) from t
 
+t         bidPrices            bidSizes           bidIndex
+----------------------------------------------------------
+05:15:43  7.83 8.20 9.84 6.93  57 0 72 50 62      2 1 0 4 
+00:59:05  0.97 7.44 9.33 2.93  97 99 27 31        2 1 4 0
+01:19:44  2.88 5.63 4.98 5.56  47 57 31 15 68 49  1 4 3 0
 
+/ from col bidPrices, shows index position of descending values
+/ 2nd index position = 3rd value = 9.84 largest
+```
 
+```q
+/2 now isolate only the largest value
+
+update bidIndex:({first idesc x} each bidPrices) from t
+
+t         bidPrices            bidSizes           bidIndex
+----------------------------------------------------------
+05:15:43  7.83 8.20 9.84 6.93  57 0 72 50 62      2 
+00:59:05  0.97 7.44 9.33 2.93  97 99 27 31        2
+01:19:44  2.88 5.63 4.98 5.56  47 57 31 15 68 49  1
+
+/ adding first = only retrieves first value 
+/ largest bid since ordered by idesc
+```
+
+```q
+/3 add a new column, bestBid, and retrieve the bestBid from the index position in bidIndex
+
+update bestBid:bidPrices@'bidIndex from update bidIndex:({first idesc x} each bidPrices) from t
+
+t         bidPrices            bidSizes     bidIndex   bestBid
+--------------------------------------------------------------
+05:15:43  7.83 8.20 9.84 6.93  0 72 50 62    2          9.84 
+00:59:05  0.97 7.44 9.33 2.93  23 99 27 31   2          9.33
+01:19:44  2.88 5.63 4.98 5.56  57 31 15 49   1          5.63
+
+/ bestbid = looks at bidIndex col, retrieves index position 2 from bidPrice col = 9.8
+/ everything after from is what we calculated above as the bidIndex col
+```
+
+```q
+/4 add new column, bestBidSize, and retrieve the largest bidsize based on the bidIndex column
+
+update bestBidSize:bidSizes@'bidIndex from update bidIndex:({first idesc x} each bidPrices) from t
+
+t         bidPrices            bidSizes     bidIndex   bestBidSize
+------------------------------------------------------------------
+05:15:43  7.83 8.20 9.84 6.93  0 72 50 62    2          50 
+00:59:05  0.97 7.44 9.33 2.93  23 99 27 31   2          27
+01:19:44  2.88 5.63 4.98 5.56  57 31 15 49   1          31
+
+/ bestBidSize = looks at bidIndex col, retrieves index position 2 from bidSizes col = 50
+```
+```q
+/5 Now combine all 3 queries into single one:
+
+update bestBid:bidPrices@'bidIndex, bestBidSize:bidSizes@'bidIndex from update bidIndex:({first idesc x}each bidPrices) from t
+
+t         bidPrices            bidSizes     bidIndex   bestBid  bestBidSize
+---------------------------------------------------------------------------
+05:15:43  7.83 8.20 9.84 6.93  0 72 50 62    2          9.84       50
+00:59:05  0.97 7.44 9.33 2.93  23 99 27 31   2          9.33       27
+01:19:44  2.88 5.63 4.98 5.56  57 31 15 49   1          5.63       31
+
+/ useful to use index position to retrieve value in another column
+/ lookup colum @`source column
+/ you can have multiple update statements to add new columns
+/ the bestBid and bestBidSize columns actually retrieve from a new column called bidIndex
+```
 
 <hr>
 
