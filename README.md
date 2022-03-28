@@ -55,17 +55,17 @@
 
 ## 5. [Lists Problem Set](#list_problemset)
 
-## 6. [Primitive Operations](#primitive_header)
+## 6. [List Operations](#primitive_header)
 1. [Addition](#add_list)
 2. [Comparing Lists](#compare_lists)
 3. [Equal and Match Differences](#match_diff)
-4. [Basic Operations](#basic_operations)
+4. [Basic List Operations](#basic_operations)
 5. [Division Remainders Mod](#mod_operations)
 6. [Running Sums/Moving Windows](#running_sums)
 7. [Reverse](#reverse_ops)
 8. [Upper/Lowercase](#uppercase_ops)
 
-## 7. [Primitive Operations Problem Set](#primitive_problemset)
+## 7. [List Operations Problem Set](#primitive_problemset)
 
 ## 8. [Dictionary](#dict_header)
 1. [Ways to Construct Dictionaries](#dict_from_list)
@@ -719,8 +719,10 @@ x cross y
 / x(2) to y(4)
 ```
 
+cross also works on lists + tables
+
 ```q
-/ also works on lists + tables
+/ cross syms and ints
 
 s:`IBM`MSFT`AAPL
 v: 1 2
@@ -730,7 +732,7 @@ s cross v
 ```
 
 ```q
-([]s) cross ([]v)
+( [] s) cross ( [] v)
 
 s    | v
 ---------
@@ -742,12 +744,12 @@ AAPL | 1
 AAPL | 2
 
 / so takes every element of s (IBM, MSFT, AAPL) and combines with every element of v (1 2)
-/ the ([] s) returns a table
+/ the ( [] s) returns a table
 
 ```q
-/ ([]s) returns a single column table
+/ ( [] s) returns a single column table
 
-([]s)
+( [] s)
 
 s
 ----
@@ -756,13 +758,15 @@ MSFT
 AAPL
 ```
 
+cross sym + timeseries
+
 ```q
-/ useful for building xbar timeseries
+/ cross is useful for building xbar timeseries
 
 time: 09:00u 09:15u 09:30u 09:45u
 sym: `GOOG`IBM
 
-([] sym) cross ([] time)
+( [] sym) cross ( [] time)
 
 sym  | time
 ------------
@@ -1430,51 +1434,67 @@ dl[;2]
 ### 🔵 4.12 Random Operator in Lists
 
 ```q
+/ pick 5 random items from list
+
 5 ? 1 2 3 4 5
 1 3 2 2 4
 
-/ pick 5 random items from list
 ```
 
 ```q
+/ pick 5 random items from 0-9
+
 5 ? 10
 8 5 5 9 2
 
-/ pick 5 random items less than 10
 ```
+
 ```q
+/ pick 5 distinct random items from 0-9
+/ aka, "DEAL", like dealing cards from a deck
+/ never repeats the same numbers
+
 -5 ? 10
 8 5 1 9 2
 
-/ pick 5 distinct random items less than 10
+-10 ? 10
+7 1 3 9 5 0 4 6 8 2
+
+-11 ? 10
+/error
+
+/ error because you can't return 11 items from a 10 item list
+
 ```
 
 ```q
+/ pick 5 random syms with length 2
+
 5 ? `2
 `ah `lj `ef `ie `jf
 
-/ pick 5 random syms with length 2
 ```
 
 ```q
+/ pick 5 random chars 
+
 5 ? " "
 "lwhev"
 
-/ pick 5 random chars 
 ```
 
 ```q
-list: 1 2 3 4 5
+/ from list, find 2
 
+list: 1 2 3 4 5
 list ? 2
 1
 
-/ from list, find 2
+/ from list, return 2 random elements
 
 2 ? list
 3 4
 
-/ from list, return 2 random elements
 ```
 
 <a name="count_list"></a>
@@ -1774,10 +1794,18 @@ p where p<avg p
 100 200 300 400
 ```
 
+**🔵 5.9 Create a list of ints from 1 to 10**
+
+```q
+1 + til 10
+1 2 3 ...10
+
+```
+
 <hr>
 
 <a name="primitive_header"></a>
-## 🔴 6. Primitive Operations
+## 🔴 6. List Operations
 [Top](#top)
 
 <a name="add_list"></a>
@@ -1831,7 +1859,7 @@ Match
 ```
 
 <a name="basic_operations"></a>
-### 🔵 6.4 Basic Operations
+### 🔵 6.4 Basic List Operations
 
 l: 10 20 30 40 50 
 
@@ -2053,7 +2081,7 @@ sum d where d > 100
 <hr>
 
 <a name="primitive_problemset"></a>
-## 🔴 7. Primitive Operations Problem Set
+## 🔴 7. List Operations Problem Set
 [Top](#top)
 
 **🔵 7.1 Find index location for "ryan" in "hello ryan where is ryan"
@@ -10117,13 +10145,16 @@ see also joins on tables
 / x lj y 
 
 / x = source table (can be key or unkeyed)
-/ y = lookup table (t2 must be keyed)
+/ y = lookup table (must be keyed)
 
-/ for each row in source table, find match on keyed columns in lookup table
-/ adds new columns to the end of original table
+/ joins COLUMNS to existing table
+
+/ for each row in source table, find match on [keyed columns] in lookup table
+/ [ADDS NEW COLUMNS] to the end of original table
 / will always have same number of rows as original table
 / no match = nulls
-/ column names must match and 2nd table must be keyed
+/ column names MUST MATCH 
+/ 2nd table MUST BE KEYED
 
 trade table
 x date        time         sym     price    size  
@@ -10158,9 +10189,9 @@ x date        time         sym    price     size cond  sector  employees
 ```q
 / x pj y
 
-/ y table has to be keyed
 / x table can be keyed or unkeyed
-/ where there is a match on key across tables, values are added together 
+/ y table has to be keyed
+/ where there is a match on key across tables, values are ADDED TOGETHER
 / other columns on original table remain unchanged
 / values have to be compatible with addition. for ex, if sym, will fail
 
@@ -10196,15 +10227,15 @@ x `sym`  sector  employees
 ```q
 / x ij y
 
-/ y has to be keyed
 / x can be keyed or unkeyed
-/ similar to left join, but only returns rows where matches occur
+/ y has to be keyed
+/ similar to LEFT JOIN, but ONLY RETURNS rows where MATCH OCCURS
 / if match occurs in keyed table, column added on, or updated if already exists
 / non matches removed from new table (no nulls)
 
 trade table:
 x date       sym    price   size  
---------------------------------------
+----------------------------------
 1|2021.06.03| C   | 107.2 | 63500
 2|2021.06.03| MSFT| 96.8  | 1700
 3|2021.06.03| UBS | 100.3 | 50300
@@ -10235,12 +10266,14 @@ x date        sym    price  size  sector employees
 / adds ALL rows/columns together
 / allows tables with different columns to be joined
 ```
+
 ```q
-/ unkeyed union join
+/ UNKEYED union join
 
 / unkey uj = return all rows + all columns
 / cols from 1 table but not the other are filled with nulls
-/ even if values match, does NOT update. adds as new row.
+/ even if values match, DOES NOT UPDATE VALUES
+/ if values match = ADDS NEW ROW
 
 t1
 sym  | price | size | cond
@@ -10270,40 +10303,45 @@ RBS  | 78.01 | 98700 |
 / unkeyed uj = return all rows + all columns
 / cols from 1 table but not the other are filled with nulls
 ```
-```q
-/ keyed union join
 
-/ right lookup table must be keyed (duh)
-/ if match, rows from left table are updated with values from right table
+```q
+/ KEYED union join
+
+/ BOTH TABLES HAVE TO BE KEYED
+/ if match on keys, rows from left table are updated with values from right table
 / if no match, null returned
 / useful when consolidating price buckets
 
+trade:( [sym:`C`MSFT`UBS]; price: 100 100 100; size: 10 10 10)
+
 trade table:
-date       sym   price  size  
-----------------------------
-2021.06.03| C   | 107.2| 10
-2021.06.03| MSFT|  96.8| 10
-2021.06.03| UBS | 100.3| 10
+`sym`  | price | size  
+-------------------
+`C`    |  100  | 10
+`MSFT` |  100  | 10
+`UBS`  |  100  | 10
 
 stock table:
-`sym`   sector  size  book
---------------------------
-`FB`  |Tech   |100  | A      
-`GOOG`|Tech   |100  | B
+`sym`  | sector | size | book
+-----------------------------
+`UBS`  |  Tech  |  100 |  A      
+`GOOG` |  Tech  |  100 |  B
 
 trade uj stock
 
-date       `sym`  price  size book
-----------------------------------
-2021.06.03| C   | 107.2 | 10 | 
-2021.06.03| MSFT| 96.8  | 10 |
-2021.06.03| UBS | 100.3 | 10 |
-          | FB  |       |100 | A
-          | GOOG|       |100 | A
+`sym`  | price | size | sector | book
+-------------------------------------
+`C`    |  100  |   10  |       |	
+`MSFT` |  100  |   10  |       |	
+`UBS`  |  100  |  300  | tech  | 30
+`GOOG` |       |  300  | tech  | 30
 
-/ no key match for FB or GOOG, so appends new row
-/ adds new column book; blank for existing, pulls in value from new
+/ from [trade table], no match for C, copies entire row
+/ from [trade table], no match for MSFT, copies entire row
+/ from [trade table], match on UBS, UPDATES VALUES, ADDS new columns
+/ from [stock table], no match on GOOG, ADDS new row + columns
 ```
+
 ```q
 / union join + xbar example
 
@@ -10361,9 +10399,6 @@ minute| avgmid | avgprice
 09:45 |	 79.4  |  79.7
 09:50 |	 80.4  |  80.4
 ```
-
-
-
 
 <a name="qsqljoins_problem_set"></a>
 ## 🔴 22. qSQL Joins Problem Set
