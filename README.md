@@ -8884,23 +8884,102 @@ select from trade where date=2021.10.31, price>({x[`size] wavg x`price}; ([]size
 ### 🔵 19.19) xgroup
 
 ```q
-/ load trade.q script
+/ load ex-joins.q script
 
-/ 1. group the trade table by the sym column
+trade:
+dt	  | sym	 | price  | size
+---------------------------------
+2015-01-01|    C |   10.0 |  10
+2015-01-02|    C |   10.5 | 100
+2015-01-03|   MS |  260.0 |  15
+2015-01-04|    C |   11.0 | 200
+2015-01-04|  DBK |   35.6 |  55
+2015-01-05| AAPL | 1010.0 |  20
+2015-01-06| AAPL | 1020.0 | 300
+2015-01-07|   MS |  255.0 | 200
+2015-01-07|   MS |  254.0 | 400
+```
+
+```q
+/ 1. retrieve latest trades grouped by sym
+
+select by sym from trade
+
+`sym`  | dt 	    | price  | size
+----------------------------------
+`AAPL` | 2015-01-06 | 1020.0 | 300
+`C`    | 2015-01-04 | 11.0   | 200
+`DBK`  | 2015-01-04 | 35.6   | 55
+`MS`   | 2015-01-07 | 254.0  | 400
+
+/ by using simple QSQL to group by sym
+/ the resulting table automatically selects
+/ the LAST values by date
+/ for ex, 3 C's, but the table outputs values from 2015.01.04
+```
+
+```q
+/ 2. retrieve ALL trades grouped by sym
 
 `sym xgroup trade
 
-sym | date
-----| -----
-C   | 2021.10.19... 
-MSFT| 2021.10.19... 
-RBS | 2021.10.19...
+`sym`  | dt	                               |    price     |   size
+---------------------------------------------------------------------------
+`C`    | (2015-01-01d;2015-01-02d;2015-01-04d) |   10 10.5 11 | 10 100 200
+`MS`   | (2015-01-03d;2015-01-07d;2015-01-07d) | 260 255 254f | 15 200 400
+`DBK`  | ,2015-01-04d	                       |        ,35.6 |        ,55
+`AAPL` | (2015-01-05d;2015-01-06d)	       | 1,010 1,020f |     20 300
 
-/ group by column `sym
+/ xgroup retrieves ALL values, grouped by sym
+/ returns values in NESTED columns
+```
 
-/ to flatten this out, use ungroup
+```q
+/ 3. from the table above, sort the prices desc order
 
-ungroup select time by sym from trade
+`price xdesc `sym xgroup trade
+
+`sym`  | dt	                               |    price     |   size
+---------------------------------------------------------------------------
+`AAPL` |	     (2015-01-05d;2015-01-06d) | 1,010 1,020f |	    20 300
+`MS`   | (2015-01-03d;2015-01-07d;2015-01-07d) | 260 255 254f |	15 200 400
+`DBK`  |                          ,2015-01-04d |        ,35.6 |        ,55
+`C`    | (2015-01-01d;2015-01-02d;2015-01-04d) |   10 10.5 11 | 10 100 200
+
+/ even in its nested form, the values in price column are now sorted in desc order
+```
+
+```q
+/ 4. from original trade table, select the highest 2 prices by sym
+
+select 2 sublist desc price by sym from trade
+
+sym  |	price
+-------------------
+AAPL | 1,010 1,020f
+C    |      10 10.5
+DBK  |        ,35.6
+MS   |     260 255f
+
+
+/ sublist will return the 2 descending prices 
+/ grouped by sym
+```
+
+```q
+/ 5. ungroup the nested table to show each price per row
+
+ungroup select 2 sublist desc price by sym from trade
+
+sym  | price
+-------------
+AAPL | 1020.0
+AAPL | 1010.0
+C    |   11.0
+C    |   10.5
+DBK  |   35.6
+MS   |  260.0
+MS   |  255.0
 ```
 
 <a name="differ_sql"></a>
