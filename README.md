@@ -10684,7 +10684,7 @@ ndate      | ticker | title
 / notice the column headers are different in the newsItems table
 / for a ij, the column headers have to match up!
 
-/ first step is calc the avg price grouped by dt, sym from trade table
+/ 1. first step is calc the [avg price] grouped [by dt, sym] from trade table
 
 t1: select avgprice: avg price by dt, sym from trade
 
@@ -10699,7 +10699,7 @@ dt        | sym | avgprice
 2015-01-06| AAPL| 1020.0
 2015-01-07| MS  | 254.5
 
-/ change column names for newsItems table + add keys to first 2 cols
+/ 2. change [column names] for newsItems table + add keys to first 2 cols
 
 t2: 2!`dt`sym xcol newsItems
 
@@ -10708,15 +10708,17 @@ dt         |  sym   | title
 2015-01-06 |   MS   | traders did it!
 2015-01-04 |   C    | regulators investigating
 
-/ then use an ij to join the 2 tables together
+/ 2. then use an ij to join the 2 tables together
 
 (select avg price by dt, sym from trade) ij (2!`dt`sym xcol newsItems)
+
 / or simply:
+
 t1 ij t2
 
-dt        | sym |price|title
-----------------------------------------------
-2015-01-04|  C  |11.0 |regulators investigating
+dt         | sym | price | title
+---------------------------------------------------
+2015-01-04 |  C  | 11.0  | regulators investigating
 
 / inner join = only rows that match will be returned
 / need to set key to newsItems table in order for the ij to work
@@ -10749,7 +10751,8 @@ dt        | sym |price |size
 2015-01-07| MS	|254.0 | 400
 
 / take newsItem table, join the trade table to add column for latest price
-/ need to amend columns of newsItems to match trade table (dt, ticker)
+
+/ 1. need to [amend column names] of newsItems to match trade table (dt, ticker)
 
 `dt`sym xcol newsItems
 
@@ -10758,29 +10761,34 @@ dt         |  sym   | title
 2015-01-06 |   MS   | traders did it!
 2015-01-04 |   C    | regulators investigating
 
-/ need to key the sym column for trade table
+/ 2. need to [key] the [sym column] for trade table
+/ note - ONLY key the sym column. if you key the date column
+/ you will return nothing for MS
 
-/ since they want the latest price, 2015.01.03 = no trades for MS
-/ so we need to retrieve the last price
+/ they want the latest price for both MS and C
+/ for C = match on 2015.01.04 for dates
+/ for MS = no match on 2015.01.06
+/ so you want to retrieve the [LAST price] prior to 2015.01.06
 / easiest way to do this is to sort by `dt ascending
 / so the ij will automatically take the last price
-/ luckily table is already sorted by ascending, but just in case:
+
+/ 3. sort trade table by `dt ascending
 
 `dt xasc `sym xkey trade
 
-sym     dt              price   size
--------------------------------------
-C	2015-01-01	10.0	10
-C	2015-01-02	10.5	100
-MS	2015-01-03	260.0	15
-C	2015-01-04	11.0	200
-DBK	2015-01-04	35.6	55
-AAPL	2015-01-05	1010.0	20
-AAPL	2015-01-06	1020.0	300
-MS	2015-01-07	255.0	200
-MS	2015-01-07	254.0	400
+`sym` |    dt      | price | size
+----------------------------------
+`C`   |	2015-01-01 | 10.0  |  10
+`C`   |	2015-01-02 | 10.5  | 100
+`MS`  |	2015-01-03 | 260.0 |  15
+`C`   |	2015-01-04 | 11.0  | 200
+`DBK` |	2015-01-04 | 35.6  |  55
+`AAPL`|	2015-01-05 | 1010.0|  20
+`AAPL`|	2015-01-06 | 1020.0| 300
+`MS`  |	2015-01-07 | 255.0 | 200
+`MS`  |	2015-01-07 | 254.0 | 400
 
-/ join the table via inner join
+/ 4. join the table via inner join
 
 (`dt`sym xcol newsItems) ij (`dt xasc`sym xkey trade)
 
@@ -10799,15 +10807,17 @@ dt         |  sym   | title                   | price
 2015-01-04 |   C    | regulators investigating| 10  
 ```
 
-```q
-/ alternative solution: as of join method
+alternative solution: as of join method
 
+```q
 / quick 101
 / aj [`col_1`col_2; soure_table; `col_1`col_2 lookup_table]
 
 / last item of columns will be less than or equal join
 / aj looks for values (columns) from source to lookup table and pulls in the most recent price
+```
 
+```q
 aj [`ticker`ndate;newsItems; `ndate`ticker xcol trade]
 
 / from newsItems table, retrieve values in columns `ticker and `ndate
