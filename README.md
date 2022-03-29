@@ -11340,6 +11340,7 @@ key |  value
 ### 🔵 24.6 Each Previous / Each Prior
 
 ```q
+/ x ': y
 / each prior = perform operation on element with its prior element
 
 10 + ': 1 2 3 4 7
@@ -11391,10 +11392,12 @@ deltas 1 2 3 4
 ## 🔴 25. Adverbs Problem Set
 [Top](#top)
 
-## 🔵 25.1 Given: ("cow"; "fox";"badger") use EACH RIGHT to prepend "the" before each item##
+**🔵 25.1 Given: ("cow"; "fox";"badger"), use EACH RIGHT to prepend "the" before each item**
 
 ```q
-/ each right = add x to each element of y
+/ x ,/: y
+/ each right = apply EACH element of y to entire x 
+/ the top of / points to the RIGHT = each RIGHT
 
 "the" ,/: ("cow";"fox";"badger")
 
@@ -11410,21 +11413,22 @@ strs: ("cow";"fox";"badger")
 
 <hr>
 
-## 🔵 25.2 Use EACH LEFT to add "jumped" to strs ##
+**🔵 25.2 Use EACH LEFT to add "jumped" to strs**
 
 ```q
-/ each left = add y to each element of x
+/ x ,\: y
+/ each left = apply EACH x to entire y
+/ the top of \ points to the left = each LEFT
 
 strs,\: " jumped"
 
-"cow jumped" 
-"fox jumped" 
-"badger jumped"
-
+"the cow jumped" 
+"the fox jumped" 
+"the badger jumped"
 ```
 <hr>
 
-## 🔵 25.3 Given the nested list: dd: (1 5 10; 200 30 40; 20 23 24), find the max of each list ##
+**🔵 25.3 Given the nested list: dd: (1 5 10; 200 30 40; 20 23 24), find the max of each list**
 
 ```q
 dd: (1 5 10; 200 30 40; 20 23 24)
@@ -11432,11 +11436,12 @@ dd: (1 5 10; 200 30 40; 20 23 24)
 max each dd
 10 200 24
 
-/ use each to calc max on each individual nested list
+/ use EACH to calc max on each individual nested list
 ```
+
 <hr>
 
-## 🔵 25.4 Using EACH PRIOR, create a function that calculates the moving sum with window size of 2 ##
+**🔵 25.4 Using EACH PRIOR, create a function that calculates the moving sum with window size of 2**
 
 ```q
 / each prior = perform action on each element with its prior element
@@ -11444,6 +11449,9 @@ max each dd
 L: 20 30 4 6 1 2
 +': [L]
 20 50 34 10 7 3
+
+/ note +': 10 20 30 doesn't work
+/ has to feed in a pre-defined list
 
 / alternatively:
 
@@ -11457,7 +11465,8 @@ L: 20 30 4 6 1 2
 
 <hr>
 
-## 🔵 25.5 Use EACH BOTH to join the lists to give (5 8; 7 3; 9 4) ##
+**🔵 25.5 Use EACH BOTH to join the lists to give (5 8; 7 3; 9 4)**
+
 ```q
 numbers: 5 7 9
 powers: 8 3 4
@@ -11473,23 +11482,31 @@ key| value
 
 <hr>
 
-## 🔵 25.6 Use EACH BOTH to raise 5 to the power of 8, 7 to the power of 3, etc. ##
+**🔵 25.6 Use EACH BOTH to raise 5 to the power of 8, 7 to the power of 3, etc.**
 
 ```q
-numbers xexp' powers
+numbers xexp powers
 
 390625 343 6561f
 ```
 
 <hr>
 
-## 🔵 25.7 A bank account pays 5% interest a year. Write a function that takes the current balance and returns the new balance after one year. Then use scan\ with that function to display the interest every year, up to 7 years in the future ##
+**🔵 25.7 A bank account pays 5% interest a year. Write an anonymous function that takes the current balance and returns the new balance after one year.**
 
 ```q
-/ assume starting balance of 100
+/ create anonymous function 
+/ accepts 1 argument = starting balance = 100
 
 {x * 1.05} 100
 105
+
+/ 100 is argument for starting balance
+/ after 1 year = 105
+```
+
+```q
+/ 2. use scan \ to display the interest every year for 7 years
 
 {x * 1.05} \ [7; 100.]
 
@@ -11506,7 +11523,7 @@ numbers xexp' powers
 
 <hr>
 
-## 🔵 25.8 Create a function, fib, that takes a fibonnaci sequence as its argument and returns the sequence complete with the next entry ##
+**🔵 25.8 Create a function, fib, that takes a fibonnaci sequence as its argument and returns the next entry**
 
 ```q
 / the fib seq = 1 + prior 
@@ -11522,9 +11539,11 @@ fib 1 1
 
 <hr>
 
-## 🔵 25.9 Use the over function to create a function, fibn, to generate a fib sequence n numbers long where n is the functions argument ##
+**🔵 25.9 Use the over function to create a function, fibn, to generate a fib sequence n numbers long where n is the functions argument**
 
 ```q
+ / i dont get this
+
 fibn: {x fib/ 1 1}
 fibn 5
 1 1 2 3 5 8 13
@@ -11533,19 +11552,22 @@ fibn 5
 
 <hr>
 
-## 🔵 25.10 Use the scan to calculate the depreciation of cars 
+**🔵 25.10 Use the scan to calculate the depreciation of cars**
 
 ```q
+/ func accepts [c and r] as arguments
 / c = initial car value
 / r = depreciation rate per year
 
-depr:{[c;r] c*1-r%100}
+depr:{ [c;r] c*1 - r % 100}
 depr[100;8]
 92
+```
 
-/ What is the value after 5 years?
+```q
+/ 2. What is the value after 5 years?
 
-depr[;8]\[5;100]
+depr[;8] \ [5;100]
 100
 92
 84.64
@@ -11553,7 +11575,12 @@ depr[;8]\[5;100]
 71.63
 65.90
 
+/ scan takes 2 arguments = years + initial value
 / use scan to iterate the function 5x
+/ with initial value = 100
+/ depre function accepts blank for intial value
+/ and 8 as interest rate
+
 ```
 
 <hr>
