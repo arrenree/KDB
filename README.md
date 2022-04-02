@@ -9064,8 +9064,11 @@ date       time         sym  price    size  cond duration
 2021.10.19 09:30:02.758 A    100.35   50300 B    00:00:00.015
 ```
 
+xprev
+
 ```q
-/ xprev - moves each element of list n spaces to the right
+/ x xprev y
+/ xprev - moves each element of list y, x spaces to the right
 
 3 xprev 1 2 3 4 5 6
 0N 0N 0N 1 2 3
