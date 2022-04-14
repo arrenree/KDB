@@ -11059,11 +11059,72 @@ wj vs wj1
 / an adverb modifies an existing verb or function to alter how its applied to its arguments
 / combines 2 verbs and uses it as a new function
 
+each
 each both x,'y 
 each left x,\: y
 each right x,/: y 	
 scan x \ y
 over x / y
+```
+
+<a name="eachboth_adverbs"></a>
+### 🔵 24.1 Each
+
+Running Functions with EACH
+
+```q
+/ EACH can be used to run a function multiple times
+/ when calling the function parameters, leave one parameter blank
+/ then use EACH to call list of parameters
+```
+
+```q
+/ assume table price
+
+price: ([] date: 2021.01.21 2021.03.21 2021.09.21; ticker:`AAPL`AAPL`MSFT; ex: `US`UW`US; price: 10 20 30)
+
+price:
+date       | ticker | ex | price
+--------------------------------
+2021-01-21 |  AAPL  | US | 10
+2021-03-21 |  AAPL  | UW | 20
+2021-09-21 |  MSFT  | US | 30
+```
+
+```q
+/ create function f
+/ takes in 3 args: [sym, startdate, enddate]
+/ queries the price table 
+/ and returns the syms that falls within the [startdate] and [enddate]
+
+f:{ [sym;start;end] select from price where date within (start;end), ticker in sym}
+f[`AAPL;2021.01.21; 2021.12.21]
+
+date       | ticker | ex | price
+---------------------------------
+2021-01-21 | AAPL   | US | 10
+2021-03-21 | AAPL   | UW | 20
+
+/ function queries AAPL from jan 21 to dec 21
+```
+
+```q
+/ if you want to instead query through a list of syms
+/ you can leave the parameter blank
+/ then use each to call a list of symbols
+
+f:{ [sym;start;end] select from price where date within (start;end), ticker in sym}
+raze f[ ;2021.01.21; 2021.12.21] each `AAPL`MSFT
+
+date       | ticker | ex | price
+--------------------------------
+2021-01-21 | AAPL   | US | 10
+2021-03-21 | AAPL   | UW | 20
+2021-09-21 | MSFT   | US | 30
+
+/ left the sym parameter blank
+/ but uses EACH on a list of syms `AAPL`MSFT
+/ need raze to collapse 1 layer
 ```
 
 <a name="eachboth_adverbs"></a>
