@@ -24,10 +24,11 @@
 
 ## 2. [Data Types & Casting & Enumeration](#casting_header)
 1. [Datatype Table](#datatype_table)
-2. [Date](#date_type)
-3. [Time](#time_type)
-4. [Casting](#cast_type)
-5. [Enumeration](#enu_cast)
+2. [Integer Datatypes](#integer_type)
+3. [Text Datatypes](#text_type)
+4. [Temporal Datatypes](#time_type)
+5. [Casting](#cast_type)
+6. [Enumeration](#enu_cast)
 
 ## 3. [Data Types & Casting & Enumeration Problem Set](#casting_problemset)
 
@@ -789,6 +790,7 @@ IBM  | 09:45
 <a name="datatype_table"></a>
 ### 🔵 2.1 Datatype Table
 
+
 type|	size|	char|	num|	notation|	Null Value|	Positive Infinity
 -|-|-|-|-|-|-
 Mixed List|	|	|	|0|	|	|	
@@ -829,40 +831,148 @@ d.dd
 22i 
 ```
 
+<a name="integer_type"></a>
+### 🔵 2.2 Integer Data Types
+
+1. Long
+
+```q
+/ basic integer type is a LONG (8 bytes)
+/ lets say you have an integer 13
+
+type 13
+-7h
+
+/ a negative datatype means its an atom
+/ -7h = long atom
+```
+
+2. Short and Int
+
+```q
+/ two smaller integer datatypes are short and int
+
+/ short = 2 bytes
+/ trailing h
+/ ex, 13h
+
+
+/ int = 4 bytes
+/ trailing i
+/ ex, 13i
+```
+
+3. Float
+
+```q
+/ a float is a number with a decimal 
+/ trailing f
+/ any division % automatically results in a float
+```
+
+<a name="text_type"></a>
+### 🔵 2.3 Text Data Types
+
+1. char
+
+```q
+/ a single character enclosed by double quotes
+/ stored as one byte
+/ "q" 
+
+/ "this is not a char, but a string"
+```
+
+2. sym
+
+```q
+/ a sym is an atom holding text
+/ denoted by backtick
+/ can hold arbitrary number of chars (single or multiple)
+/ sym is irreducible, so you cannot access individual chars
+
+/ `q
+/ `alsoasym
+
+/ a sym is not a char
+/ a sym is not a string
+```
+
 <a name="time_type"></a>
-### 🔵 2.2 Time
+### 🔵 2.4 Temporal Data Types
+
+1. date
+
 ```q
+/ date stored as 4 bytes
+/ denoted as yyyy.mm.dd
+/ underlying value is days from Jan 1, 2000
+/ pos for post millennium, neg for pre
 
-t: 11:02:58:000
+2000.01.01 = 0
+1b
+/ START of the millennium
 
-t.hh
-t.mm
-t.minute
-t.ss
-t.second
-
-11i
-2i
-11:02
-58i
-11:02:85 
-```
-```q
-Current Time
-.z.t
-
-Current Date
-.z.d
-
-Current Timespan
-.z.n
-
-Current TimeStamp
-.z.p
+2000.01.02 = 1
+1b
+/ first day of the millennium
 ```
 
+2. time
+
 ```q
-/ Timestamp Examples
+/ denoted as hh:mm:ss.uuu
+/ use time if milliseconds are sufficient
+
+12:00:00.000
+```
+
+3. timespan
+
+```q
+/ denoted as 0Dhh:mm:ss.nnnnnnnnn
+/ note that the 0D is optional
+
+0D12:34:56.123456789
+```
+
+4. datetime (not used anymore)
+
+```q
+/ ppl don't use datetime anymore as its dated
+/ but here is a reference
+
+2000.01.01T12:00:00.000
+```
+
+5. timestamp (preferred)
+
+```q
+/ combines a date and a timespan
+/ underlying timestamp value is a long 
+/ representing the count of nanoseconds from the millennium
+
+2014.11.22D17:43:40.123456789
+```
+
+```q
+/ extract the date from 2014.11.22D17:43:40.123456789
+
+`date$2014.11.22D17:43:40.123456789
+2014.11.22d
+```
+
+```q
+/ extract the timespan from 2014.11.22D17:43:40.123456789
+
+`timespan$2014.11.22D17:43:40.123456789
+17:43:40.123456789n
+```
+
+5. timestamp example
+
+```q
+/ Timestamp Example
 
 depth
 time                       sym  price
@@ -880,7 +990,9 @@ c    |t|f|a
 time |p| |		
 sym  |s| |g
 price| |f|		
+```
 
+```q
 / extract the timestamp column
 
 select time from depth
@@ -890,7 +1002,9 @@ time
 2021-11-07T08:04:21.425000
 2021-11-07T08:14:59.215000
 2021-11-07T08:21:30.944000
+```
 
+```q
 / extract the date from timestamp
 
 select `date$time from depth
@@ -900,7 +1014,9 @@ time
 2021-11-07
 2021-11-07
 2021-11-07
+```
 
+```q
 / extract the time from timestamp
 
 select time.time from depth
@@ -913,9 +1029,47 @@ time
 08:21:30.944
 ```
 
+6. hour, minute, second
+
+```q
+
+t: 11:02:58:000
+
+t.hh
+11i
+
+t.mm
+2i
+
+t.minute
+11:02u
+
+t.ss
+58i
+
+t.second
+11:02:58v
+```
+
+7. current time, date, timespan
+
+```q
+Current Time
+.z.t
+
+Current Date
+.z.d
+
+Current Timespan
+.z.n
+
+Current TimeStamp
+.z.p
+```
 
 <a name="cast_type"></a>
-### 🔵 2.3 Casting
+### 🔵 2.5 Casting
+
 ```q
 / casting = changes one datatype to another type that's compatible
 / parsing = converting from a string to a native type
@@ -925,7 +1079,7 @@ time
 / Casting y to x
 ```
 
-Casting strings to sym
+1. Casting strings to sym
 
 ```q
 "S" $ "a","b","c"
@@ -935,7 +1089,7 @@ Casting strings to sym
 / or can also use `
 ```
 
-Casting syms to strings 
+2. Casting syms to strings 
 
 ```q
 string `abc
@@ -944,7 +1098,7 @@ string `abc
 / sym to string, simply use "string" function
 ```
 
-Casting int to dates
+3. Casting int to dates
 
 ```q
 `date$2
@@ -953,7 +1107,7 @@ Casting int to dates
 / 2nd day of the millennia
 ```
 
-Casting int to time
+4. Casting int to time
 
 ```q
 `time$2
@@ -962,7 +1116,7 @@ Casting int to time
 / 2 + 00:00:00.000
 ```
 
-Casting int to month
+5. Casting int to month
 
 ```q
 `month$2
@@ -972,7 +1126,7 @@ Casting int to month
 / 2 + 2000.01.01
 ```
 
-Casting int to minute
+6. Casting int to minute
 
 ```q
 `minute$2
@@ -981,13 +1135,14 @@ Casting int to minute
 / takes 2 + 00:00
 ```
 
-Casting int to seconds
+7. Casting int to seconds
 
 ```q
 `seconds$2
 00:00:02
 ```
-Casting ints/0 to booleans
+
+8. Casting ints/0 to booleans
 
 ```q
 `boolean$9
@@ -999,7 +1154,7 @@ Casting ints/0 to booleans
 0b
 ```
 
-Converting list of syms to string
+9. Converting list of syms to string
 
 ```q
 string `a`b`c`d`e
@@ -1016,7 +1171,7 @@ raze string `a`b`c`d`e
 / a negative type means it's an atom!
 ```
 
-Float Rounding when Casting to Int
+10. Float Rounding when Casting to Int
 
 ```q
 `int$3.1
@@ -1028,7 +1183,7 @@ Float Rounding when Casting to Int
 / will round accordingly up or down
 ```
 
-Casting a date to a symbol
+11. Casting a date to a symbol
 
 ```q
 `$2020.01.01
@@ -1043,8 +1198,12 @@ error
 ```
 
 <a name="enu_cast"></a>
-### 🔵 2.4 Enumeration
-* enumeration is converting a list of values to a defined domain which restricts values to that domain
+### 🔵 2.6 Enumeration
+
+```q
+/ enumeration is converting a list of values 
+/ to a defined domain, which restricts values to that domain
+```
 
 ```q
 suits:`hearts`clubs`spades`diamonds
