@@ -29,6 +29,7 @@
 4. [Temporal Datatypes](#time_type)
 5. [Casting](#cast_type)
 6. [Enumeration](#enu_cast)
+7. [Infinities and Nulls](#infin_type)
 
 ## 3. [Data Types & Casting & Enumeration Problem Set](#casting_problemset)
 
@@ -812,24 +813,10 @@ minute|	4	|u	|17|	12:11|	0Nu|	0Wu
 second	|4|	v	|18|	12:11:17|	0Nv	|0Wv
 time	|4	|t	|19	|09:01:02:042	|0Nt	|0Wt
 enum	|4|	*|	20-77	|`u$v|	|
-table|	|	|98	|([] c1:ab`c; c2:10 20 30) | 
+table|	|	|98	| ([] c1:ab`c; c2:10 20 30) | 
 dictionary	|	|	|99	|`a`b`c!!10 20 30 |
 
-<a name="date_type"></a>
 
-```q
-Given:
-d: 2011.02.22
-
-d.year
-d.mm
-d.month
-d.dd
-
-2011i
-2i
-22i 
-```
 
 <a name="integer_type"></a>
 ### 🔵 2.2 Integer Data Types
@@ -918,7 +905,23 @@ type 13
 / first day of the millennium
 ```
 
-2. time
+2. Extracting year, month, days
+
+```q
+Given:
+d: 2011.02.22
+
+d.year
+d.mm
+d.month
+d.dd
+
+2011i
+2i
+22i 
+```
+
+3. time
 
 ```q
 / denoted as hh:mm:ss.uuu
@@ -927,7 +930,7 @@ type 13
 12:00:00.000
 ```
 
-3. timespan
+4. timespan
 
 ```q
 / denoted as 0Dhh:mm:ss.nnnnnnnnn
@@ -936,7 +939,7 @@ type 13
 0D12:34:56.123456789
 ```
 
-4. datetime (not used anymore)
+5. datetime (not used anymore)
 
 ```q
 / ppl don't use datetime anymore as its dated
@@ -945,7 +948,7 @@ type 13
 2000.01.01T12:00:00.000
 ```
 
-5. timestamp (preferred)
+6. timestamp (preferred)
 
 ```q
 / combines a date and a timespan
@@ -969,7 +972,7 @@ type 13
 17:43:40.123456789n
 ```
 
-5. timestamp example
+7. timestamp example
 
 ```q
 / Timestamp Example
@@ -1029,7 +1032,7 @@ time
 08:21:30.944
 ```
 
-6. hour, minute, second
+8. Extracting hour, minute, second
 
 ```q
 
@@ -1051,7 +1054,7 @@ t.second
 11:02:58v
 ```
 
-7. current time, date, timespan
+9. current time, date, timespan
 
 ```q
 Current Time
@@ -1226,6 +1229,37 @@ el[0]:`pear
 cast
 
 / also cannot update value if not in the existing domain
+```
+
+<a name="infin_type"></a>
+### 🔵 2.7 Infinities and Nulls
+
+```q
+Literal | Value
+------------------------------------------
+ 0w	| Positive float infinity
+-0w	| Negative float infinity
+ 0n	| Null float ; NaN, or not a number
+ 0W	| Positive long infinity
+-0W	| Negative long infinity
+ 0N	| Null long
+```
+
+```q
+/ float infinity lower case w
+/ integer infinity upper case W
+/ w chosen due to resemblance to infinity symbol.
+
+/ division of positive value by 0 = positive infinity
+/ division of negative value by 0 = negative infinity
+
+/ q philosophy is that any valid arithmetic expression will
+/ produce a result, rather than error
+/ therefore dividing by 0 produces a special float value
+```
+
+```q
+/ null = missing data
 ```
 
 <hr>
