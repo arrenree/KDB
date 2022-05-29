@@ -295,47 +295,52 @@
 
 <a name="assign_intro"></a>
 ### 🔵 1.1 Assigning Values to Varibles
+
 ```q
 a: 7
 a
-```
 7
+```
 
 <a name="expression_intro"></a>
 ### 🔵 1.2 Expressions
 ```q
 6*7
-```
 42
+```
 
 You can also store an expression in a variable
+
 ```q
 b: 6*7
 b
-```
 42
-
+```
 
 <a name="division_intro"></a>
 ### 🔵 1.3 Division
-* division in KDB is expressed as %
-* always gives a float response
+
+```q
+/ division in KDB is expressed as %
+/ always gives a float response
+```
 
 ```q
 4 % 2
-```
 2
+```
 
 <a name="load_intro"></a>
 ### 🔵 1.4 Loading Scripts
+
 ```q
 \l scriptname.q
 ```
+
 ```q
 / to show all tables
 
 tables []
-
 ```
 
 ```q
@@ -347,6 +352,7 @@ can comment multiple lines
 and finish with this
 \
 ```
+
 ```q
 / creating script: function whitespace matters!
 
@@ -371,45 +377,55 @@ f[1;2;3]
 
 <a name="float_intro"></a>
 ### 🔵 1.5 Floats
-* a float is any number with a decimal point
-* remember, division will always return a float response
+
+```q
+/ a float is any number with a decimal point
+/ remember, division will always return a float response
+```
 
 <a name="til_intro"></a>
 ### 🔵 1.6 Til
-* til generates integers until value
-* always starts at 0; does NOT include value indicated
+
+```q
+/ til generates integers until value
+/ always starts at 0; does NOT include value indicated
+```
 
 ```q
 til 4
-```
 0 1 2 3
+```
 
 ```q
-1+ til 4
-```
+1 + til 4
 1 2 3 4
+```
 
 <a name="boolean_intro"></a>
 ### 🔵 1.7 Booleans
-* booleans are true/false statements
-* 0b = false
-* 1b = true
+
+```q
+/ booleans are true/false statements
+/ 0b = false
+/ 1b = true
+```
 
 ```q
 101b
+/ True, False, True
 ```
-True, False, True
 
 ```q
 42 = 6*7
-```
 1b (true)
+```
 
 ```q
 1 2 3 = 10 2 30
-```
 010b
-* can compare 2 lists of equal length
+
+/ can compare 2 lists of equal length
+```
 
 <a name="over_intro"></a>
 ### 🔵 1.8 Over
@@ -418,9 +434,8 @@ True, False, True
 +/ [2 3 4] 
 9
 
-/ reduces 2, 3, 4 with +
+/ execuutes + "over" entire list
 / returns SINGLE output 9
-/ execuutes "over" entire list
 ```
 
 ```q
@@ -441,15 +456,17 @@ True, False, True
 (*/) 2 # 5
 25
 
-/ 2#5= 5 5
+/ 2 # 5 = 5 5
 / (*/) means multiple over the list 5 x 5 = 25
 / notice you have to use ( ) to contain the (*/)
+```
 
-
-2 */ 2#5
+```q
+2 */ 2 # 5
 50
 
 / notice no more parenthesis if you are multiplying 2 over
+/ 2 # 5 = 5 5
 / 2 * 5 * 5 = 50
 ```
 
@@ -553,21 +570,27 @@ count each (til 6; 10 20 30)
 
 ```q
 k: 1 2 3 4
-2#k
+2 # k
 1 2
 
 / take # will take the first 2 values of list k
+```
 
--2#k
+```q
+-2 # k
 3 4
 
 / take last 2 values of list k
+```
 
+```q
 5 # 8
 8 8 8 8 8 
 
 / take 5 values of 8
+```
 
+```q
 5 # 1 2 3
 1 2 3 1 2
 
@@ -586,12 +609,16 @@ k: 1 2 3 4
 3 4
 
 / drops the FIRST 2 values from list k
+```
 
+```q
 -2_k
 1 2
 
 / - drops the LAST 2 values from list k
+```
 
+```q
 k_2
 1 2 4
 
@@ -609,6 +636,7 @@ l: 1 2 3 4 5 6
 
 / cuts list into elements of 2
 ```
+
 ```q
 3 cut l
 (1 2 3; 4 5 6)
