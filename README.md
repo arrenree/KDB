@@ -284,6 +284,22 @@
 
 <hr>
 
+## 🔴 Getting Started
+[Top](#top)
+
+```q
+/ launch command prompt
+
+cd \q
+
+/ change directory to q
+
+q.exe -p 5000
+
+/ launch q
+
+```
+
 <a name="kdbintro_header"></a>
 ## 🔴 1. KDB Basics
 [Top](#top)
