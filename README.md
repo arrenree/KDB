@@ -12028,6 +12028,54 @@ Honda,300,3000
 ### 🔵 26.5) Loading CSV Files
 
 ```q
+/ step 1: read the csv file to see what datatypes are in file
+/ step 2: open the csv file (header vs no header)
+```
+
+```q
+/ first, create a sample csv file called book1 and save to your directory
+
+book1
+city population temp
+---------------------
+LA      100     10
+NY      200     20
+SEA     300     30
+
+/ step 1: read the csv file using read0
+
+read0 `:book1.csv
+("city,population,temp";"LA,100,10";"NY,200,20";"SEA,300,30")
+
+/ read0 function will returns the contents of a text file as a list of strings
+/ this gives you an idea of what datatypes are contained in the file
+```
+
+```q
+/ step 2: load the file with HEADERS using 0: (load function)
+
+t2:("SII";enlist",") 0: `:book1.csv
+t2
+
+city	population  temp
+-------------------------
+LA	100	    10
+NY	200    	    20
+SEA	300	    30
+
+/ the 0: function helps you load files
+/ you need to specify the datatype prior to loading
+
+/ t2 names your table
+/ "SII" = sym, int, int for datatypes
+/ since the csv file has headers, you'll need to enlist a comma
+/ this is known as a delimiter
+/ delimiter = is a character (comma) that marks the beginning or end of a unit of data
+```
+
+Example 2
+
+```q
 / the 0: function prepares, saves, and loads text files. 
 
 tab1: ("ICS";enlist",")0: `:tab1.csv
@@ -12041,7 +12089,9 @@ a b c
 1 A 4
 2 B 5
 3 C 6
+```
 
+```q
 / to leave out certain columns, simply omit datatype in first argument
 
 tab1: ("IC ";enlist",")0: `:tab1.csv
@@ -12051,7 +12101,11 @@ a b
 1 A
 2 B
 3 C
+
+/ this omits the 3rd column of syms
 ```
+
+Loading a csv file with no headers
 
 ```q
 / to load table with no column headers
@@ -12064,6 +12118,12 @@ tab2
 A B C
 4 5 6
 
+/ notice there's no "enlist"
+/ hence it doesnt treat the first row as a column header
+```
+Load csv file as dictionary
+
+```q
 / to turn into dictionary, set `a`b`c as keys
 
 `a`b`c!("ICS";",")0: `:tab2.csv
@@ -12082,8 +12142,11 @@ a b c
 2 B 5
 3 C 6
 ```
+
+Example 3
+
 ```q
-/ Example 2
+/ assume csv file called nyse_20110621.csv
 
 ("**********"; ",") 0: `:nyse_20110621.csv
 
