@@ -11890,6 +11890,14 @@ depr[;8] \ [5;100]
 ## 🔴 26. Saving and Loading Data
 [Top](#top)
 
+```q
+/ KDB communicates with the console, files, and system through "connection handles"
+/ file and process handles are created by hopen
+/ and destroyed by hclose
+
+/ so file handle is a way to connect to a file
+```
+
 <a name="txt_import"></a>
 ### 🔵 26.1) Reading TXT files
 
@@ -11899,16 +11907,31 @@ depr[;8] \ [5;100]
 hopen `:test.txt
 read0 `:test.txt
 
-/ file handler = a temporary reference number that an OS assigns to a file requested by a user to be opened
-/ hopen function will open the txt file
+/ hopen function will open the txt file (connects a process or file)
 / read0 function will read the txt file
 ```
 
 <a name="txt_export"></a>
-### 🔵 26.2a) Manipulating File Handle
+### 🔵 26.2) Writing to TXT files
 
 ```q
-/ to write to txt, simply use hopen to get the file handle, store the file handle, and store strings to it
+/ write to txt file 
+
+`:test2.txt 0:("hello";"goodbye")
+
+/ creates txt file called test2
+/ 0: writes the following strings to the file
+
+read0 `:test3.txt
+/ ("hello";"goodbye")
+
+/ read0 will "read" the txt file
+```
+
+```q
+/ method 2
+/ to write to txt, simply use hopen to get the file handle,
+/ store the file handle, and store strings to it
 
 fh:hopen `:hi.txt
 fh "10"
@@ -11928,6 +11951,7 @@ hclose fh
 
 <a name="tables_exportformat"></a>
 ### 🔵 26.2b) Saving CSV files
+
 ```q
 / there are 2 ways to save to text:
 /       1) save function (save `name.csv)
@@ -11962,8 +11986,8 @@ save `trade.csv
 ```
 
 ### 🔵 26.3) Saving tables as txt, csv, excel, and xml files
-```q
 
+```q
 cars: ( [] maker: `Ford`Tesla`Honda; price: 100 200 300; weight: 1000 2000 3000)
 
 maker| price| weight
