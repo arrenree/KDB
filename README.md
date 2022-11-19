@@ -1014,6 +1014,13 @@ type `$"symwith space"
 <a name="time_type"></a>
 ### 🔵 2.4 Temporal Data Types
 
+1. [Date](#temporal_date)
+2. [Time](#temporal_time)
+3. [Timespan](#temporal_timespan)
+4. [Datetime](#temporal_datetime)
+5. [Timestamp](#temporal_timestamp)
+
+<a name="temporal_date"></a>
 1. Date
 
 ```q
@@ -1075,7 +1082,8 @@ d.dd
 22i 
 ```
 
-3. time
+<a name="temporal_time"></a>
+2. Time
 
 ```q
 / denoted as hh:mm:ss.uuu
@@ -1087,7 +1095,8 @@ type 12:00:00.000
 / datatype time
 ```
 
-4. timespan
+<a name="temporal_timespan"></a>
+3. Timespan
 
 ```q
 / denoted as 0Dhh:mm:ss.nnnnnnnnn
@@ -1096,7 +1105,8 @@ type 12:00:00.000
 0D12:34:56.123456789
 ```
 
-5. datetime (not used anymore)
+<a name="temporal_datetime"></a>
+4. Datetime (not used anymore)
 
 ```q
 / ppl don't use datetime anymore as its dated
@@ -1110,7 +1120,8 @@ type 2000.01.01T12:00:00.000
 
 ```
 
-6. timestamp (preferred)
+<a name="temporal_timestamp"></a>
+6. Timestamp (preferred)
 
 ```q
 / combines a date and a timespan
