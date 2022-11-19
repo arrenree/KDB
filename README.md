@@ -1239,30 +1239,31 @@ t.second
 ```q
 Given table depth:
 
-depth
-time                       sym  price
--------------------------------------
-2021-11-07T08:04:21.425000 YHOO 33.99
-2021-11-07T08:14:59.215000 ORCL 35.16
-2021-11-07T08:21:30.944000 NOK  42.01
+depth: ([] timestamp: 2021.11.07D08:04:21.425000, 2021.11.07D08:14:59.215000, 2021.11.07D08:21:30.944000; sym: `YHOO`ORCL`NOK; price: 39.99 35.16 42.01)
+
+timestamp                  |  sym | price
+------------------------------------------
+2021-11-07T08:04:21.425000 | YHOO | 39.99
+2021-11-07T08:14:59.215000 | ORCL | 35.16
+2021-11-07T08:21:30.944000 | NOK  | 42.01
 
 meta depth
 
-/ time column is datatype p = timestamp
+c          | t | f | a
+------------------------
+timestamp  | p |   |		
+sym        | s |   | g
+price      |   | f | 		
 
-c    |t|f|a
-------------
-time |p| |		
-sym  |s| |g
-price| |f|		
+/ timestamp column is datatype p = timestamp
 ```
 
 ```q
 1. Extract the TIMESTAMP column
 
-select time from depth
+select timestamp from depth
 
-time
+timestamp
 --------------------------
 2021-11-07T08:04:21.425000
 2021-11-07T08:14:59.215000
@@ -1272,26 +1273,31 @@ time
 ```q
 2. Extract the DATE from TIMESTAMP
 
-select `date$time from depth
+select `date$timestamp from depth
 
-time
+timestamp
 ----------
 2021-11-07
 2021-11-07
 2021-11-07
+
+/ extract timestamp from depth
+/ then cast it to a date
 ```
 
 ```q
 3. Extract the TIME from TIMESTAMP
 
-select time.time from depth
-select `time$time from depth
+select `time$timestamp from depth
 
-time
+timestamp
 ------------
 08:04:21.425
 08:14:59.215
 08:21:30.944
+
+/ extract timestamp from depth
+/ then cast it to time to extract only the time
 ```
 
 :point_right: 4. Extracting CURRENT Temporal Data
