@@ -861,6 +861,48 @@ table|	|	|98	| ([] c1:ab`c; c2:10 20 30) |
 dictionary	|	|	|99	|`a`b`c!!10 20 30 |
 
 
+### 🔵 2.1 Data Types - High Level Concepts
+
+Defining Datatypes
+
+```q
+/ to define a datatype, type char value at end
+
+1b
+type 1b
+-1h
+
+/ define datatypes using the char column in table
+/ we define 1 as boolean with b
+/ type returns -1h, the number corresponds to the num column in table above
+/ negative means atom
+
+1i
+type 1i
+-6h
+
+/ now, we define 1 as an int by using i in the char column
+/ type returns -6h, corresponding to the num column
+```
+
+Defining bytes
+
+```q
+/ bytes are a little different
+/ need to prefix 0x (intead of adding to end)
+
+type 12j
+-7h
+
+/ type 12 is a long datatype
+
+type 0x12
+-4h
+
+/ by prefixing 0x before 12, we define it as a byte
+/ 4 corresponds to num column = byte
+```
+
 
 <a name="integer_type"></a>
 ### 🔵 2.2 Integer Data Types
