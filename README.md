@@ -836,7 +836,7 @@ IBM  | 09:45
 ### 🔵 2.1 Datatype Table
 
 
-type|	size|	char|	num|	notation|	Null Value|	Positive Infinity
+type| size (bytes) |	char|	num|	notation|	Null Value|	Positive Infinity
 -|-|-|-|-|-|-
 Mixed List|	|	|	|0|	|	|	
 boolean|	1|	b|	1|	1b|	0b|	
