@@ -1012,16 +1012,17 @@ type `$"symwith space"
 ```
 
 <a name="time_type"></a>
-### 🔵 2.4 Temporal Data Types
+### 🔵 2.4 Temporal Datatypes
 
 1. [Date](#temporal_date)
 2. [Time](#temporal_time)
 3. [Timespan](#temporal_timespan)
 4. [Datetime](#temporal_datetime)
 5. [Timestamp](#temporal_timestamp)
+6. [Extracting From Temporal Datatypes](#temporal_extract)
 
 <a name="temporal_date"></a>
-1. Date
+### :white_medium_small_square: 1. Date
 
 ```q
 / denoted as YYYY.MM.DD
@@ -1066,24 +1067,8 @@ type 2022.11.01
 / true - this is the first day after 2000.01.01
 ```
 
-2. Extracting year, month, days
-
-```q
-Given:
-d: 2011.02.22
-
-d.year
-d.mm
-d.month
-d.dd
-
-2011i
-2i
-22i 
-```
-
 <a name="temporal_time"></a>
-2. Time
+### :white_medium_small_square: 2. Time
 
 ```q
 / denoted as hh:mm:ss.uuu
@@ -1096,7 +1081,7 @@ type 12:00:00.000
 ```
 
 <a name="temporal_timespan"></a>
-3. Timespan
+### :white_medium_small_square: 3. Timespan
 
 ```q
 / denoted as 0Dhh:mm:ss.nnnnnnnnn
@@ -1106,7 +1091,7 @@ type 12:00:00.000
 ```
 
 <a name="temporal_datetime"></a>
-4. Datetime (not used anymore)
+### :white_medium_small_square: 4. Datetime (not used anymore)
 
 ```q
 / ppl don't use datetime anymore as its dated
@@ -1117,38 +1102,142 @@ type 2000.01.01T12:00:00.000
 
 / datatype datetime
 / but again, not really used anymore
-
 ```
 
 <a name="temporal_timestamp"></a>
-6. Timestamp (preferred)
+### :white_medium_small_square: 5. Timestamp (preferred)
 
 ```q
 / combines a date and a timespan
 / underlying timestamp value is a long 
 / representing the count of nanoseconds from the millennium
+/ YYYY.MM.DD D HH:MM:SS:MMMMMMMMM
 
-2014.11.22D17:43:40.123456789
+type 2014.11.22D17:43:40.123456789
+-12h
+
+/ -12 is datatype timestamp
+```
+
+<a name="temporal_extract"></a>
+### :white_medium_small_square: 5. Extracting From Temporal Datatypes
+
+:point_right: 1. Extracting from DATE
+
+```q
+d: 2011.02.22
+type d
+-14h
+
+/ -14h confirms datatype is date
 ```
 
 ```q
-/ extract the date from 2014.11.22D17:43:40.123456789
+1. Extract the year from date d
+
+d.year
+2011i
+
+/ extracted year by using .year syntax
+```
+
+```q
+2. Extract month from date d
+
+d.mm
+2i
+
+/ extracted month by using .mm syntax
+
+/ alternatively can also do:
+
+d.month
+2011-02m
+
+/ by using the .month syntax
+/ you extract both the year and the 02 month
+```
+
+```q
+3. Extract the day from date d
+
+d.dd
+22i
+
+/ extracted date by using .dd syntax
+```
+
+:point_right: 2. Extracting from TIME
+
+```q
+t: 11:02:58:000
+type t
+-19h
+
+/ -19h is datatype TIME
+```
+
+```q
+1. Extract HOURS from TIME
+
+t.hh
+11i
+
+/ extracted hours using .hh syntax
+```
+
+```q
+2. Extract MINUTES from TIME
+
+t.mm
+2i
+
+/ extracted minutes using .mm syntax
+
+/ alternative:
+
+t.minute
+11:02u
+
+/ using the .minute syntax, we get HH:MMu
+```
+
+```q
+3. Extract SECONDS from TIME
+
+t.ss
+58i
+
+/ extracted seconds using .ss syntax
+
+/ alternatively:
+
+t.second
+11:02:58v
+
+/ using the .second syntax we get HH:MM:SS
+```
+
+:point_right: 3. Extracting from TIMESTAMP
+
+```q
+1. Extract the DATE from timestamp 2014.11.22D17:43:40.123456789
 
 `date$2014.11.22D17:43:40.123456789
 2014.11.22d
 ```
 
 ```q
-/ extract the timespan from 2014.11.22D17:43:40.123456789
+2. Extract the TIMESPAN from timestamp 2014.11.22D17:43:40.123456789
 
 `timespan$2014.11.22D17:43:40.123456789
 17:43:40.123456789n
 ```
 
-7. timestamp example
+:point_right: 4. Extracting from TIMESTAMP #2
 
 ```q
-/ Timestamp Example
+Given table depth:
 
 depth
 time                       sym  price
@@ -1169,7 +1258,7 @@ price| |f|
 ```
 
 ```q
-/ extract the timestamp column
+1. Extract the TIMESTAMP column
 
 select time from depth
 
@@ -1181,7 +1270,7 @@ time
 ```
 
 ```q
-/ extract the date from timestamp
+2. Extract the DATE from TIMESTAMP
 
 select `date$time from depth
 
@@ -1193,7 +1282,7 @@ time
 ```
 
 ```q
-/ extract the time from timestamp
+3. Extract the TIME from TIMESTAMP
 
 select time.time from depth
 select `time$time from depth
@@ -1205,29 +1294,7 @@ time
 08:21:30.944
 ```
 
-8. Extracting hour, minute, second
-
-```q
-
-t: 11:02:58:000
-
-t.hh
-11i
-
-t.mm
-2i
-
-t.minute
-11:02u
-
-t.ss
-58i
-
-t.second
-11:02:58v
-```
-
-9. current time, date, timespan
+:point_right: 4. Extracting CURRENT Temporal Data
 
 ```q
 Current Time
