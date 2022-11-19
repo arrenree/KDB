@@ -907,32 +907,48 @@ type 0x12
 <a name="integer_type"></a>
 ### 🔵 2.2 Integer Data Types
 
-1. Long
+1. [Long](#datatype_long)
+2. [Short](#datatype_short)
+3. [Int](#datatype_int)
+
+<a name="datatype_long"></a>
+### :white_medium_small_square: 1. Long
 
 ```q
 / basic integer type is a LONG (8 bytes)
-/ lets say you have an integer 13
+/ any number you type is automatically a long
 
 type 13
 -7h
 
 / a negative datatype means its an atom
-/ -7h = long atom
+/ -7h = datatype long
 ```
 
-2. Short and Int
+<a name="datatype_short"></a>
+### :white_medium_small_square: 2. Short 
 
 ```q
-/ two smaller integer datatypes are short and int
-
 / short = 2 bytes
-/ trailing h
-/ ex, 13h
+/ designated by number + h
 
+type 13h
+-5h
 
+/ 5 = datatype short
+```
+
+<a name="datatype_int"></a>
+### :white_medium_small_square: 3. Int
+
+```q
 / int = 4 bytes
-/ trailing i
-/ ex, 13i
+/ designated by number + i
+
+type 13i
+-6h
+
+/ 6 is datatype int
 ```
 
 3. Float
@@ -946,7 +962,11 @@ type 13
 <a name="text_type"></a>
 ### 🔵 2.3 Text Data Types
 
-1. char
+1. [Char](#textdata_char)
+2. [Sym](#textdata_sym)
+
+<a name="textdata_char"></a>
+### :white_medium_small_square: 1. Char
 
 ```q
 / text data enclosed by double quotes
@@ -965,7 +985,8 @@ type "apple"
 / notice its no longer negative
 ```
 
-Strings (char vectors)
+### :white_medium_small_square: Strings (char vectors)
+
 ```q
 / a string is NOT a datatype
 / a string is a list of chars
@@ -979,7 +1000,8 @@ type "this is a string"
 / so strings are still datatype char
 ```
 
-2. sym
+<a name="textdata_sym"></a>
+### :white_medium_small_square: 2. Sym
 
 ```q
 / a sym is an atom holding text
