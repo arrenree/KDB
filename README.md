@@ -949,17 +949,41 @@ type 13
 1. char
 
 ```q
-/ a single character enclosed by double quotes
+/ text data enclosed by double quotes
 / stored as one byte
-/ "q" 
 
-/ "this is not a char, but a string"
+type "a" 
+-10h
+
+/ this is an atomic char (negative)
+/ -10 corresponds to num column
+
+type "apple"
+10h
+
+/ this also a char vector (aka a STRING)
+/ notice its no longer negative
+```
+
+Strings (char vectors)
+```q
+/ a string is NOT a datatype
+/ a string is a list of chars
+/ some also call this a char vector
+
+
+type "this is a string"
+10h
+
+/ type 10h is a char vector
+/ so strings are still datatype char
 ```
 
 2. sym
 
 ```q
 / a sym is an atom holding text
+/ a sym holds a sequence of chars as a single unit
 / denoted by backtick
 / can hold arbitrary number of chars (single or multiple)
 / sym is irreducible, so you cannot access individual chars
@@ -971,24 +995,68 @@ type 13
 / a sym is not a string
 ```
 
+```q
+/ syms usually cannot contain spaces between characters
+/ if you must have a space, need to use special syntax
+/ syntax is `$"   "
+
+type `thisisasym
+-11h
+
+/ datatype sym
+
+type `$"symwith space"
+-11h
+
+/ also datatype sym
+```
+
 <a name="time_type"></a>
 ### 🔵 2.4 Temporal Data Types
 
-1. date
+1. Date
 
 ```q
+/ denoted as YYYY.MM.DD
 / date stored as 4 bytes
-/ denoted as yyyy.mm.dd
 / underlying value is days from Jan 1, 2000
 / pos for post millennium, neg for pre
 
+type 2022.11.01
+-14h
+
+/ datatype date
+```
+
+```q
+/ by casting a DATE to an INT
+/ you'll retrieve number of days since 2000.01.01
+
+`int$2000.01.05
+4i
+
+/ date begins on 2000.01.01
+/ so Jan 5, 2000 is 4 days from 2000.01.01
+
+`int$1999.12.25
+-7i
+
+/ negative before 2000.01.01
+/ Dec 25, 1999 is 7 days until 2000.01.01
+```
+
+```q
+/ can test this using booleans
+
 2000.01.01 = 0
 1b
-/ START of the millennium
+
+/ true - the date "count" begins on 2000.01.01
 
 2000.01.02 = 1
 1b
-/ first day of the millennium
+
+/ true - this is the first day after 2000.01.01
 ```
 
 2. Extracting year, month, days
@@ -1013,7 +1081,10 @@ d.dd
 / denoted as hh:mm:ss.uuu
 / use time if milliseconds are sufficient
 
-12:00:00.000
+type 12:00:00.000
+-19h
+
+/ datatype time
 ```
 
 4. timespan
@@ -1029,9 +1100,14 @@ d.dd
 
 ```q
 / ppl don't use datetime anymore as its dated
-/ but here is a reference
+/ YYYY.MM.DD T HH:MM:SS.MMM
 
-2000.01.01T12:00:00.000
+type 2000.01.01T12:00:00.000
+-15h
+
+/ datatype datetime
+/ but again, not really used anymore
+
 ```
 
 6. timestamp (preferred)
