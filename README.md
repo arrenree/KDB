@@ -2704,8 +2704,16 @@ sum d where d > 100
 6 20
 
 / ss = string search
-/ returns index location
+/ returns index location of ENTIRE string
 / ryan appears twice; at the 6th and 20th index location
+
+/ notice the difference here:
+
+"hello ryan where is ryan" ? "ryan"
+6 7 8 9 
+
+/ using the ? find operators, we retrieve the index position
+/ of individual chars in first appearance (since ryan comes up twice)
 ```
 
 <hr>
@@ -2729,6 +2737,7 @@ hello johhn where is john
 2005.01.01 - 2004.01.01
 366
 
+/ if you simply do 2005 - 2004, you'll get 1
 ```
 
 <hr>
@@ -2738,6 +2747,8 @@ l: 7 5 13 20 19 17 30 <br>
 k: 7 17 200 300 400 1000 <br>
 
 ```q
+/ use inter function to return common elements of 2 lists
+
 l inter k
 7 17
 
@@ -2763,12 +2774,15 @@ sum 5#l
 7 17 200 300
 
 / drop last 2 items from k
+/ negative means drop from END
 ```
 
 <hr>
 
 **🔵 7.7 Return only numbers in l that are wholly divisible by 5**
 ```q
+l: 7 5 13 20 19 17 30
+
 l mod 5
 2 0 3 0 4 2 0
 
