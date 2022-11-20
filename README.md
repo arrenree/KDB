@@ -1917,12 +1917,14 @@ dl[;2]
 
 ```q
 / ? find will return the index position
+/ syntax is list ? atom
 
 1 2 3 4 5 ? 3
 2
 
 / find index position of 3
 ```
+
 ```q
 1 2 3 4 5 ? 7
 5
@@ -1930,6 +1932,7 @@ dl[;2]
 / find index position 7
 / not found, returns max index + 1
 ```
+
 ```q
 1 2 2 3 4 ? 2
 1
@@ -1942,15 +1945,16 @@ dl[;2]
 ### 🔵 4.12 Random Operator in Lists
 
 ```q
-/ pick 5 random items from list
+/ atom ? list
+/ picks 5 random items from list
 
 5 ? 1 2 3 4 5
 1 3 2 2 4
-
 ```
 
 ```q
 / pick 5 random items from 0-9
+/ atom ? atom (this atom becomes a pseudo list)
 
 5 ? 10
 8 5 5 9 2
@@ -1961,6 +1965,7 @@ dl[;2]
 / pick 5 distinct random items from 0-9
 / aka, "DEAL", like dealing cards from a deck
 / never repeats the same numbers
+/ use neg sign
 
 -5 ? 10
 8 5 1 9 2
@@ -1972,7 +1977,6 @@ dl[;2]
 /error
 
 / error because you can't return 11 items from a 10 item list
-
 ```
 
 ```q
@@ -1992,17 +1996,23 @@ dl[;2]
 ```
 
 ```q
-/ from list, find 2
+/ from list, find index location of 2
 
 list: 1 2 3 4 5
 list ? 2
 1
 
+/ element 2 is in index position 1
+```
+
+```q
 / from list, return 2 random elements
+/ atom ? list
 
 2 ? list
 3 4
 
+/ atom ? list returns 2 random elements 
 ```
 
 <a name="count_list"></a>
@@ -2014,18 +2024,21 @@ count 1 2 3 4
 
 / counts number of elements in list
 ```
+
 ```q
 count enlist 1 2 3 4
 1
 
 / counts the first dimension of the enlisted structure
 ```
+
 ```q
 count (1 2 3;4 5 6)
 2
 
 / counts number of nested lists
 ```
+
 ```q
 count each (1 2 3; 4 5 6)
 3 3
@@ -2036,7 +2049,7 @@ count each (1 2 3; 4 5 6)
 <a name="raze_intro"></a>
 ### 🔵 4.14 Raze
 
-Raze collapses one level of nesting
+Raze collapses one level of nesting and joins items together
 
 ```q
 t: (1 2; 3 4 5) / this is a nested list containing 2 levels
@@ -2051,6 +2064,26 @@ raze t
 
 ```q
 / 2 levels of nesting
+
+b:((1 2; 3 4); (5 6 7 8))
+b
+    1 2
+    3 4
+5 6 7 8
+
+/ 2 levels of nesting
+
+raze b
+1 2
+3 4
+5 6 7 8
+
+/ collapses element 0 level of nesting (1 2 and the 3 4) in list 
+/ joins to element 1 (5 6 7 8)
+```
+
+```q
+/ another example:
 
 b: (1 2; (3 4; 5 6); 7; 8)
 1 2
@@ -2071,19 +2104,32 @@ raze b
 / collapses 3 4 up a level
 ```
 
+Flatten ALL LEVELS (raze/)
+
 ```
-/ flatten all levels raze/
+/ to flatten all levels, use raze/
 
 b: (1 2; (3 4; 5 6); 7; 8)
 raze/ [b]
 1 2 3 4 5 6 7 8
 
+/ have to encase b with [ ] 
 / using raze/[x] will flatten all levels
 ```
 
+Convert list of syms to singular char element
+
 ```q
+Given list of syms `a`b`c:
+
+/ first convert list of syms to list of chars
+
 string `a`b`c
 "a","b","c"
+
+/ do this using the string function
+
+/ then to collapse into one element, use raze function
 
 raze string `a`b`c
 "abc"
@@ -2093,6 +2139,11 @@ raze string `a`b`c
 ### 🔵 4.15 Union Lists
 
 ```q
+Return only the distinct elements of two lists
+
+1 2 3
+3 4 5
+
 1 2 3 union 3 4 5
 1 2 3 4 5 
 
@@ -2103,29 +2154,53 @@ raze string `a`b`c
 ### 🔵 4.16 Where clause with Lists
 
 ```q
-/ if you have 2 lists, you can use indexing to retrieve corresponding values in lists
+/ Can use comparison operator on two lists
 
 size: 100 300 50 70
 price: 4 8 6 2
 
+/ Are the elements in list greater than 5?
+/ using comparison operator on list to  return list of booleans
+
 price > 5
 0110b
 
-/ using comparison operator on list returns list of booleans
+/ false (4), true (8), true (6), false (2)
+```
+
+```q
+/ which index positions are elements greater than 5?
 
 where price > 5
 1 2
 
 / where + comparison operator = shows index position 
+/ index position 1 (8) and 2 (6) are greater than 5
+```
+
+```q
+/ retrieve the index position from list SIZE where corresponding
+/ element in list price is greater than 5
 
 size where price > 5
+300 50
 
-/ returns value from 2nd list using index position from original list
+/ within price list, elements 1 and 2 are greater than 5
+/ the corresponding elements in size are 300 and 50 (index positions 1 and 2)
+```
+
+```q
+/ retrieve the average of elements in list size
+/ where the corresponding index positions in list price
+/ is greater than 5
 
 avg size where price > 5
+175
 
-/ can perform calc on 2nd list too (avg price)
+/ from above, the corresponding elements in size are 300 and 50
+/ hence avg = 175
 ```
+
 <a name="contain_ops"></a>
 ### 🔵 4.17 Contain
 
