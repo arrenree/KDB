@@ -1350,7 +1350,7 @@ Current TimeStamp
 / Casting y to x
 ```
 
-1. Casting strings to sym
+:point_right: 1. Casting strings to sym
 
 ```q
 Cast strings "a","b","c" to a sym
@@ -1367,7 +1367,7 @@ Cast strings "a","b","c" to a sym
 / or can also use `
 ```
 
-2. Casting syms to strings 
+:point_right: 2. Casting syms to strings 
 
 ```q
 Cast sym `abc to a string
@@ -1379,7 +1379,7 @@ string `abc
 / converts syms to a char vector (aka string)
 ```
 
-3. Casting int to dates
+:point_right: 3. Casting int to dates
 
 ```q
 Cast 2i to a date
@@ -1402,7 +1402,7 @@ Cast 2i to time
 / becomes 2 milliseconds
 ```
 
-5. Casting int to month
+:point_right: 5. Casting int to month
 
 ```q
 Cast 2i to a month
@@ -1414,7 +1414,7 @@ Cast 2i to a month
 / 2 + 2000.01.01 = 2000.03
 ```
 
-6. Casting int to minute
+:point_right: 6. Casting int to minute
 
 ```q
 Cast 2i to a minute
@@ -1425,7 +1425,7 @@ Cast 2i to a minute
 / takes 2 + 00:00
 ```
 
-7. Casting int to seconds
+:point_right: 7. Casting int to seconds
 
 ```q
 Cast 2i to seconds
@@ -1434,7 +1434,7 @@ Cast 2i to seconds
 00:00:02
 ```
 
-8. Casting ints to booleans
+:point_right: 8. Casting ints to booleans
 
 ```q
 Cast 9i to a boolean
@@ -1448,7 +1448,7 @@ Cast 9i to a boolean
 0b
 ```
 
-9. Converting list of syms to string
+:point_right: 9. Converting list of syms to string
 
 ```q
 Convert syms `a`b`c`d`e to a string
@@ -1467,7 +1467,7 @@ raze string `a`b`c`d`e
 / raze collapses one level of nesting, joining items of list together
 ```
 
-10. Float Rounding when Casting to Int
+:point_right: 10. Float Rounding when Casting to Int
 
 ```q
 Cast float 3.1f to an int
@@ -1481,7 +1481,7 @@ Cast float 3.1f to an int
 / will round accordingly up or down
 ```
 
-11. Casting a date to a symbol
+:point_right: 11. Casting a date to a symbol
 
 ```q
 Cast 2020.01.01 to a sym
@@ -1591,10 +1591,9 @@ el, : apple
 / use the ,: operator
 ```
 
-
 <hr>
 
-**🔵 3.2 Show 3 ways to conver float 4.5 to an integer**
+**🔵 3.2 Show 3 ways to convert float 4.5 to an integer**
 ```q
 `int$4.5
 "i"$4.5
@@ -1605,18 +1604,34 @@ el, : apple
 
 **🔵 3.3 Given strings "2001.02.02" and "2003.08.09", parse the strings into KDB dates**
 ```q
+/ parsing is converting a string to a different datatype
+/ need to use slightly different syntax (upper case)
+
 "D"$("2001.02.02";"2003.08.09")
 
-/ these are strings which you are trying to parse into the date datatype
+/ the original dates are strings which you are trying to parse into the date datatype
+/ so you have a simple list of 2 strings (that look like dates)
 / have to use upper case when parsing
 ```
-
 
 <hr>
 
 **🔵 3.4 Given the mixed list L: ("100.1";"hello";"10"), convert elements to float, char, and int**
 ```q
-"F*I"$("100.1";"hello";"10")
+/ ("100.1";"hello";"10") is a list of strings
+/ to convert (or parse) to different datatypes, simply use the parse syntax
+
+/ break down by single:
+
+"F" $ "100.1"
+100.1
+
+/ converts the string "100.1" to float 100.1
+
+/ simply combine all parse datatypes together within " "
+/ note that for char, since its already a char, can just use * 
+
+"F*I" $ ("100.1";"hello";"10")
 100.1
 "hello" 
 10i
