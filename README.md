@@ -2205,23 +2205,26 @@ avg size where price > 5
 ### 🔵 4.17 Contain
 
 ```q
+/ use in operator to check if list contains atom
 / in operator returns booleans
+/ is x in y? 
 
 5 in 1 2 3 4
 0000b
 
-/ is x in y? 
-/ no, so 0
+/ 0 = false, so no, 5 not in list 
 ```
 
 <a name="except_ops"></a>
 ### 🔵 4.18 Except
 
 ```q
+/ return all elements in list x EXCEPT y
+/ returns x except y
+
 1 2 3 4 except 3
 1 2 4
 
-/ returns x except y
 / return the list except 3
 ```
 
@@ -2229,24 +2232,26 @@ avg size where price > 5
 ### 🔵 4.19 Inter
 
 ```q
+/ returns items found in BOTH in both x and y
+/ x inter y
+
 1 2 3 inter 2 3 4
 2 3
 
-/ x inter y
-/ returns items in both x and y
 / inter returns values occuring in both lists
+/ in this case, 2 and 3
 ```
 
 <a name="distinct_ops"></a>
 ### 🔵 4.20 Distinct
 
 ```q
-/ distinct syms
+/ distinct returns only distinct items from list
 
 distinct `a`a`b`b`c`c
-a b c
+`a`b`c
 
-/ distinct only returns distinct items/values
+/ distinct returned distinct syms from list
 ```
 
 ```q
@@ -2254,6 +2259,8 @@ a b c
 
 distinct 1 2 2 3 3 4 4 5
 1 2 3 4 5
+
+/ distinct returned distinct ints from list
 ```
 
 ```q
@@ -2262,8 +2269,9 @@ distinct 1 2 2 3 3 4 4 5
 distinct 100?5
 4 0 1 3 2
 
-/ return only the distinct numbers
-/ from 100 random numbers between 0-4
+/ 100 ? 5 returns 100 random numbers from 0-4
+/ distinct only returns the distinct numbers
+/ so you already know its going to be 0, 1, 2, 3, 4
 ```
 
 <hr>
@@ -2276,11 +2284,14 @@ distinct 100?5
 
 ```q
 / atom ? atom
-3 ? 10
+/ returns 3 random numbers from 0-9
 
-/ returns 3 random numbers from 0-10
+3 ? 10
+0 2 5
 
 / atom ? list
+/ returns 3 random numbers from list on right
+
 3 ? 10 20 30
 10 10 30
 
@@ -2309,6 +2320,8 @@ m: (1 2 3; 10 20 30; 100 200 300) <br>
 ```q
 3#p
 100 200 300
+
+/ use take # function to take first 3 items from list p
 ```
 
 <hr>
@@ -2316,15 +2329,23 @@ m: (1 2 3; 10 20 30; 100 200 300) <br>
 **🔵 5.4 From t, retrieve the list "sold"**
 
 ```q
+/ list t is a string (list of chars)
+/ so use indexing to retrieve individual elements from string
+/ to makeup new string "sold"
+
+/ 1. first find index position of elements of chars "sold"
+/ in other words, retrieve index positions for chars in string "sold"
+
 t?"sold"
 0 8 6 14
 
-/ retrieve index positions for chars in string "sold"
+/ so these index positions correspond to chars "sold"
+
+/ 2. then use indexing to retrieve those individual chars
 
 t[0 8 6 14]
 "sold"
 
-/ then you can retrieve chars using indexing
 ```
 
 <hr>
@@ -2332,18 +2353,20 @@ t[0 8 6 14]
 **🔵 5.5 Create the nested list ("shoot";"bob") by indexing into t**
 
 ```q
+/ 1. Find index location in string t of chars "shoot" and "bob"
+
 t?"shoot"
 0 4 8 8 16
 
 t? "bob"
 19 8 19
 
+/ 2. Then use indexing to retrieve those chars
+
 t(0 4 8 8 16; 19 8 19)
 ("shoot";"bob")
 
-/ find index location of chars in string "shoot" and "bob"
-/ then retrieving those index positions (letters) to spell out
-/ since you are retrieving a list of chars, need to use () instead of [ ]
+/ since you are retrieving a LIST of chars, need to use ( ) instead of [ ]
 ```
 
 <hr>
@@ -2365,7 +2388,8 @@ p[5]: 1000
 3#desc p
 100 500 400
 
-/ take 3 numbers from descending list p
+/ desc sorts list p from largest to smallest
+/ then use take function # to take first 3 elements
 ```
 
 <hr>
@@ -2373,8 +2397,12 @@ p[5]: 1000
 **🔵 5.8 Find values of p that are below the mean**
 
 ```q
-p where p<avg p
+p where p < avg p
 100 200 300 400
+
+/ avg p = 350
+/ where p < avg p returns index position where statement true
+/ p where p < avg p returns value where index position is true
 ```
 
 **🔵 5.9 Create a list of ints from 1 to 10**
@@ -2383,6 +2411,8 @@ p where p<avg p
 1 + til 10
 1 2 3 ...10
 
+/ use til function to generate 0-9
+/ 1 + 0-9 = 1-10
 ```
 
 <hr>
