@@ -320,6 +320,7 @@ a
 
 <a name="expression_intro"></a>
 ### 🔵 1.2 Expressions
+
 ```q
 6*7
 42
@@ -379,6 +380,7 @@ f[1;2;3]
 
 / notice the indentation
 ```
+
 ```q
 / .z.x holds data in string form
 
@@ -450,7 +452,7 @@ til 4
 +/ [2 3 4] 
 9
 
-/ execuutes + "over" entire list
+/ executes + "over" entire list
 / returns SINGLE output 9
 ```
 
@@ -664,16 +666,19 @@ l: 1 2 3 4 5 6
 1 4 cut l
 (2 3 4; 5 6)
 
-/ 2nd element (4) = cut list by 4
+/ 2nd element (4) = cut list by 4 = (1 2 3 4; 5 6)
 / first element (1) = AFTER cutting, then drop everything before this element (1) from output
+/ hence (2 3 4; 5 6)
 ```
 
 ```q
 2 3 cut l
 (3; 4 5 6)
 
-/ drop all elements from 2 and before (1, 2)
-/ cut after 3
+/ cut l into elements of 3 = (1 2 3; 4 5 6)
+/ drop everything before element 2 (element 2 = 3 since start counting at 0)
+/ drops 1 and 2
+/ hence (3; 4 5 6)
 ```
 
 <a name="pluscolon"></a>
@@ -778,6 +783,21 @@ s cross v
 ```
 
 ```q
+Given the two lists, create a table containing every element from both lists
+
+s:`IBM`MSFT`AAPL
+v: 1 2
+
+( [] s)
+
+s
+----
+IBM
+MSFT
+AAPL
+
+/ creates table from list s.
+
 ( [] s) cross ( [] v)
 
 s    | v
@@ -791,20 +811,9 @@ AAPL | 2
 
 / so takes every element of s (IBM, MSFT, AAPL) and combines with every element of v (1 2)
 / the ( [] s) returns a table
-
-```q
-/ ( [] s) returns a single column table
-
-( [] s)
-
-s
-----
-IBM
-MSFT
-AAPL
 ```
 
-cross sym + timeseries
+Cross sym + timeseries
 
 ```q
 / cross is useful for building xbar timeseries
@@ -1659,31 +1668,6 @@ type
 **Append symbol ooo to list s**
 ```q
 s,:`ooo
-```
-
-<hr>
-
-**🔵 3.6 Create an enumeration t containing values p q r that is restricted to domain s**
-```q
-s: `symbol$()
-t: `s$`p`q`r
-
-/ t is now an enumeration which only contain domain s (symbols)
-```
-
-**🔵 3.7 Insert new value u into t**
-
-```q
-s,:`u
-error
-
-/ since t is restricted to domain s, need to first add u into s before adding to t
-
-t,:`u
-`p`q`r`u
-
-/ now it works
-
 ```
 
 <hr>
