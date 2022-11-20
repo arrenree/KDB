@@ -1353,7 +1353,14 @@ Current TimeStamp
 1. Casting strings to sym
 
 ```q
+Cast strings "a","b","c" to a sym
+
 "S" $ "a","b","c"
+`abc
+
+/alternatively:
+
+`$"a","b","c"
 `abc
 
 / use capital "S" to cast to sym
@@ -1363,43 +1370,55 @@ Current TimeStamp
 2. Casting syms to strings 
 
 ```q
+Cast sym `abc to a string
+
 string `abc
 "abc"
 
 / sym to string, simply use "string" function
+/ converts syms to a char vector (aka string)
 ```
 
 3. Casting int to dates
 
 ```q
+Cast 2i to a date
+
 `date$2
 2000-01-03d
 
-/ 2nd day of the millennia
+/ 2nd day of the millennia (2000.01.01)
 ```
 
 4. Casting int to time
 
 ```q
+Cast 2i to time
+
 `time$2
 00:00:00.002t
 
 / 2 + 00:00:00.000
+/ becomes 2 milliseconds
 ```
 
 5. Casting int to month
 
 ```q
+Cast 2i to a month
+
 `month$2
 2000.03m
 
 / KDB time starts at 2000.01.01 
-/ 2 + 2000.01.01
+/ 2 + 2000.01.01 = 2000.03
 ```
 
 6. Casting int to minute
 
 ```q
+Cast 2i to a minute
+
 `minute$2
 00:02
 
@@ -1409,13 +1428,17 @@ string `abc
 7. Casting int to seconds
 
 ```q
+Cast 2i to seconds
+
 `seconds$2
 00:00:02
 ```
 
-8. Casting ints/0 to booleans
+8. Casting ints to booleans
 
 ```q
+Cast 9i to a boolean
+
 `boolean$9
 1b
 
@@ -1428,23 +1451,27 @@ string `abc
 9. Converting list of syms to string
 
 ```q
+Convert syms `a`b`c`d`e to a string
+
 string `a`b`c`d`e
 ("a";"b";"c";"d";"e")
 
 / converting list of syms to singular string
+/ converts to a list of atomic chars
+
+/ to combine into ONE vector of chars:
 
 raze string `a`b`c`d`e
 "abcde"
-```
-```q
--7h
 
-/ a negative type means it's an atom!
+/ raze collapses one level of nesting, joining items of list together
 ```
 
 10. Float Rounding when Casting to Int
 
 ```q
+Cast float 3.1f to an int
+
 `int$3.1
 3i
 
@@ -1457,13 +1484,16 @@ raze string `a`b`c`d`e
 11. Casting a date to a symbol
 
 ```q
+Cast 2020.01.01 to a sym
+
 `$2020.01.01
 error
 
-/ can't cast a date directly to a sym
-/ need to cast as string first
+/ CAN'T cast a date directly to a sym
+/ need to cast as string first, then cast to sym
 
 `$string 2021.01.01
+`2021.01.01
 
 / cast as string first, then cast as sym
 ```
@@ -1477,26 +1507,44 @@ error
 ```
 
 ```q
+Given 2 lists:
+
 suits:`hearts`clubs`spades`diamonds
 l: `hearts`clubs`diamonds
+
+Enumerate all symbols in list l under same domain as suits
+and call this new list el
+
 el: `suits$l
 
-/ enumerate all symbols in list l under same domain as suits
+/ restricts values in list l to the values of domain suits
 / will enforce/restrict their type as same domain 
 ```
 
 ```q
+Append sym `apple to list el
+
 el,:`apple
 cast
 
-/ if you try adding a value that is NOT within that domain (apple), you will get a cast error
+/ cast error
+/ if you try adding a value that is NOT within that domain (`apple), you will get a cast error
 ```
 
 ```q
+Update value of first item list in el to `pear
+
 el[0]:`pear
 cast
 
-/ also cannot update value if not in the existing domain
+/ cast error
+/ also cannot update value if NOT in the existing domain
+
+el[0]:`diamond
+el
+`diamonds`clubs`diamonds
+
+/ can only update values within domain
 ```
 
 <a name="infin_type"></a>
