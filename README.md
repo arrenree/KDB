@@ -86,19 +86,20 @@
 ## 9. [Dictionary Problem Set](#dict_problemset)
 
 ## 10. [Functions](#functions_header)
-1. [Defining & Calling Functions](#define_func)
-2. [Anonymous Function](#anon_function)
-3. [Implicit Argument](#implicit_argu)
-4. [Local vs Global Variables](#local_global_variables)
-5. [Projected Functions](#projected_func)
-6. [If True Statements](#iftrue_state)
-7. [If True/Else Statements](#iftrue_else_state)
-8. [Adding Conditional Branch Pair](#add_cond_branch)
-9. [Do Loops](#do_loop)
-10. [While_Loops](#while_loop)
-11. [Multi Condition While Loops](#multi_cond_while_loop)
-12. [Prime Numbers Function Case Study](#prime_func)
-13. [Function within a Function Lambda](#func_lambda)
+1. [Functions]
+2. [Defining & Calling Functions](#define_func)
+3. [Anonymous Function](#anon_function)
+4. [Implicit Argument](#implicit_argu)
+5. [Local vs Global Variables](#local_global_variables)
+6. [Projected Functions](#projected_func)
+7. [If True Statements](#iftrue_state)
+8. [If True/Else Statements](#iftrue_else_state)
+9. [Adding Conditional Branch Pair](#add_cond_branch)
+10. [Do Loops](#do_loop)
+11. [While_Loops](#while_loop)
+12. [Multi Condition While Loops](#multi_cond_while_loop)
+13. [Prime Numbers Function Case Study](#prime_func)
+14. [Function within a Function Lambda](#func_lambda)
 
 ## 11. [Functions Problem Set](#func_problem_set)
 
@@ -310,9 +311,20 @@ q.exe -p 5000
 * in KDB, all operators are executed RIGHT to LEFT
 
 <a name="assign_intro"></a>
-### 🔵 1.1 Assigning Values to Varibles
+### 🔵 1.1 Varibles
 
 ```q
+/ a variable is a name associated with storage that can hold a value of a specific domain
+/ Assignment - act of associating a name and a value
+
+/ Assignment is NOT substitution 
+/ Assignment can subsequently be changed and the variable will then have that value
+```
+
+
+```q
+/ Declare variable A with an assignment of 7
+
 a: 7
 a
 7
@@ -3585,6 +3597,32 @@ peter| 56.1
 <a name="functions_header"></a>
 ## 🔴 10. Functions
 [Top](#top)
+
+### 🔵 10.1 Functions Intro
+
+```q
+/ in mathematics, a FUNCTION associates a unique output value to each input value
+/ the collection of all input values is the domain of the function
+/ the collection from which output values are chosen is the codomain (or range)
+/ a function is also called a MAP from its domain to its codomain
+
+/ the output value that a function f associates to an input value x is read "f of x" or "f at x"
+/ we apply (or evaluate) f at an argument to obtain the corresponding result
+```
+```q
+/ 2 basic ways to define a function: an algorithm or a graph
+
+/ an ALGORITHM is a sequence of operations on the input values to arrive at the corresponding output value
+/ for ex, we define the squaring function, over the domain and codomain of real numbers, to assign as output value the input value times itself
+
+/ alternatively, you can define a function by explicitly listing its input-output associations
+/ the collection of associated input-output pairs is the graph of the function.
+```
+
+```q
+/ the number of inputs to a function is called its valence
+```
+
 
 <a name="define_func"></a>
 ### 🔵 10.1 Defining & Calling Functions
