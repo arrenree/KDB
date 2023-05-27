@@ -853,11 +853,16 @@ IBM  | 09:45
 ## 🔴 2. Data Types & Casting 
 [Top](#top)
 
+```q
+/ a datatype is a particular kind of data item, as defined by the values it can take
+
+```
+
 <a name="datatype_table"></a>
 ### 🔵 2.1 Datatype Table
 
 
-type| size (bytes) |	char|	num|	notation|	Null Value|	Positive Infinity
+type| size (bytes) |	char|	type|	notation|	Null Value|	Positive Infinity
 -|-|-|-|-|-|-
 Mixed List|	|	|	|0|	|	|	
 boolean|	1|	b|	1|	1b|	0b|	
