@@ -7852,11 +7852,14 @@ date      |  time | sym |price| size|cond|bookId | owner | name
 [Top](#top)
 
 ```q
-Evaluated in the following order:
-1. from 
-2. where (filter data)
-3. by (group data)
-4. select
+Select price by date from trade where sym = `AAPL
+
+/ QSQL is evaluated in the following order:
+
+1. from (from file)
+2. where (filters data)
+3. by (groups data)
+4. select (returns columns)
 ```
 
 <a name="select_template"></a>
@@ -7874,7 +7877,7 @@ Evaluated in the following order:
 ```
 
 ```q
-/1. retrieve entire trade table
+/1. Retrieve entire trade table
 
 select from trade
 
@@ -7885,11 +7888,11 @@ date       time         sym  price    size  cond
 2022.03.19 09:30:02.638 RBS  99.65561 6300      
 
 / select always results in a table
-/ select from trade = select whole table
+/ select from trade = retreive every column from table
 ```
 
 ```q
-/2. retrieve only the sym and price columns from trade table
+/2. Retrieve ONLY the sym and price columns from trade table
 
 select sym, price from trade
 
@@ -7899,11 +7902,12 @@ MS   | 109.19
 AAPL | 97.307
 RBS  | 99.655
 
-/ select + column names = will retrieve columns
+/ select [column name] = only retrieves specific columns
+/ if you filter by WHERE, you'd retrieve all columns
 ```
 
 ```q
-/3. retrieve only first 2 rows of trade 
+/3. Retrieve only first 2 rows of trade 
 
 2 sublist trade
 
@@ -7916,7 +7920,7 @@ date	   | time	  | sym | price  | size	 | cond
 ```
 
 ```q
-/4. select the high, low, open, and close price by sym from trade table
+/4. Retrieve the high, low, open, and close price by sym from trade table
 
 select high: max price, low: min price, open: first price, close: last price by sym from trade
 
@@ -7926,22 +7930,33 @@ A    | 109.9 | 50.0 | 83.7 | 1.0
 AA   | 109.9 | 50.0 | 97.1 | 70.7
 AAPL | 109.9 | 50.0 | 97.3 | 98.0
 
+/ select allows you to create NEW columns
+/ and perform operations on those new columns
+/ in this case, created new columns called high, low, open, close
 / grouped by sym
-/ select a new column name will add it to your table
 ```
 
-### Analytics on Grouped Data
 ```q
-select max price by sym from trade
+/5. Aggregate price by sym, then ungroup this data
+
 select price by sym from trade
 ungroup select price by sym from trade
+
+sym | price
+--------------
+A   | 66.77
+A   | 71.66
+A   | 54.56
+A   | 109.47
+
 ```
 
 <a name="selectadd_template"></a>
 ### 🔵 19.2) Adding a new column using select
 
 ```q
-/ if you select a column name that doesnt exist, it will append it
+/ retrieve columns sym price, size
+/ add new column total, which is price x size
 
 select sym, price, size, total:price*size from trade
 
@@ -7951,7 +7966,8 @@ C    | 107.2 | 63500 | 6807314
 MSFT |  96.8 | 1700  |  164687
 RBS  |  97.1 | 80700 | 7837050 
 
-/ new column named total is returned
+/ select allows you to add new columns + perform operations
+/ select + new column name = appends that column
 ```
 
 <a name="qsqlvirtuali_template"></a>
@@ -7961,6 +7977,10 @@ RBS  |  97.1 | 80700 | 7837050
 / q provides a virtual column i
 / which represents the "offset" of each record
 / useful for counting how many rows
+```
+
+```q
+/1. Retrieve the row number, sym and price from trade
 
 select i, sym, price from trade
 
@@ -7972,13 +7992,21 @@ x | sym  | price
 3 | A    | 100.35  
 4 | B    |  55.8
 
-/ column x = virtual column i 
+/ column x = virtual column i
 ```
 
 ```q
-/ example 2
+/2. How many of each sym is there with cond = A from trade table?
 
-/ how many of each sym is there with cond = A from trade table?
+select by sym from trade where cond="A"
+
+sym  | date       | time         | price | size  | cond
+-------------------------------------------------------
+A    | 2023-05-28 | 17:29:54.914 | 60.61 | 47500 | A
+AA   | 2023-05-28 | 17:29:56.463 | 90.08 | 10300 | A
+AAPL | 2023-05-28 | 17:29:58.767 | 87.40 | 24100 | A
+
+/ this retrieves the table filtering for cond =A and grouped by sym
 
 select count i by sym from trade where cond="A"
 
@@ -7988,16 +8016,18 @@ select count i by sym from trade where cond="A"
 `AA`   | 12648
 `AAPL` | 12451
 
-/ since you are grouping by sym
-/ the sym column becomes keyed
+/ i is the virtual column
+/ count i = counts the number of aggregations by sym
+/ so select count i returns the sum of agg grouped by sym
 ```
 
 <a name="qsqlselectmaxmin_template"></a>
 ### 🔵 19.4) Select using [ ]
 
 ```q
-/ select [] can be used to get the first n or last n records of a table
-/ select [n m] can be used to get records starting from n and upto count m from n
+/ select [ ] can be used to retrieve specific rows from table 
+
+/ 1. Retrieve the first 4 rows from trade table
 
 select [4] from trade
 
@@ -8008,10 +8038,15 @@ date       | time	  | sym  | price | size | cond
 2022-03-19 | 09:30:02.743 | RBS	 | 97.1	 |80700	| C
 2022-03-19 | 09:30:02.758 | A	 | 100.3 |50300 | B
 
-/ selects the first 4 records
+/ retrieves the first 4 rows
+/ alternatively, can use: 
+
+4 sublist trade
 ```
 
 ```q
+/2. Retrieves the last 3 rows from trade table
+
 select [-3] from trade
 
 date       | time	  | sym  | price | size | cond
@@ -8021,12 +8056,29 @@ date       | time	  | sym  | price | size | cond
 2022-03-19 | 09:30:02.743 | RBS	 | 97.1	 |80700	| C
 
 / selects the last 3 records
+/ alternatively, can use:
+
+-3 sublist trade
+
 ```
 
 ```q
-select [1 4] from trade
+/ select [n m] retrieves records starting from index position n
+/ and up to count m
+/ for ex, [2 3] means starting from index position 2
+/ retrieve next 3 rows
 
-/ skips 0, returns 1, 2, 3, 4
+select [2 3] from trade
+
+date       | time	  | sym | price  | size  | cond
+--------------------------------------------------------
+2023-05-24 | 09:30:02.954 | E   | 103.13 | 41800 | B
+2023-05-24 | 09:30:02.970 | MS  | 66.40	 | 65600 |	 
+2023-05-24 | 09:30:02.992 | A   | 66.77  | 1100  |	 
+
+/ starts from index position 2
+/ so skips rows 0 and 1 
+/ returns the next 3 rows
 ```
 
 <a name="select_from_where"></a>
