@@ -8068,6 +8068,8 @@ date       | time	  | sym  | price | size | cond
 / for ex, [2 3] means starting from index position 2
 / retrieve next 3 rows
 
+/3. Retrieve rows 3 to 6 from trade
+
 select [2 3] from trade
 
 date       | time	  | sym | price  | size  | cond
@@ -8077,7 +8079,7 @@ date       | time	  | sym | price  | size  | cond
 2023-05-24 | 09:30:02.992 | A   | 66.77  | 1100  |	 
 
 / starts from index position 2
-/ so skips rows 0 and 1 
+/ so skips rows 1 and 2 (index pos 0 and 1) 
 / returns the next 3 rows
 ```
 
@@ -8107,7 +8109,7 @@ select from trade where sym in `AAPL`RBS
 ```
 
 ```q
-/ 1. retrieve trades for sym A on 2021.05.29
+/ 1. Retrieve trades for sym A on 2021.05.29
 
 select from trade where date=2021.05.29, sym=`A
 
@@ -8122,7 +8124,7 @@ date      | time        | sym |price| size | cond
 ```
 
 ```q
-/2. retrieve prices on 2021.05.29 for sym A
+/2. Retrieve prices on 2021.05.29 for sym A
 
 select price from trade where date=2021.05.29, sym=`A
 
@@ -8150,16 +8152,26 @@ price
 / min price
 / avg price
 / etc
+/ since you only select 1 column, returns 1 column
 ```
 
 ```q
-/4. count how many trades have condition A
+/4. How many trades have condition A
 
 count select from trade where cond="A"
 211597
 
 / the count function tallies the number of rows
 / from your query
+/ alternatively:
+
+select count i from trade where cond="A"
+
+x
+----
+211594
+
+/ returns single column with specific count
 ```
 
 ```q
@@ -8175,13 +8187,14 @@ AAPL |2021-06-02|17:29:58.262|76.18|22500|A
 
 / the BY CLAUSE is used for aggregations
 / groups all trades by sym and sets column as key
+/ .z.d = today's date
 ```
 
 ### Where Clause Table Filter - Example 1
 
 ```q
 / you can apply the WHERE clause filter
-/ based on values from in another table
+/ to retrieve values from 2 different tables 
 
 t1: ([] date: 2021.10.21 2021.10.21 2021.10.21 2021.10.21; sym: `GOOG`MSFT`FB`AMZN; exch: `nyse`nyse`nasdaq`nasdaq)
 t2: ([] sym: `GOOG`FB; exch: `nyse`nasdaq)
@@ -8203,18 +8216,23 @@ FB   | nasdaq
 
 ```q
 /1. retrieve values from t1 where date is 2021.10.21
-/ AND values from [sym] + [exch] columns are found in t2
+/ AND values from columns [sym] + [exch] are found in t2
 
-select from t1 where date=2021.10.21, ( [] sym; exch) in t2
+select from t1 where date=2021.10.21, ([] sym; exch) in t2
 
 date       | sym  | exch
 ----------------------------
 2021-10-21 | GOOG | nyse
 2021-10-21 | FB	  | nasdaq
 
-/ first filters date = 2021.10.21 in t1
-/ then it filters a TABLE with column names = [sym;exch] in t2
-/ so ONLY the values in t1 that meet ALL criteria are returned
+/ so this is pretty cool
+/ from t1, first filter by date 2021.10.21
+/ then, filter by columns sym and exch from table 2
+/ this is all happening within the WHERE clause
+/ ONLY the values in t1 that meet ALL where criteria are returned
+/ note the syntax
+/ you are filter for ALL values within the columns sym and exch
+/ from table 2
 ```
 
 ### Where Clause Table Filter - Example 2
@@ -8249,8 +8267,8 @@ cond |c| |
 ```
 
 ```q
-/ since you have multiple parameters, 
-/ it's easier to create a table of these parameters,
+/ since you have multiple query parameters, 
+/ it's easier to create a NEW TABLE of these parameters,
 / then use this table as part of your WHERE filter
 
 /2. create new table, toget, with the target parameters
@@ -8269,9 +8287,10 @@ MSFT   C
 ```
 
 ```q
-/3. Use QSQL to filter the table of parameters
+/3. Now use this new table as part of your WHERE filtering
+/ remember syntax for querying 2 separate tables!
 
-select from trade where date=2021.11.17, ( [] sym; cond) in toget
+select from trade where date=2021.11.17, ([] sym; cond) in toget
 
 date       sym  price size cond
 -------------------------------
@@ -8281,12 +8300,16 @@ date       sym  price size cond
 2021-10-30 IBM	89.19 86600 A
 2021-10-30 IBM	84.13 46600 A
 
+/ queries 2 tables (original source + new where filter parameters)
 / first filters by date 2021.11.17
-/ then filters by the values in the [sym] and [cond] columns
+/ then filters by the values in the columns [sym] and [cond]
 / from the [toget] table
+/ notice syntax when querying from 2 separate tables
+/ need to specify values from columns from 2nd table
 ```
 
 ### Where Clause Ordering
+(bad example?)
 
 ```q
 / be careful about how you order the where filters
@@ -8302,7 +8325,7 @@ price   size
 ```
 
 ```q
-/ find largest price and size > 200
+/1. find the largest price when size > 200
 
 select from trade where size > 200, price = max price
 
@@ -8378,7 +8401,8 @@ Jane  |   F  |	A
 
 / so instead of "creating" a separate table
 / you construct the table of possible outcomes in place
-/ then you simply filter using table with column names = [gender]; [grade]
+/ filter ALL true values from columns [gender] and [grade]
+/ from table created in place of every possible outcome
 ```
 
 <a name="select_by"></a>
@@ -8423,14 +8447,19 @@ date        |open |high  |low |close
 ```q
 / find the number of total number of trades for RBS grouped by date and hours
 
-select count i, max price by date, time.hh from trade where sym=`RBS
+select count i by date, time.hh from trade where sym=`RBS
 
-date        |hh   | x   | price
-------------------------------
-`2021-05-29`|`9`  | 645 | 50.5 
-`2021-05-30`|`10` | 154 | 50.0
+date       | hh | x
+-----------------------
+2023-05-24 | 9  | 650
+2023-05-24 | 10 | 1217
+2023-05-24 | 11 | 1244
+2023-05-24 | 12	| 1301
 
-/ i is a virtual column that returns the number of rows (as column x)
+/ whenver you need to count something,
+/ use count i = virtual column i
+/ by groups data by date and time.hh
+/ time.hh uses dot notation to aggregate time into hours
 ```
 
 <a name="using_ops_functions"></a>
@@ -8445,6 +8474,10 @@ date        | price
 --------------------------
 `2021-05-29`| 100 99 22 33
 `2021-05-30`| 23 199 44 12
+
+/ perform analytics in WHERE clause (price < avg price)
+/ groups by DATE
+/ returns values in PRICE column
 ```
 
 ```q
@@ -8470,14 +8503,6 @@ d   | price
 
 ```q
 /3. retrieve price divide by max price, keyed by today, where the price is less than the avg price
-
-select price by date from trade where sym=`AAPL, price < avg price, date=.z.d
-
-date       | price
---------------------------------
-2022.03.23 | 0.77 0.73 0.99 0.94
-
-/ alternative syntax:
 
 select {x % max x} price by date from trade where sym=`AAPL, price < avg price, date=.z.d
 
