@@ -8586,7 +8586,8 @@ date      | time          |sym   | price  | size | cond
 ```q
 / 1. retrieve the number of small trades for each sym
 / small trades = size less than 999
-/ add column called tradesize = small for each sym
+/ add column called sizegroup = small for each sym
+/ group results by both sym and sizegroup
 
 select num:count i by sym, sizegroup:`small from trade where size within 0 999
 
@@ -8598,9 +8599,11 @@ select num:count i by sym, sizegroup:`small from trade where size within 0 999
 `B`   |   `small`   | 499
 
 / num = number of trades which sizes are less than 999
-/ use COUNT to return NUMBER of trades
-/ since you're aggregating BY sym, the sym + sizegroup cols are keyed
-/ use WHERE within x y = range of values to be selected
+/ leverages the virtual column i
+/ uses COUNT to sum NUMBER of trades in i
+/ add new column sizegroup and append `small to every line
+/ group by sym + sizegroup = these are keyed
+/ use within function on WHERE = filters range of values 0 to 999
 ```
 
 ```q
@@ -8631,9 +8634,31 @@ select num:count i by sym, sizegroup:`small from trade where size within 0 999
 
 ```q
 / BIN takes LHS defined buckets, and returns index position of RHS list
-/ syntax is: size1 size2 size3 bin x
-/ x = list
+/ syntax is: x1 x2 x3 bin y1 y2 y3
+/ x = buckets you define
 
+100 200 300 bin 101 199 202 303 404
+0 0 1 2 2
+
+/ 100 200 300 are your buckets (index pos 0 1 2)
+/ notice 101 and 199 both fall into bucket 100 
+/ hence returns index position 0
+/ anything greater than 300 falls into bucket 2
+```
+
+```q
+/ RENAMING bin baskets
+/ you can rename your bin baskets
+
+`small`med`large 100 200 300 bin 101 199 202 303 400
+`small`small`med`large`large
+
+/ so instead of returning index positions
+/ it returns the names you selected
+/ small med or large
+```
+
+```q
 / 1. Group each element of list size into buckets of 100, 300, 500
 
 size: 100 200 300 400 500 600
@@ -8649,7 +8674,7 @@ size: 100 200 300 400 500 600
 ```
 
 ```q
-/ 2. RENAME these buckets into small, medium, large
+/ 2. RENAME buckets to small, medium, large
 
 `small`medium`large 100 300 500 bin size
 `small`small`medium`medium`large`large
@@ -8668,6 +8693,9 @@ size: 100 200 300 400 500 600
 f: {`small`medium`large 0 1000 9000 bin x}
 f [500 1000 100000]
 `small`medium`large
+
+/ x becomes your input for shapes to be bucketed
+/ dont need declare x as variable since implicit
 ```
 
 ```q
@@ -8690,14 +8718,15 @@ BAC |   small    | 3948
 
 / the f function takes in list of numbers,
 / and returns = small, medium, or large
-/ so you need to add a new column (sizebucket)
-/ for these outputs
-/ utilizes the f function as an aggregator for fby
+/ sizebucket = new column that runs f function with size as input
+/ however, needs an aggregator fby to organize results
+/ fby sym = aggregates output by sym
+/ which matches your original query aggregator (by sym)
 / notice you're grouping the count i by sym
 / since this needs to match the agg fby sym
 ```
 
-BIN example 2:
+BIN example 2 (alternative explanation)
 
 ```q
 / 1. for list of sizes, group into buckets of 0, 1000, or 9000
@@ -8798,17 +8827,19 @@ xbar price - problem set
 /1. retrieve the total size and total number of trades
 / for each sym and each $1 price buckets
 
-select sum size, cnt:count i by sym, 1 xbar price from trade
+select sum size, num:count i by sym, 1 xbar price from trade
 
-`sym` |`price`|   size   | cnt
------------------------------
+`sym` |`price`|   size   | num
+------------------------------
  `A`  |  `50` | 44191500 | 838
  `A`  |  `51` | 42318700 | 842
  `A`  |  `52` | 41432200 | 832
  `A`  |  `53` | 30434493 | 832
 
-/ groups the data by sym and 1 dollar price buckets
-/ cnt = tallies virtual column i
+/ xbar used as an aggregator via the BY CLAUSE
+/ 1 xbar price = groups price into buckets of 1
+/ groups the data by sym and xbar (1 dollar price buckets)
+/ num = counts the virtual column i
 / ie, how many total trades were executed by sym for that price bucket
 ```
 
@@ -8828,19 +8859,21 @@ x bar time.ss / x second buckets
 xbar time - problem set
 
 ```q
-/1. find the max price and total size of trades during 5 min window
+/1. find the max price and total size of trades during 5 min windows
 
-select max price, sum size by sym, 5 xbar time.minute from trades
+select max price, sum size by sym, 5 xbar time.minute from trade
 
-sym  |minute | price|size
--------------------------
-AAPL | 08:00 | 27.4 | 100
-AAPL | 08:05 | 27.9 | 200
-AAPL | 08:10 | 28.2 | 300
+sym  | minute | price | size
+----------------------------
+AAPL | 08:00  | 27.4  | 100
+AAPL | 08:05  | 27.9  | 200
+AAPL | 08:10  | 28.2  | 300
 
-/ set xbar as 5 minute time buckets
-/ grouped sym, then 5 min time buckets
-/ sym + minute are keyed (since by)
+/ 5 xbar time.minute = groups xbar as 5 minute buckets
+/ original column is time (datatype time)
+/ by using dot notation, you are rounding to nearest minute
+/ notice the output - the column says minute now (instead of time)
+/ so this groups your query by sym and 5 min buckets
 ```
 
 ```q
@@ -8848,20 +8881,21 @@ AAPL | 08:10 | 28.2 | 300
 
 select max price by sym, 45 xbar time.minute from trade
 
-sym |minute | price
-----------------------
- A  |09:00  | 109.94
- A  |09:45  | 109.99
- A  |10:30  | 109.96
+sym | minute | price
+---------------------
+ A  | 09:00  | 109.94
+ A  | 09:45  | 109.99
+ A  | 10:30  | 109.96
 
-/ group by sym, set xbar as 45 minute time buckets
+/ 45 xbar time.minute = groups into 45 min buckets
+/ uses the dot notation to round time into minutes
 ```
 
 Amending xbar time buckets (advanced)
 
 ```q
-/ notice how in the above example, the time bucket starts at 9:00
-/ what if we wanted the 15 min bucket to include 9:30 instead?
+/1. notice how in the above example, the time bucket starts at 9:00
+/   what if we wanted the 15 min bucket to include 9:30 instead?
 
 select max price by sym, 09:30 + 45 xbar time.minute - 09:30 from trade
 
@@ -8871,26 +8905,37 @@ sym|minute |price
  A | 10:15 |109.99
  A | 10:45 |109.96
 
-/ by adding 9:30 and subtracting 9:30 from xbar, you can shift the time bucket
+/ by adding 9:30 and subtracting 9:30 from xbar, you can shift the START time bucket
 / to include your desired time
 
 / logic here:
 / the 45 xbar time.minute = groups into 45 min buckets
+/ (i don't get this explanation)
 / subtracting your time 9:30 = you shift the list to include your desired time
 / adding 9:30 = reset to center around your desired time
 ```
 
 ```q
-/ to clean this up, you can write the xbar shift as a function
-
-timeshift:{[start;minbar;time] start + minbar xbar(`minute$time) - start}
+/2. Re-write the xbar time shift as a function called timeshift
 
 / timeshift is a func that takes 3 arguments
 / start = start time
-/ minbar = timing you want to bucket by
-/ time = times (col)
+/ bucket = timing you want to bucket by
+/ time = input times to be bucketed
 
 / cast time to minutes
+
+timeshift:{[start;bucket;time] start + bucket xbar(`minute$time) - start}
+
+/ 3 args = start, bucket, time
+/ notice syntax as you cast time as minutes
+/ need parenthesis
+```
+
+```q
+/3. Query the max price grouped by sym and 45 min buckets
+/ using the function you just created
+/ to ensure 09:30 is one of the buckets
 
 select max price by sym, time: timeshift[09:30;45;time] from trade
 
@@ -8900,33 +8945,43 @@ sym|minute |price
  A | 10:15 |109.99
  A | 10:45 |109.96
 
-/ and this will give you the same exact result
-/ 9:30 = time you want to start
-/ 45 = time bucket
-/ time = column to bucket by
-
-/ or you could retrieve total trades and size by sym, grouped by 45 mins
-
-select sum size, cnt: count i by sym, time: timeshift[09:30;45;time] from trade
-
-sym|minute|   size  |cnt
--------------------------
- A |09:30 |242733500|4800
- A |10:15 |223808400|4497
- A |11:00 |247590700|4898
+/ time column utilizes the timeshift function
+/ timeshift has 3 args: 9:30 start time, 45 min buckets
+/ and time = input of times from time column
 ```
 
 ```q
+/4. What's the total number of trades grouped by size for each 45 min bucket?
+
+select sum size, num: count i by sym, time: timeshift[09:30;45;time] from trade
+
+sym | minute | size     | num
+------------------------------
+ A  | 09:30  | 242733500| 4800
+ A  | 10:15  | 223808400| 4497
+ A  | 11:00  | 247590700| 4898
+```
+
+```q
+/5. Retrieve total number of trades for RBS by date and 15 min buckets
+/ also retrieve the max price for each 45 min bucket
+
 select count i, max price by date, xbar [15*60*1000;time] from trade where sym=`RBS
 
-   date   |    time    | x |price
-----------------------------------
-2021-05-30|11:40:02.743|100|97.113
-2021-05-30|11:44:03.025|123|98.66 
+date       |    time      | x   | price
+-----------------------------------------
+2021-05-30 | 11:40:02.743 | 100 | 97.113
+2021-05-30 | 11:44:03.025 | 123 | 98.66 
 
-/ retrieve number of trades (count) and max price, keyed by date and time 
-/ 15 mins x 60 sec x 1000 ms to get to milliseconds
-/ xbar rounds its 2nd argument to nearest multiple of first argument (so rounds time to 15 mins)
+/ notice the syntax for this xbar is different
+/ you want buckets of 15 mins
+/ dataype time = milliseconds
+/ so to convert 15 mins into milliseconds:
+/ 15 mins x 60 sec x 1000 ms = to get to milliseconds
+/ xbar rounds its 2nd argument to nearest multiple of first argument 
+/ so rounds time to 15 mins
+/ also need the max price column, so this returns the max value
+/ for each bucket
 ```
 
 ```q
