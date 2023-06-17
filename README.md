@@ -8633,6 +8633,7 @@ select num:count i by sym, sizegroup:`small from trade where size within 0 999
 ### 🔵 19.11b) BIN function - Creating buckets of aggregation
 
 ```q
+ 
 / BIN takes LHS defined buckets, and returns index position of RHS list
 / syntax is: x1 x2 x3 bin y1 y2 y3
 / x = buckets you define
@@ -8640,10 +8641,12 @@ select num:count i by sym, sizegroup:`small from trade where size within 0 999
 100 200 300 bin 101 199 202 303 404
 0 0 1 2 2
 
+/ returns index position of LHS
 / 100 200 300 are your buckets (index pos 0 1 2)
 / notice 101 and 199 both fall into bucket 100 
 / hence returns index position 0
 / anything greater than 300 falls into bucket 2
+
 ```
 
 ```q
