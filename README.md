@@ -9587,38 +9587,64 @@ temp:32 31 75 69 70 68 12
 / city = what you are filtering by
 ```
 
-### fby on a table
+### fby Practice Problems
 
 ```q
-/ 1. find the max price per symbol
-
 / load trades.q script
-
-select from trade where price=(max;price) fby sym
-
-time       |sym  |src| price | size
------------------------------------
-2019-03-11 |GOOG | L | 36.01 | 1427
-2019-03-11 |GOOG | O | 36.01 | 708
-2019-03-11 |MSFT | N | 35.5  | 7810
-
-/ notice there are 2 GOOG (both same "max" price)
-/ you can add another fby filter for time
 ```
 
 ```q
-/ 2. find the latest max price by sym
+/ 1. find the max price per symbol (without using fby)
 
-select from t where price=(max;price) fby sym, time=(max;time) fby sym
+select max price by sym from trade
+
+sym | price
+----------------
+A   | 109.9989
+AA  | 109.9987
+AAPL| 109.9997
+B   | 109.9992
+
+/ notice only returns sym + max price columns
+/ if you want to return the entire table
+/ need to use fby
+```
+
+```q
+/ 2. Find the max price per symbol (using fby)
+
+select from trade where price=(max;price) fby sym
+
+date	   | time         | sym  | price    | size  | cond
+-----------------------------------------------------------
+2023-09-05 | 10:38:23.110 | MS	 | 109.9994 | 58500 | B
+2023-09-05 | 11:54:07.340 | AAPL | 109.9997 | 6800  |	 
+2023-09-05 | 12:57:02.029 | MSFT | 109.9998 | 23400 | C
+2023-09-05 | 13:20:30.544 | GOOG | 109.9999 | 12700 | C
+2023-09-05 | 13:57:07.069 | AA	 | 109.9987 | 86100 | C
+
+/ notice fby returns the entire table
+/ fby goes at the END after where
+/ finds the max price filtering by sym
+/ max = aggr
+/ price = col 1
+/ sym = sym 2
+```
+
+```q
+/ 3. Find the LATEST max price by sym (using 2 fby)
+
+select from trade where price=(max;price) fby sym, time=(max;time) fby sym
 
 time      |sym  |src| price | size
 -----------------------------------
 2019-03-11|GOOG	| O | 36.01 | 708
 2019-03-11|MSFT | N | 35.01 | 7810
 
-/ first filtered max price by sym
-/ then filtered max time by sym
-/ can do multiple fby filters
+/ fby goes AFTER the where clause
+/ first fby max price by sym
+/ then fby last time fby sym
+/ can have multiple fby filters
 ```
 
 ### fby Example 3
