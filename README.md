@@ -9587,7 +9587,7 @@ temp:32 31 75 69 70 68 12
 / city = what you are filtering by
 ```
 
-### fby Practice Problems
+### fby Problem Set 1
 
 ```q
 / load trades.q script
@@ -9647,22 +9647,57 @@ time      |sym  |src| price | size
 / can have multiple fby filters
 ```
 
-### fby Example 3
+### fby Problem Set 2
 
 ```q
-/ 1. find the highest price on 2021.10.31
+/ 1. From the trade table, find the sym with the single highest price on 2023.09.05, and return all columns
 
-select from trade where date=2021.10.31, price=max price
+select from trade where date=2023.09.05, price=max price
 
-/ you are looking for the SINGLE highest price on date
-/ filter by date, then the max price from this date
-/ don't need fby since you're not aggregating anything
+date       | time         | sym  | price    | size  | cond
+-----------------------------------------------------------
+2023-09-05 | 13:20:30.544 | GOOG | 109.9999 | 12700 | C
+
+/ since you need to retrieve ALL columns,
+/ need to filter AFTER the where clause (returns all columns)
+/ you are looking for the SINGLE highest price on a specific date
+/ there's no aggregation invovled, hence no need for fby
 ```
 
 ```q
-/ 2. find the max price by sym on this 2021.10.31
+/ 1b. Notice what happens when you do this:
 
-select from trade where date=2021.10.31, price=(max;price) fby sym
+select max price from trade where date = 2023.09.05
+
+price
+-----
+109.999
+
+/ only returns the single highest price
+/ and nothing else
+```
+
+```q
+/ 1c. Alternatively, notice what happens when you do this:
+
+select max price by sym from trade where date = 2023.09.05
+
+sym  | price
+-----------------
+A    | 109.9971
+AA   | 109.9987
+AAPL | 109.9997
+B    | 109.9953
+
+/ if you group by sym, it retrieves the max price
+/ for ALL syms on that date
+/ and doesn't return any other columns
+```
+
+```q
+/ 2. From trade table, find the max price by sym on 2023.09.05, return all columns (using fby)
+
+select from trade where date=2023.09.05, price=(max;price) fby sym
 
 date       | time         | sym | price | size | cond
 ------------------------------------------------------
@@ -9670,11 +9705,15 @@ date       | time         | sym | price | size | cond
 2021-11-26 | 10:25:22.268 | MSFT| 109.9	| 49100| C
 2021-11-26 | 11:49:11.143 | D	| 109.9 |  5600| A
 
-/ since you need to find max price BY sym (aggr by sym)
-/ you need to use fby function
+/ since you want ALL COLUMNS, need to filter conditions after WHERE clause
 / first filters by date, then finds max price aggr by sym
+/ you want the max price by sym, which means for each sym, aggregate all prices,
+/ and find the largest one = needs aggregation
+/ hence you need to use fby function
+```
 
-/ if you did this instead:
+```q
+/ 2b. Notice what happens if you do this instead:
 
 select max price by sym from trade where date = 2021.11.26
 
@@ -9684,31 +9723,82 @@ A    | 109.9
 AA   | 113.2
 AAPL | 339.1
 
-/ this will ONLY return the sym + max price column
+/ this will ONLY returns the sym + max price column
+/ if you want to return the entire table,
+/ need to filter AFTER the where clause
 ```
-
-fby 2 aggregators
+### fby Problem Set 3 (2 aggregators)
 
 ```q
-/ 3. find the max price by sym AND cond on 2021.10.31
+/ 1. From trade table, find the max price by sym AND cond on 2023.09.05, but return ALL columns
 
-select from trade where date=2021.10.31, price=(max;price) fby ( [] sym; cond)
+select from trade where date=2023.09.05, price=(max;price) fby ( [] sym; cond)
 
-/ aggregate by more than one field using a table
-/ filter by date, then max price by sym AND cond
+/ need to use fby AFTER the where clause to return all columns
+/ in other words, i want the max price for EACH sym and cond combination
+/ this means aggregating the max price for both sym and cond
+/ to aggregate by more than one field, use fby + TABLE 
+/ Table has 2 columns; sym and cond
+/ first filters by date, then aggregates the max price by sym AND cond
 ```
 
-### fby Example 4: VWAP
+### fby Problem Set 4 (VWAP)
 
 ```q
-/ compare each price to its vwap price
+1. Find the VWAP price from the 2 lists below:
+
+size: 100 200 300 400
+price: 10 20 30 40
+
+size wavg price
+30f
+
+/ VWAP = volume weighted average price, so can use the wavg function 
+/ wavg = weighted average function
+/ x wavg y = calculates the weighted average between the 2 lists
+```
+
+```q
+2. Create a vwap function that uses size and price as arguments
+
+vwap:{[size;price] size wavg price}
+vwap[size;price]
+30f
+
+/ the function allows inputs from list size + price
+/ and output is the same as above
+```
+
+```q
+3. From trade table, using your function, retrieve the vwap price for each sym
+
+select vwap:vwap[size;price] by sym from trade
+
+sym  | vwap
+---------------
+A    | 79.9450
+AA   | 79.9903
+AAPL | 79.9948
+B    | 79.8015
+BAC  | 79.8109
+
+/ selecting a new column name will add that column
+/ new column utilizes your vwap function
+/ and uses size and price columns from trade table
+```
+
+```q
+/ 1. For each sym on 2023.09.05, retrieve only the prices that are greater than the VWAP price. Return all columns
 
 select from trade where date=2021.10.31, price>({x[`size] wavg x`price}; ([]size;price)) fby sym
 
-/ vwap = volume weighted avg price, so need to use wavg function
-/ syntax = x wavg y
+/ return all columns = filter to come AFTER where clause
+/ retrieves prices that are greater than the vwap price for each sym
+/ "for each sym" = fby sym
+/ VWAP calculated via the wavg function
+/ for each size, retrieves corresponding element from column size
+/ and for each price, retrieves corresponding element from each price
 / for every x (row), find the wavg for each size/price
-/ fby sym
 ```
 
 <a name="xgroup_sql"></a>
