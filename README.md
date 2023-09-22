@@ -86,7 +86,7 @@
 ## 9. [Dictionary Problem Set](#dict_problemset)
 
 ## 10. [Functions](#functions_header)
-1. [Functions]
+1. [Functions](#define_func)
 2. [Defining & Calling Functions](#define_func)
 3. [Anonymous Function](#anon_function)
 4. [Implicit Argument](#implicit_argu)
