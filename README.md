@@ -6602,7 +6602,10 @@ val | b
 ### 🔵 14.3 Removing Columns from keyed table
 
 ```q
-/ you CANNOT delete/drop/remove columns from a KEYED table
+/ 2 methods: delete and drop
+
+/ 1. DROP METHOD
+/ you CANNOT drop a column from a KEYED table
 / must first UNKEY, then drop the columns
 
 tab1:([id:"abc"]pupil:`john`paul`rachel;subject:`maths`physics`chem;mark:96 55 82)
@@ -6614,46 +6617,120 @@ tab1:([id:"abc"]pupil:`john`paul`rachel;subject:`maths`physics`chem;mark:96 55 8
 `c`  | rachel |	chem	|  82
 
 / tab1 is a keyed table (id column)
+```
+```q
+/ 1. DROP METHOD
+/ you CANNOT drop an unkeyed column (say, subject)
 
-0!tab1
+(enlist`subject)_tab1
+/ error
+
+/ you also CANNOT drop a keyed column (id)
+
+(enlist`id)_tab1
+/ error
+```
+
+```q
+/ 1. DROP METHOD
+/ need to first unkey table, then drop column
+
+0!`tab1
 / unkeys the table
 
 (enlist`id)_tab1
 
-/ after you UNKEY the table, you can drop columns
-/ need enlist since single column
+pupil  | subject | mark
+------------------------
+john   | maths   | 96
+paul   | physics | 55
+rachel | chem	 | 82
 
-id | pupil  | subject | mark
-------------------------------
-a  | john   |	maths   |  96
-b  | paul   |	physics |  55
-c  | rachel |	chem	|  82
+
+/ after you UNKEY the table, you can drop columns
+/ remember need to use ENLIST since single column
+```
+
+```q
+/ 1. DROP METHOD
+/ now can also drop unkeyed columns (say subject)
+
+0!`tab1
+/ unkeys the table
+
+(enlist`subject)_tab1
+
+id | pupil  | mark
+-------------------
+a  | john   | 96
+b  | paul   | 55
+c  | rachel | 82
+
+/ subject column dropped
+```
+
+```q
+/ 2. DELETE method to remove columns
+
+delete subject from tab1
+
+id | pupil  | mark
+-------------------
+a  | john   | 96
+b  | paul   | 55
+c  | rachel | 82
+
+/ works much easier!
+```
+
+```q
+/ 2. DELETE method to remove columns
+/ even works on keyed columns (id)
+
+delete id from tab1
+
+pupil  | subject | mark
+------------------------
+john   | maths   | 96
+paul   | physics | 55
+rachel | chem	 | 82
 ```
 
 <a name="retrieving_keysvalues"></a>
 ### 🔵 14.3 Retrieving Keys/Values
 
 ```q
-/ retrieve keys as 
+kt: ([id:`a`b`c`d] name:`jane`jim`kim`john)
+kt
+
+`id`| name
+---------
+`a` | jane
+`b` | jim
+`c` | kim
+`d` | john
+
+/ retrieve keys from table kt
 
 key kt
 
-id| name
----------
-a | jane
-b | jim
-c | kim
-d | john
+| id |
+------
+| a  |
+| b  |
+| c  |
+| d  |
 
-/ key will return the entire column of keyed results
+/ key table will return the entire column of keyed results
+/ this only works on keyed tables
 ```
 
 ```q
-/ retrieve ONLY the column names that are keyed
+/ retrieve column names that are keyed
 
 keys kt
 
-`id`name
+`id
 
 / KEYS will only return the column names that are keyed!
 ```
@@ -6663,33 +6740,38 @@ keys kt
 
 value kt
 
-employer|age
-------------
-citi    | 11
-citi    | 22
-ms      | 33
-ts      | 44
+| name |
+--------
+| jane |
+| jim  |
+| kim  |
+| john |
 
+/ retrieves values from table kt as a single column
 ```
 
 <a name="changing_keys"></a>
 ### 🔵 14.4 Changing Keys (xkey)
-```q
-table kt
-`id`|name|employer| age
-----------------------
-`a` |jane|  citi  | 11
-`b` |jim |  citi  | 22
-`c` |kim |    ms  | 13
-`e` |john|    ts  | 15
 
-/ only id column is keyed for now
+```q
+t:([id:`a`b`c`d] name:`jane`jim`kim`john; employer:`citi`citi`ms`ts; age:11 22 13 15)
+
+table t
+
+`id`| name | employer | age
+---------------------------
+`a` | jane | citi     | 11
+`b` | jim  | citi     | 22
+`c` | kim  | ms       | 13
+`e` | john | ts       | 15
+
+/ id column is keyed
 ```
 
 ```q
-/ add name col as key
+/ 1. Add name as a key column
 
-`id`name xkey `kt
+`id`name xkey `t
 
 id | name |employer| age
 ----------------------
@@ -6699,14 +6781,14 @@ id | name |employer| age
 `e`|`john`|   ts   | 15
 
 / changed key columns to both id and name
-/ use backtick kt to change underlying table
+/ use backtick t to change underlying table
 ```
 
 <a name="adding_keys"></a>
 ### 🔵 14.5 Adding Keys (xkey)
 
 ```q
-1!kt
+1!t
 
 `id`|name|employer| age
 ----------------------
@@ -6721,7 +6803,7 @@ id | name |employer| age
 alternative syntax:
 
 ```q
-`id xkey kt
+`id xkey t
 
 `id`|name|employer| age
 ----------------------
@@ -6737,7 +6819,7 @@ alternative syntax:
 ### 🔵 14.6 Removing Keys (xkey)
 
 ```q
-0!kt
+0!t
 
 id |name|employer| age
 ----------------------
@@ -6750,7 +6832,7 @@ e  |john|    ts  | 15
 alternative syntax:
 
 ```q
-() xkey `kt
+() xkey `t
 
 id |name|employer| age
 ----------------------
@@ -6768,14 +6850,14 @@ e  |john|    ts  | 15
 ```q
 / for keyed tables, use UPSERT instead of INSERT!!
 
-kt: ( [id:`a`b`c`d; name:`jane`jim`kim`john] employer:`citi`citi`ms`ts; age: 11 22 33 44)
+kt: ( [id:`a`b`c`d] name:`jane`jim`kim`john; employer:`citi`citi`ms`ts; age: 11 22 33 44)
 
-`id`|`name`|employer| age
+`id`|name`|employer| age
 ----------------------
-`a` |`jane`|  citi  | 11
-`b` |`jim` |  citi  | 22
-`c` |`kim` |   ms   | 13
-`e` |`john`|   ts   | 15
+`a` | jane|  citi  | 11
+`b` | jim |  citi  | 22
+`c` | kim |   ms   | 13
+`e` | john`|   ts   | 15
 
 nd: ( [id:`e`f] name:`dan`kate; employer:`walmart`walmart; age:200 200)
 
