@@ -159,7 +159,7 @@
 8. [Grouped Attribute](#group_attribute)
 9. [Parted Attribute](#parted_attribute)
 
-## 17. [Foreign Key Restrictions](#fkey_restrictions)
+## 17. [Foreign Key Tables](#fkey_restrictions)
 1. [Single Foreign Keys](#single_fkey)
 2. [Checking Foreign Keys](#check_fkey)
 3. [Upserting with Foriegn Keys](#upsert_fkey)
@@ -7732,20 +7732,70 @@ attr lp
 <hr>
 
 <a name="fkey_restrictions"></a>
-## 🔴 17. Foreign Key Restrictions
+## 🔴 17. Foreign Key Tables
 [Top](#top)
 
 ```q
-/ foreign keys RESTRICT the values that are allowed in a column
+/ a foreign key is a field in one table which identifies a row in another table
+/ foreign keys can also RESTRICT the values that are allowed in a column
 / domain table has to be keyed!
 ```
 
 <a name="single_fkey"></a>
-### 🔵 17.1 Single Foreign Keys
+### 🔵 17.1 Setting Columns as Foreign Keys to another table
 
 ```q
-/ company table = domain table
-/ column sym is KEYED
+/ 1. Create table, tabid, with id columns keyed:
+
+tabid:([id:10 11 12 13] sym:`a`b`c`d)
+
+`id` | sym
+--------
+`10` | a
+`11` | b
+`12` | c
+`13` | d
+```
+
+```q
+/ 2. Create second table, tab, which copies column id
+/ from the tabid table
+/ add in price table with 4 random prices
+
+tab:( [] id:`tabid$10 11 12 13; price: 4?5.0)
+
+id | price
+-----------
+10 | 2.2264
+11 | 3.3138
+12 | 2.3247
+13 | 0.6558
+
+/ so you take values 10 11 12 13 and set as fkey to tabid table
+/ syntax is like casting $
+/ syntax: `DOMAIN_TABLE $ VALUES
+/ this binds the column as an fkey to tabid table
+```
+
+```q
+/ 3. Check the meta for table tab
+
+meta tab
+
+c     |	t | f     | a
+-----------------------
+id    |	j | tabid |	
+price |	f |	  |	
+
+
+/ under f (foreign key), column id now says tabid
+/ which means column id is a fkey from tabid table
+```
+
+Example 2: Setting column as an FKEY to domain of another table
+
+```q
+/ Given the 2 tables below:
 
 company:([sym:`TS`KX`C`AAPL`GOOG`MS] advice: 6?`HOLD`BUY`SELL; level: 6?100)
 company
@@ -7757,6 +7807,8 @@ sym   |advice| level
 `AAPL`|	BUY  | 90
 `GOOG`|	SELL | 73
 `MS`  |	SELL | 90
+
+/ company table = domain table
 
 employee:( [] name:`ryan`charlie`arthur`greg; employer:`TS`KX`KX`MS)
 
@@ -7770,7 +7822,7 @@ greg   | MS
 ```
 
 ```q
-/ set an FKEY for the [employer column] from [employee table] 
+/ 1. Set an FKEY for the [employer column] from [employee table] 
 / to the domain of [company table]
 
 update `company$employer from `employee
@@ -7782,6 +7834,28 @@ update `company$employer from `employee
 / to the DOMAIN in [company table] (KEYED sym column)
 / the domain table HAS to be keyed
 / the values in [employer column] MUST EXIST in domain [company table]
+```
+
+```q
+/ 2. Check the meta data for both tables
+
+meta company
+
+c       | t | f | a
+---------------------
+`sym`   | s |   |	
+`advice`| s |   |	
+`level` | j |   |
+
+meta employee
+
+c         | t | f       | a
+----------------------------
+`name`    | s |         |	
+`employer`| s | company |	
+
+/ this confirms that employer column from employee
+/ now has an fkey to domain of company table
 ```
 
 <a name="check_fkey"></a>
@@ -7816,7 +7890,7 @@ employer|company
 ### 🔵 17.3 Upserting with Foreign Keys
 
 ```q
-/ upsert name:`james`claire and employer:`RBS`RBS into the [employee table]
+/1. Upsert name:`james`claire and employer:`RBS`RBS into the [employee table]
 
 upsert[employee; ( [] name:`james`claire; employer:`RBS`RBS)]
 `cast
@@ -7827,10 +7901,11 @@ upsert[employee; ( [] name:`james`claire; employer:`RBS`RBS)]
 ```
 
 ```q
-/ need to FIRST add RBS into the company domain (as a keyed sym)
+/2. Need to FIRST add RBS into the company domain (as a keyed sym)
 / remember  need to use enlist when adding single rows
 
 insert[`company; ([sym:enlist `RBS] advice:enlist `SELL; level: enlist 20)]
+upsert[`company; ([sym:enlist `RBS] advice:enlist `SELL; level: enlist 20)]
 
 company
 sym   |advice| level
@@ -7845,7 +7920,7 @@ sym   |advice| level
 ```
 
 ```q
-/ now you can append james and claire
+/3. Now you can append james and claire from RBS
 
 upsert[employee; ( [] name:`james`claire; employer:`RBS`RBS)]
 
@@ -7859,6 +7934,44 @@ greg   | MS
 james  | RBS
 claire | RBS
 ```
+
+<a name="retrieve_fkey"></a>
+### 🔵 17.4 Retrieving rows as dictionary
+
+```q
+t: ([] a:`a`b`c`d; b:1 2 3 4; c: 10 11 12 13; d: 100+til 4)
+
+a | b |	c  | d
+-----------------
+a | 1 |	10 | 100
+b | 2 |	11 | 101
+c | 3 |	12 | 102
+d | 4 |	13 | 103
+
+/ 2. Retrieve the 3rd row as a dictionary
+
+t[2]
+
+key | value
+-----------
+a   | c
+b   | 3
+c   | 12
+d   | 102
+
+/ the 3rd row is index position 2
+/ and output will be a dictionary 
+```
+
+```q
+/ 2. Retrieve column c as a list
+
+t[`c]
+10 11 12 13
+
+/ using index retrieve on a dict will return a list
+```
+
 
 <a name="retrieve_fkey"></a>
 ### 🔵 17.4 Retrieving Columns via fkey
@@ -7903,7 +8016,7 @@ employer|s|company|
 ```
 
 ```q
-/ from the [employee table], retrieve the values from the [advice column]
+/ 1. From the [employee table], retrieve the values from the [advice column]
 / and the [level column] from the [company table]
 
 update employer.advice, employer.level from employee
@@ -7917,8 +8030,14 @@ greg   |MS      |SELL  |90
 
 / prev you keyed the [employer column] to domain of [company table]
 / so the [employer column] is your LINK to the [company table]
-/ update a new column will ADD the new column to the table
+/ update a new column will ADD the new column to the existing table
 / pulls in VALUES from [advice column] and [level column] from [company table]
+
+/ typically its TABLE_NAME.COLUMN_NAME
+/ but since column EMPLOYER is now an FKEY to company table
+/ that's your LINK to the other table
+/ so it becomes FKEY_Column.Target_column
+/ as you are trying to pull in advice and level from company
 ```
 
 <a name="multi_fkey"></a>
@@ -7934,8 +8053,6 @@ office
 `KX`  | `NY`   | 354
 `C`   | `LDN`  | 1007
 
-/ columns SYM and LOC are KEYED
-
 employee: ([] name:`ryan`charlie`arthur; employer:`TS`KX`KX; city:`LDN`NY`NY)
 
 employee
@@ -7946,10 +8063,10 @@ charlie|KX      |NY
 arthur |KX      |NY
 ```
 
-Set the fkey for employee table
+Setting multiple fkeys
 
 ```q
-/ fkey the [employer] and [city] columns from [employee]
+/ 1. fkey the [employer] and [city] columns from [employee]
 / to the domain of [office] table
 
 exec `office$flip (employer;city) from employee
