@@ -633,26 +633,32 @@ k: 1 2 3 4
 ### 🔵 1.14 Drop
 
 ```q
+/ drop the FIRST 2 values from list k
+
 k: 1 2 3 4
 
 2_k
 3 4
-
-/ drops the FIRST 2 values from list k
 ```
 
 ```q
+/ drops the LAST 2 values from list k
+
 -2_k
 1 2
 
-/ - drops the LAST 2 values from list k
+/ the -2 means drop from back of list
 ```
 
 ```q
-k_2
+/ drop from index position in list
+
+k _ 2
 1 2 4
 
+/ list _ atom = drop from index position
 / if order is list _ number, then it drops the element at that index position
+/ has to have space between list and atom!
 / 2nd index position = 3
 ```
 
@@ -2031,6 +2037,76 @@ list ? 2
 
 / atom ? list returns 2 random elements 
 ```
+
+```q
+/ generate a random list of 100 times
+
+n:100
+
+n?19:00
+07:48u;03:19u;13:34u;00:24u;01:13u
+
+/ have the times start at 08:00am
+
+08:00 + n?19:00
+19:57u;17:41u;16:09u;09:20u
+
+/ then sort in ascending order
+
+asc 08:00 + n?19:00
+08:18u;08:27u;08:29u;08:52u;08:57u
+```
+
+Random List Problem Set
+
+```q
+/ 1. create a list of 100 "ticks" between -0.2 and 0.2
+
+n:100
+n?-0.2 -0.1 0 0.1 0.2
+
+0.2 0 -0.1 -0.2 0.1 0.2 0 0.2 0.1 0 0.2...
+/ list of 100 "ticks"
+
+/ add a base price, say 40
+/ and make the movements consecutive
+
+40+sums n?-0.2 -0.1 0 0.1 0.2
+40.2 40.3 40.3 40.2 40.3 40.2
+
+/ taking the running sums makes the movement consecutive
+```
+
+```q
+/ 2. Create a table:
+/ of sym A
+/ 100 random times in ascending order from 9:30 to 16:00
+/ and 100 prices from 40 handle + tick detail
+
+t:( []sym:`A; time:asc 09:30+n?16:00; price: 40+sums n?-0.2 -0.1 0 0.1 0.2)
+
+sym | time  | price
+--------------------
+A   | 09:36 | 40.2
+A   | 09:56 | 40.4
+A   | 10:18 | 40.6
+A   | 10:24 | 40.7
+A   | 10:31 | 40.8
+```
+
+```q
+/ 3. Find the min and max price by hour from table t
+
+select low: min price, high: max price by time.hh from t
+
+hh | low | high
+----------------
+0  | 39.4 | 40.1
+1  | 39.5 | 39.7
+9  | 40.2 | 40.4
+10 | 40.4 | 40.8
+```
+
 
 <a name="count_list"></a>
 ### 🔵 4.13 Count Operator in Lists
