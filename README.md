@@ -73,9 +73,9 @@
 1. [Ways to Construct Dictionaries](#dict_from_list)
 2. [Retrieving values](#retrieve_dict)
 3. [Index Retrieve](#index_retrieve_dict)
-4. [Take](#take_dict)
-5. [Drop](#drop_dict)
-6. [Upsert](#upsert_dict)
+4. [Retrieve from Dict (Take)](#take_dict)
+5. [Removing Rows in Dict (Drop)](#drop_dict)
+6. [Adding Rows to Dict](#upsert_dict)
 7. [Multi Key Dictionaries](#multi_key_dict)
 8. [Repeat Keys](#repeat_key_dict)
 9. [Find Operator](#find_dict)
@@ -3144,7 +3144,7 @@ c2 | 2
 ```
 
 <a name="take_dict"></a>
-### 🔵 8.4 Take
+### 🔵 8.4 Retrieve from Dict (Take)
 
 ```q
 / another form of retrieving from dictionaries
@@ -3183,10 +3183,12 @@ d`a`b
 ```
 
 <a name="drop_dict"></a>
-### 🔵 8.5 Drop
+### 🔵 8.5 Removing Rows in Dict (Drop)
 
 ```q
-/ drop ROWS in dictionaries
+/ 1. Drop the first 2 rows in dict d
+
+d:`a`b`c!1 2 3
 
 key | value
 ----------
@@ -3198,13 +3200,14 @@ c   | 3
 
 key | value
 -----------
-C   | 3
+c   | 3
 
 / drop first 2 rows from dictionary d
+/ still returns a dict
 ```
 
 ```q
-/ drop keys + values from dict
+/ 2. Remove entire row with key b
 
 d: `a`b`c ! 1 2 3
 
@@ -3222,14 +3225,36 @@ a   | 1
 c   | 3
 
 / drop key b and its associated value from the dict
-/ can drop multiple keys at once
+/ syntax wise, also works as dict _ `b
 ```
 
+```q
+/ 3. Drop rows with key a and b
+
+`a`b _ d
+
+key | value
+----------
+c   | 3
+
+/ can drop multiple keys at once
+/ note syntax has to have space before and after drop _
+```
 
 <a name="upsert_dict"></a>
-### 🔵 8.6 Upsert
+### 🔵 8.6 Adding Rows to Dictionaries
 
 ```q
+d: `a`b`c ! 1 2 3
+
+key|value
+--------
+a  |1
+b  |2
+c  |3
+
+/ add a new row with key e and value 99 to dict
+
 d [`e]: 99
 
 key|value
@@ -3244,10 +3269,11 @@ e  |99
 / if key doesn't exist, will insert new key + value
 
 ```
-<a name="upsert_dict"></a>
-### 🔵 8.6 Nested List within Dictionaries
+Adding Rows to Nested Lists within Dictionaries
 
 ```q
+/ create dict with nested values:
+
 dict:`alpha`bravo`charlie!((1 2 3);(4 5 6); (7 8 9))
 
 key     | value
@@ -3257,48 +3283,16 @@ bravo	| 4 5 6
 charlie | 7 8 9
 ```
 
-Adding new row to dict via join
+Adding new row to dict (via join)
 
 ```q
 dict,(`delta`echo)!(10 11 12;13 14 15)
 
-/ join not in place, which means its not saved to dict
+/ join not "in place", which means its not saved to dict
 / to update the underlying table, need to use join assign ,:
 ```
 
-Adding new row via Join Assign
-
-```q
-dict,:(`delta`echo)!(10 11 12;13 14 15)
-
-key     | value
----------------
-alpha	| 1 2 3
-bravo	| 4 5 6
-charlie | 7 8 9
-delta   | 10 11 12
-echo    | 13 14 15
-
-/ join assign adds the row + updates underlying dict
-```
-
-Upserting Rows
-
-```q
-dict[`charlie]: 100 200 300
-
-key     | value
----------------
-alpha	| 1 2 3
-bravo	| 4 5 6
-charlie | 100 200 300
-delta   | 10 11 12
-echo    | 13 14 15
-
-/ updates values based on indexed key (`charlie)
-```
-
-Inserting a single row to dict (enlist!)
+Adding single row to dict (via Join Assign)
 
 ```q
 dict,:(enlist `golf)! enlist 10
@@ -3312,10 +3306,44 @@ delta   | 10 11 12
 echo    | 13 14 15
 golf    | 100
 
-/ need to use enlist when adding / upserting single row to dict
-/ for dict enlist, need to enlist both key AND value
-
+/ need to use ENLIST when using join assign to dict
+/ Need to ENLIST BOTH key AND value
 ```
+
+Adding multiple rows to dict (via Join Assign)
+
+```q
+dict,:(`delta`echo)!(10 11 12;13 14 15)
+
+key     | value
+---------------
+alpha	| 1 2 3
+bravo	| 4 5 6
+charlie | 7 8 9
+delta   | 10 11 12
+echo    | 13 14 15
+
+/ join assign adds the row & updates underlying dict
+```
+
+Adding single row to dict (via Upsert)
+
+```q
+dict[`charlie]: 100 200 300
+
+key     | value
+---------------
+alpha	| 1 2 3
+bravo	| 4 5 6
+charlie | 100 200 300
+delta   | 10 11 12
+echo    | 13 14 15
+
+/ updates values based on indexed key (`charlie)
+/ don't need enlist!
+```
+
+Calculating averages on dictionaries
 
 ```q
 / avg + avg each dictionary
@@ -3387,6 +3415,8 @@ a
 ### 🔵 8.9 Find Operator ? on Dictionaries
 
 ```q
+/ Retrieve the key for value 3
+
 dict: `a`b`c`d!1 2 3 4
 
 Key | Value
@@ -3403,10 +3433,22 @@ dict ? 3
 / ? FIND works for both lists and dictionaries
 ```
 
+```q
+/ works on multiple values
+
+d? 3 4
+`c`d
+
+/ returns all keys with matching values
+```
+
+
+
 <a name="dict_opt"></a>
 ### 🔵 8.10 Dictionary Operators
 
 sum 
+
 ```q
 d: `a`b`c ! 1 2 3
 
@@ -3448,6 +3490,35 @@ b  |0.02
 c  |0.03
 
 / divides all values by 100
+```
+
+Operations on Nested Dictionary
+
+```q
+dict:`alpha`bravo`charlie!((1 2 3);(4 5 6); (7 8 9))
+
+key     | value
+---------------
+alpha	| 1 2 3
+bravo	| 4 5 6
+charlie | 7 8 9
+
+/ multiple every value in key charlie by 100
+/ retrieve values only
+
+dict[`charlie]*100
+700 800 900
+
+/ multiple every value in key charlie by 100
+/ return full dictionary with results
+
+dict[`charlie]*:100
+
+key     | value
+----------------------
+alpha	| 1 2 3
+bravo	| 4 5 6
+charlie | 700 800 900
 ```
 
 <a name="dict_adding"></a>
