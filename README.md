@@ -2592,12 +2592,17 @@ adsf
 Example 1: Vector Addition Method
 
 ```
-n: 1000000
+/ create 2 lists of 1m floats from 0-11
+/ time the speed it takes to add the 2 lists together
+
+n: 1,000,000
 
 a:n?100f
 b:n?100f
 
 / a and b are lists of a million random floats
+/ the ? find function will randomly find n number of units
+/ between 0-99
 
 \t r1:a+b
 1
@@ -2606,7 +2611,8 @@ b:n?100f
 ```
 
 ```q
-/ vector addition is very fast
+/ now try running that query 100x
+/ and time it
 
 \t:100 r1:a+b
 120
@@ -2619,13 +2625,19 @@ b:n?100f
 Example 1: Iterative method (while loop)
 
 ```q
+/ create a list of adding 2 lists together
+/ and time this operation
+
+n: 1000000
 a:n?100f
 b:n?100f
 
 / a and b are lists of a million random floats
 
 r2: n#0f
-/ first setup empty results list
+/ f2 = empty results list (of floats)
+/ this "takes" a million 0f
+/ and creates a list
 
 i: 0
 / then an setup index which will cycle through the 2 lists
@@ -2645,6 +2657,30 @@ while[i<n;r2[i]:a[i]+b[i];i+:1]
 
 / much slower than vector addition
 ```
+Worth Noting Re above Syntax
+```q
+/ the empty list is actually a list of a million 0
+
+n#0f
+
+/ so n has a million values
+/ which matches list a and b
+/ so using i (as iterative counter)
+/ you are able to iterate through entire list
+
+/ if you instead created an empty list:
+
+`float$()
+
+/ and run same while loop:
+
+while[i<n;r2:a[i]+b[i];i+:1]
+
+/ your result will be a single number
+/ and no longer a list!
+/ so if you want to KEEP a list
+/ need to use iterative counter i
+```
 
 Example 1: Adverb method using EACH '
 
@@ -2661,27 +2697,29 @@ r3:+'[a;b]
 / faster than while loop, but still slower than vector addition
 ```
 
-Example 2
+Example 2 - Using While + IF functions
 
 ```q
-/ generate list of 1mm ints from 0-199
-
-d: 1000000?200
-
-/ OBJECTIVE: sum all values > 100
+/ Generate list of 1mm ints from 0-199
+/ and sum all values > 100
 ```
 
-While Loop
+While/IF Loop
 
 ```q
-i:0
-r1:0
+d: 1000000?200
+/ creates list of 1mm values from 0-199
+
+i:0 / iterator 
+r1:0 / empty list
 
 while[i<count d; if [d[i]>100;r1+:d[i]]; i+:1]
 
-/ runs while i is less than the count of the list
-/ if value of list at index i is greater than 100
-/ then add to value of result
+/ while i is less than the count of the list d
+/ the following statements will continue to run
+/ if value of list d at index i is greater than 100
+/ empty list r1 becomes r1 + value at index position d[i]
+/ iterator count goes up by 1
 ```
 
 Adverb Version
@@ -2691,9 +2729,16 @@ Adverb Version
 / adds x to the result if x > 100
 / and does this for each element x in list d
 
-r2: 0
-{if[x>100;r2+::x];}each d
+d: 1000?200
+/ creates list d of 1000 values from 0-199
 
+r2: 0
+/ creates empty list r2
+
+{if[x>100;r2+::x];} each d
+
+/ i don't understand the ::x syntax
+/ has to do with creating alias?
 / faster than using while loop
 ```
 
