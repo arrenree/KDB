@@ -12470,14 +12470,15 @@ wj vs wj1
 ```
 
 <a name="adverbs_header"></a>
-## 🔴 24. Adverbs
+## 🔴 24. Adverbs / Iterators
 [Top](#top)
 
 ```q
-/ an adverb modifies an existing verb or function to alter how its applied to its arguments
-/ combines 2 verbs and uses it as a new function
+/ Iterators (formerly known as adverbs) are primary means of iteration
+/ take single argument and return a derived function
+/ the single argument can be a list, dict, table, process handle, or func
 
-each
+each x'
 each both x,'y 
 each left x,\: y
 each right x,/: y 	
@@ -12485,10 +12486,69 @@ scan x \ y
 over x / y
 ```
 
-<a name="eachboth_adverbs"></a>
+<a name="each_monadic"></a>
 ### 🔵 24.1 Each
 
-Running Functions with EACH
+Each Example 1 (easy)
+```q
+/ each is useful for nested lists
+
+a: (`a`b`c;`d`e`f;`g`h`i)
+
+count a
+3
+
+/ a is a nested list containing 3 lists
+/ count will look at the 3 high level elements
+
+count each a
+3 3 3
+
+/ count each will dig 1 layer deeper
+/ and count the elements within each nested list
+
+/ alternative syntax
+
+count'[a]
+3 3 3
+```
+
+Each Example 2 (easy)
+
+```q
+j: ("race fast, safe car."; 0 1 2; `a`b`c)
+"race fast, safe car." 
+0 1 2
+a b c
+
+/ j is a nested list of chars, longs, and syms
+/ each list has 3 elements
+```
+
+```q
+/ 1. Reverse the order of the list
+
+reverse j
+a b c
+0 1 2
+"race fast, safe car."
+
+/ this reverses the mixed list at the top most level
+```
+
+```q
+/ 2. Maintaining the order of the mixed list,
+/ reverse the elements within each nested list
+
+reverse each j
+".rac efas , tsaf ecar"
+2 1 0
+c b a
+
+/ reverses the elements within each nested list
+```
+
+Each Example 3 (advanced)
 
 ```q
 / EACH can be used to run a function multiple times
@@ -12510,10 +12570,11 @@ date       | ticker | ex | price
 ```
 
 ```q
-/ create function f
+/ 1. Create function f
 / takes in 3 args: [sym, startdate, enddate]
-/ queries the price table 
-/ and returns the syms that falls within the [startdate] and [enddate]
+/ to query the price table 
+/ and return the syms that falls within the [startdate] and [enddate]
+/ Run the query for `AAPL between 2021.01.21 to 2021.12.21
 
 f:{ [sym;start;end] select from price where date within (start;end), ticker in sym}
 f[`AAPL;2021.01.21; 2021.12.21]
@@ -12524,12 +12585,15 @@ date       | ticker | ex | price
 2021-03-21 | AAPL   | UW | 20
 
 / function queries AAPL from jan 21 to dec 21
+/ note function syntax is date[from table] within (start;end) [from arg]
+/ ticker[from price table] in sym[arg]
+/ so TABLE to ARGUMENT
+/ easy way to remember this is, "table the argument" (for next time)
 ```
 
 ```q
-/ if you want to instead query through a list of syms
-/ you can leave the parameter blank
-/ then use each to call a list of symbols
+/ 2. Keeping the same function, but instead of querying a single sym,
+/ run a query through a LIST of syms
 
 f:{ [sym;start;end] select from price where date within (start;end), ticker in sym}
 raze f[ ;2021.01.21; 2021.12.21] each `AAPL`MSFT
@@ -12540,8 +12604,10 @@ date       | ticker | ex | price
 2021-03-21 | AAPL   | UW | 20
 2021-09-21 | MSFT   | US | 30
 
-/ left the sym parameter blank
-/ but uses EACH on a list of syms `AAPL`MSFT
+/ leave the sym parameter blank!
+/ but use EACH on a list of syms `AAPL`MSFT
+/ note this comes AFTER you call your function
+/ the result is multiple tables, so need RAZE
 / need raze to collapse 1 layer
 ```
 
@@ -12641,35 +12707,7 @@ b: 5 5 5
 / this is another syntax to use each both
 ```
 
-<a name="each_monadic"></a>
-### 🔵 24.2 Each
 
-each modifies a monadic function to make it operate one level deeper
-
-```q
-/ each useful for nested lists
-
-j: ("race fast, safe car."; 0 1 2; `a`b`c)
-"race fast, safe car." 
-0 1 2
-a b c
-```
-```q
-reverse j
-a b c
-0 1 2
-"race fast, safe car."
-
-/ so this reverses the mixed list at the top most level
-```
-```q
-reverse each j
-".rac efas , tsaf ecar"
-2 1 0
-c b a
-
-/ reverse within each list
-```
 
 <a name="eachright_eachleft"></a>
 ### 🔵 24.3 Each Right / Each Left
