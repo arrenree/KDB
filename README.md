@@ -12270,20 +12270,25 @@ dt         |  sym   | title                   | price
 ### 🔵 23.1 As of Join
 
 ```q
-/ used to find last value from one table, that matches the source table (prevailing quote)
-/ for example, from a table of trades, you want to look up the most recent price or bid size
-/ joins the closest matches from one table to another
+/ from [source table], retrieve last value from [lookup table]
+/ and JOIN it to your source table
+/ usually used to look up "most recent" price, bid, or size
+/ usually uses TIME to pull in prevailing price, quote, etc.
 
-aj [`col_1`col_2; soure_table; lookup_table]
+syntax:
 
-/ syntax = aj [column; source table; lookup table]
-/ last item of columns will be less than or equal join
-/ one of the columns is usually time, since you want to pull in prevailing price
+aj [`column1`column2; source table; lookup table]
+
+/ column 1 from source, column 2 from source
+/ column 2 usually [TIME] since you want to pull in prevailing price
+/ last item of [column], aka [TIME] will be [LESS THAN or EQUAL] join
+/ aka, retrieve in [LOOKUP table] that's <= time from [SOURCE table] 
 ```
+
 ```q
 / As of Time Join Case Study
 
-/ Find the latest bid for list of syms in table t
+/ Find the [latest bid] in table q for syms in table t
 
 t: ( [] time: 07:00 08:30 09:59t; sym:`a`a`b; price: 0.9 1.5 1.9; size:100 200 300)
 q: ( [] time: 08:00 09:00 10:00t; sym:`a`b`a; bid: 1 9 4)
@@ -12304,10 +12309,11 @@ time     |sym | bid
 
 aj [`sym`time; t;q]
 
-/ syntax = aj [`columns; source table; `columns lookup table]
-/ from columns `sym`time from table t, lookup table q and return table q columns 
 / t = source table
 / q = lookup table
+/ syntax = aj [`column1`column2; source table; lookup table]
+/ from columns `sym`time from [table t], lookup [table q]
+/ and return prevailing columns (in this case, bid)  
 / column names must match
 
 time    |sym|price| size| bid
@@ -12316,18 +12322,29 @@ time    |sym|price| size| bid
 08:30:00| a | 1.5 | 200 | 1
 09:59:00| b | 1.9 | 300 | 9
 
-/ from t, look through each sym, then time (less than or equal to)
-/ from t, first row = a. lookup a in q, but no time less than or equal to 7:00am. so bid = null
-/ from t, 2nd row = a. lookup a in q, found 8:00am <= 8:30, so pull in bid = 1
-/ from t, 3rd row = b. lookup bi n q, found 9:00am <=9:59, so bid = 9
+/ from [table t], look through each sym, retrieve data from [table q]
+/ where [time] in [table q] is less than or equal to [time] in [table t]
+
+/ 1. from [t], first row = a. lookup a in [q],
+/ compare time in [q]. retrieve bid <= 7:00am. None, so blank
+
+/ 2. from [t], 2nd row = a. lookup a in [q],
+/ compare time in [q]. found 8:00am <= 8:30, so pull in bid = 1
+
+/ 3. from [t], 3rd row = b. lookup b in [q],
+/ compare time in [q]. found 9:00am <=9:59, so bid = 9
 ```
 
 ```q
+/ 2. As of Join Example 2 (AJ)
+
+/ create [new table fq] with columns [qtime] and [qsym]
+/ create [new table ft] with columns [ftime] and [fsym]
+
+/ (you essentially replicate time and sym columns)
+
 fq: update qtime:time, qsym:sym from q
 ft: update ftime:time, fsym:sym from t
-
-/ create new table fq with columns qtime and qsym
-/ create new table ft with columns ftime and fsym
 
 table ft:
 time    |sym| bid | size| ftime   | fsym
@@ -12342,14 +12359,25 @@ time    |sym| bid|  qtime | qsym
 08:00:00| a |  1 |08:00:00| a
 09:00:00| b |  9 |09:00:00| b
 10:00:00| a |  4 |10:00:00| a
+```q
+
+```q
+/ 2. Now retrieve the prevailing bid, qtime, and qsym from [table fq]
 
 aj [`sym`time;ft;fq]
+
+/ syntax: column 1 from ft, column 2 from ft
+/ ft = source table
+/ fq = lookup table
 
 time    |sym|price|size| ftime  |fsym| bid | qtime    | qsym
 ------------------------------------------------------------
 07:00:00| a | 0.9 | 100|07:00:00| a  |     |          |
 08:30:00| a | 1.5 | 200|08:30:00| a  |  1  | 08:00:00 |	a
 09:59:00| b | 1.9 | 300|09:59:00| b  |  9  | 09:00:00 |	b
+
+/ pulled in the prevailing data: bid, qtime, qsym from [fq]
+
 
 / aj0 is the same as aj, but uses the lookup tables time column
 ```
