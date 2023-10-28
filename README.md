@@ -12554,22 +12554,29 @@ time  | sym | price |       bid
 ```
 
 ```q
+/ 3. You can perform aggregations/functions on your retrieved data!
 
-wj[windows;`sym`time;t;(q;(::;`bid); (avg;`bid); (count;`bid))]
+/ using wj with a +/- 2 min time interval,
+/ match on sym and time
+/ and retrieve bids from lookup table
+/ also calc avg bid
+/ and count the number of bids
 
-/ can perform functions! 
+wj[windows; `sym`time; t; (q; (::;`bid); (avg;`bid); (count;`bid))]
+
+time        |sym|price|    bid    |bid | bid
+---------------------------------------------
+09:00:00.000| a |10.0 |   10f |10.3| 3
+09:04:00.000| a |11.0 | 11 11 13f |11.6| 3
+09:12:00.000| a |12.0 | 17 17 17f |17.0| 3
+09:13:00.000| a |13.0 | 17 17f	  |17.0| 2
+
 / so after returning all the bids ::
 / next column = retrieve avg bids 
 / next column = retrieve count of bids
 / notice how the column name doesnt change though
-
-time        |sym|price|    bid    |bid | bid
----------------------------------------------
-09:00:00.000| a |10.0 | 10 10 11f |10.3| 3
-09:04:00.000| a |11.0 | 11 11 13f |11.6| 3
-09:12:00.000| a |12.0 | 17 17 17f |17.0| 3
-09:13:00.000| a |13.0 | 17 17f	  |17.0| 2
 ```
+
 ```q
 wj vs wj1
 / wj pulls in prevailing values not within time window
