@@ -11376,6 +11376,76 @@ BAC |   small    | 3948
 / since this needs to match the agg fby sym
 ```
 
+**🔵 QSQL Problem Set 9 (Medium)**
+
+```q
+\l trades.q
+
+/ 1. From quote table, for each sym, find the number of times
+/ the bid went up, down, and stayed the same
+
+select up:count i where bid> prev bid, down:count i where bid < prev bid, same: count i where bid = prev bid by sym from quote
+
+sym  |	  up  |	down  |	same
+-----------------------------
+A    |	21581 |	21713 |	56397
+AA   |	21593 |	21514 |	56763
+AAPL |	21646 |	21736 |	57130
+B    |	21684 |	21719 |	57158
+BAC  |	21541 |	21689 |	56864
+C    |	21826 |	21951 |	57470
+
+/ takeaway here so comparing bid vs prev bid
+/ so prev is pretty important!
+```
+
+```q
+/ 2. From quote table, using a boolean, check that
+/ all bid prices are less than ask prices
+
+update pricecross: bid <= ask from quote
+
+time  | sym  |  size | cond |  bid  |   ask  | pricecross
+----------------------------------------------------------
+09:30 | MSFT |  1700 |  B   | 95.90 | 97.84  |          1      
+09:30 | A    | 50300 |  B   | 99.34 | 101.30 |          1      
+09:30 | A    | 50300 |  B   | 99.34 | 101.30 |          1      
+09:30 | B    | 92700 |  A   | 55.26 | 56.380 |          1      
+09:30 | B    | 92700 |  A   | 55.26 | 56.380 |          1      
+
+/ boolean 1 means true
+/ so all bids are indeed less than ask prices
+```
+
+```q
+/ 3. From quote, delete all trades after noon
+
+delete from quote where time > 12:00:00
+
+time  | sym  |  size | cond |  bid  |   ask  
+--------------------------------------------
+09:30 | MSFT |  1700 |  B   | 95.90 |  97.84
+09:30 | A    | 50300 |  B   | 99.34 | 101.30
+09:30 | A    | 50300 |  B   | 99.34 | 101.30     
+```
+
+```q
+/ 4. From trade, create a function that retrieves
+/ the max time between trades for input x
+
+f:{select timediff:max(time-prev time) by sym from trade where sym in x}
+f[`AAPL]
+
+sym  |    timediff
+-------------------
+AAPL | 00:01:05:023
+
+/ max (time - prev time) retrieves max time difference by sym
+
+```
+
+
+
 **🔵 QSQL Problem Set  (HARD)**
 
 ```q
