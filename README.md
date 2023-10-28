@@ -206,9 +206,9 @@
 ## 22. [qSQL Joins Problem Set](#qsqljoins_problem_set)
 
 ## 23. [Timeseries Tables Joins](#timeseries_joins)
-1. [Asof Time Join](#asof_join)
-2. [Union Time Join](#uniontime_join)
-3. [Window Time Join](#windowtime_join)
+1. [Asof Time Join - aj](#asof_join)
+2. [Union Time Join - uj](#uniontime_join)
+3. [Window Time Join - wj](#windowtime_join)
 
 ## 24. [Adverbs](#adverbs_header)
 1. [Each Both](#eachboth_adverbs)
@@ -12267,7 +12267,7 @@ dt         |  sym   | title                   | price
 [Top](#top)
 
 <a name="asof_join"></a>
-### 🔵 23.1 As of Join
+### 🔵 23.1 As of Join - aj
 
 ```q
 / from [source table], retrieve last value from [lookup table]
@@ -12383,7 +12383,7 @@ time    |sym|price|size| ftime  |fsym| bid | qtime    | qsym
 ```
 
 <a name="uniontime_join"></a>
-### 🔵23.2 Union Time Join
+### 🔵23.2 Union Time Join - uj
 ```q
 / union join combines ALL entries from both tables
 
@@ -12415,7 +12415,7 @@ time         | sym | bid | price | size
 ```
 
 <a name="windowtime_join"></a>
-### 🔵 23.3 Window Time Join
+### 🔵 23.3 Window Time Join - wj
 
 ```q
 / wj allows you to match columns from [source] to [lookup] tables
