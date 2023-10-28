@@ -12448,9 +12448,9 @@ time         | sym | bid | price | size
 / for example, 15 mins before trade occurred
 ```
 
-```q
-/ WJ Example One
+wj Example One
 
+```q
 t:([] time: 09:00 09:04 09:12 09:13; sym: `a`a`a`a; price: 10.0 11.0 12.0 13.0)
 
 q:([] time: 09:00 + til 13; sym: `a`a`a`a`a`b`b`b`a`a`a`a`a; bid: 10.0 10.0 11.0 13.0 13.0 14.0 14.0 15.0 15.0 17.0 17.0 18.0 18.0)
@@ -12522,6 +12522,25 @@ windows: t.time +\ -00:02 00:02
 ```
 
 ```q
+/ 1. Uneven window time intervals
+
+/ lets say you want to create time intervals that are -2 and +1
+/ from your time column
+/ hint - need to use EACH LEFT
+
+windows2: -2 1 +\: t.time
+
+08:58u;09:02u;09:10u;09:11u
+09:01u;09:05u;09:13u;09:14u
+
+/ +\: add each LEFT (top points left)
+/ syntax reminder: [x +\: y] will add entire x to each element of y
+/ so this takes entire LEFT (-2 and +1)
+/ and adds to every element of RIGHT (t.time)
+/ results in a 4 x 2 matrix of time intervals
+```
+
+```q
 / 2. Now plug in [windows] to your wj to match on sym and time
 / and retrieve the bids from lookup table
 
@@ -12575,6 +12594,68 @@ time        |sym|price|    bid    |bid | bid
 / next column = retrieve avg bids 
 / next column = retrieve count of bids
 / notice how the column name doesnt change though
+```
+
+wj Example Two
+
+```q
+t:([] sym:3#`ibm; time: 10:01:01 10:01:04 10:01:08; price: 100 101 105)
+
+sym |   time   | price
+----------------------
+ibm | 10:01:01 |  100
+ibm | 10:01:04 |  101
+ibm | 10:01:08 |  105
+
+q:([] sym:9#`ibm; time: 10:01:01 + til 9; ask: 101 103 103 104 104 107 108 107 108; bid: 98 99 102 103 103 104 106 106 107)
+
+sym |	time	| ask |	bid
+----------------------------
+ibm |  10:01:01 | 101 |	 98
+ibm |  10:01:02 | 103 |  99
+ibm |  10:01:03 | 103 |	102
+ibm |  10:01:04 | 104 |	103
+ibm |  10:01:05 | 104 |	103
+ibm |  10:01:06 | 107 |	104
+ibm |  10:01:07 | 108 |	106
+ibm |  10:01:08 | 107 |	106
+ibm |  10:01:09 | 108 |	107
+```
+
+```q
+/ 1. Create Window with time intervals -2 and +1 seconds
+/ from your source table t 
+
+/ first retrieve times from t
+
+w: t.time
+10:01:01v; 10:01:04v; 10:01:08v
+
+/ then add your intervals using each left
+
+w: -2 1 +\: t.time
+(10:00:59v; 10:01:02v; 10:01:06v)
+(10:01:02v; 10:01:05v; 10:01:09v)
+
+/ window time intervals created
+```
+
+```q
+/ 2. using wj and the window time interval you created,
+/ match the corresponding syms and times within your window intervals
+/ and retrieve the max ask and min bids
+
+wj[w;`sym`time;t;(q;(max;`ask);(min;`bid))]
+
+sym | time     | price | ask | bid
+-----------------------------------
+ibm | 10:01:01 |  100  | 103 |	 98
+ibm | 10:01:04 |  101  | 104 |	 99
+ibm | 10:01:08 |  105  | 108 |	104
+
+/ so matches on syms and checks if time from [table q]
+/ fit in the window intervals
+/ then retrieves max ask and min bid
 ```
 
 ```q
