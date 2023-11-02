@@ -11566,9 +11566,100 @@ time                   |  tenm  |  fifm  | across
 2023-11-02T08:03:25.24 | 35.873 | 36.025 |   true
 2023-11-02T08:03:29.47 | 36.575 | 36.027 |   true
 ```
+Problem Set 3
 
+```q
+/ 1. Find number of times a trade was below mid, above mid,
+/ and equal to mid price. Also find abs max diff btwn mid price
+/ and trade price for each sym
 
+/ thought process:
+/ need to first join the trades and quotes table
+/ trades has trade price
+/ while quotes has bid ask mid prices
 
+aj[`sym`time;trades;quotes]
+
+select from trades
+select from quotes
+
+t: update mid:(bid + ask) % 2 by sym from aj[`sym`time; trades; quotes]
+
+time	               |  sym | price |	size  |	 bid  |	 ask  |	bsize | asize|	 mid
+--------------------------------------------------------------------------------------
+2023-11-02T08:00:52.16 | GOOG | 41.37 |	 9184 |	41.33 |	41.37 |	10000 | 9500 |	41.349
+2023-11-02T08:00:52.16 | GOOG |	41.37 |	 9184 |	41.33 |	41.37 |	10000 | 9500 |	41.349
+2023-11-02T08:01:15.19 | DELL |	29.03 |	 1243 |	29.03 |	29.08 |	6000  | 8000 |	29.055
+2023-11-02T08:01:32.30 |  NOK |	31.82 |	 1803 |	31.8  |	31.82 |	8500  |	5000 |	31.812
+
+/ rename as table t
+
+select below: count i where price < mid, above: count i where price > mid, mid: count i where price = mid, diff: max (abs(mid - price)) by sym from t
+
+sym  | below |above| mid | diff
+--------------------------------
+AAPL |	109  | 104 |  2  | 0.03
+CSCO |	125  | 100 |  2  | 0.03
+DELL |	112  | 111 |  3  | 0.03
+GOOG |	113  | 111 |  6  | 0.03
+
+/ note - you want the MAX diff btwn price - mid
+/ so need to first get abs, then max
+```
+
+```q
+/ 2. Re-Write as a function
+
+midpr:{t: update mid:(bid + ask) % 2 by sym from aj[`sym`time; trades; quotes]; select below: count i where price < mid, above: count i where price > mid, mid: count i where price = mid, diff: max (abs(mid - price)) by sym from t
+
+midpr [ ]
+
+sym  | below |above| mid | diff
+--------------------------------
+AAPL |	109  | 104 |  2  | 0.03
+CSCO |	125  | 100 |  2  | 0.03
+DELL |	112  | 111 |  3  | 0.03
+GOOG |	113  | 111 |  6  | 0.03
+```
+
+Problem Set 4
+
+```q
+/ 1. Find avg price of each sym 5 mins after the hour for each hour in trades
+/ also add avg price of each sym in last 5 mins of each hour
+
+/ thought process:
+/ time is timestamp
+/ need to first cast as time (time.time)
+/ then use mod to eliminate the hours
+/ so you can compare the minutes
+
+/ hh.mm.ss.uuu
+/ 1000 (ms) * 60 (ss) * 60 (mm) = 3,600,000 ms = 1 hour
+
+ffive: select first5: avg price by sym, hour: time.hh from trades where (time.time mod 3600000) <= 00:05:00.000
+
+sym  | hour |  first5
+----------------------
+AAPL |	 8  |  25.321
+AAPL |	 9  |  25.195
+AAPL |	10  |  25.225
+AAPL |	11  |  25.326
+
+/ adds first 5, which is avg price less than 5 mins
+/ time mod 1 hour = strips away the HOUR, and only leaves the minutes
+/ time.time = need to first cast timestamp as time
+
+lfive: select first5: avg price by sym, hour: time.hh from trades where (time.time mod 3600000) >= 00:55:00.000
+
+sym  | hour |  first5
+----------------------
+AAPL |	 8  |  25.215
+AAPL |	 9  |   25.32
+AAPL |	10  |   25.36
+AAPL |	11  |   25.30
+
+```
 
 **🔵 QSQL Problem Set (HARD)**
 
