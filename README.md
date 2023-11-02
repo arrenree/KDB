@@ -11444,9 +11444,133 @@ AAPL | 00:01:05:023
 
 ```
 
+**🔵 QSQL Problem Set (HARD)**
+
+```q
+\l fakedb.q
+or
+\l makedb.q
+
+makedb[10000;2000]
+
+\a
+```
+
+Problem Set 1
+
+```q
+/ 1. Find time where price of each sym from trades changes by largest value
+
+/ thought process:
+/ from trade table, first add new column for absolute price change by sym
+/ then find the corresponding time for the max time change per sym
+
+t2: update pricediff:abs(price-(prev price)) by sym from trades
+t2
+
+time                       | sym  | src | price | size | pricediff
+------------------------------------------------------------------
+2023-11-02T12:34:14.624000 | DELL |  N  | 29.14 | 1927 |   0.14
+2023-11-02T16:14:10.491000 | CSCO |  L  | 35.14 |  956 |   0.14
+2023-11-02T08:29:32.678000 |  IBM |  N  | 43.68 |  706 |   0.12
+2023-11-02T10:25:08.432000 | YHOO |  O  | 35.61 | 1546 |   0.12
+2023-11-02T14:34:53.380000 | YHOO |  O  | 35.06 | 4484 |   0.12
+
+/ renamed table as t2 cuz need to reference this later
+
+/ now find the time where the price diff is max per sym
+
+select time where pricediff = max pricediff by sym from t2
+
+sym  |       pricediff
+--------------------------------
+AAPL | 2023-11-02T16:14:47.275000p
+CSCO | 2023-11-02T16:14:10.491000p
+DELL | 2023-11-02T12:34:14.624000p
+GOOG | 2023-11-02T09:20:09.866000p
+IBM  | 2023-11-02T08:29:32.678000p
+
+/ note syntax: the "from" is all the way at the end
+/ after the "where"
+/ the grouping "by" is AFTER the "where"
+```
+
+```q
+/ 2. Re-write query as a function
+
+f:{t2: update pricediff:abs(price-(prev price)) by sym from trades; select time where pricediff = max pricediff by sym from t2 where sym in x}
+
+f[`YHOO]
+
+sym  |       pricediff
+--------------------------------
+YHOO | (2023-11-02T10:25:08.432000p;2023-11-02T14:34:53.380000p)
+
+/ looks messy, but it's saying there's 2 times where YHOO had max price changes
+```
+
+Problem Set 2
+
+```q
+/ 1. Calc the 10 and 15 trade moving avg for each sym
+/ marking instances (using booleans) where values cross
+
+/ thought process:
+/ add col for 10 mavg (using built in function)
+/ add col for 15 mavg 
+
+t: select time, tenm:10 mavg price, fifm: 15 mavg price from trades
+
+time                   |   tenm  |   fifm
+------------------------------------------
+2023-11-02T08:00:02.58 |  36.050 |  36.050
+2023-11-02T08:00:07.84 |  34.115 |  34.115
+2023-11-02T08:00:52.16 |  36.533 |  36.533
+2023-11-02T08:01:15.19 |  34.657 |  34.657
+
+/ added new columns for 10 and 15 mvag
+/ renamed as table t
+
+/ now add in column to determine if values crossed over
+
+update across: (tenm > fifm) <> (prev tenm > fifm) from t
+
+time                   |  tenm  |  fifm  | across
+-------------------------------------------------
+2023-11-02T08:02:47.09 | 36.338 | 36.338 |  false
+2023-11-02T08:03:10.60 | 36.338 | 36.311 |   true
+2023-11-02T08:03:18.69 | 37.479 | 36.918 |  false
+2023-11-02T08:03:25.24 | 35.873 | 36.025 |   true
+2023-11-02T08:03:29.47 | 36.575 | 36.027 |   true
+
+/ update = add new column called across
+/ <> means NOT equals
+/ the <> boolean essentially means:
+/ if True <> True = entire statement is false (doesn't cross)
+/ if True <> False = entire statement is true (crosses over)
+/ if False <> True = entire statement is true (crosses over)
+```
+
+```q
+/ 3. Re-write as a function
+
+across:{t: select time, tenm:10 mavg price, fifm: 15 mavg price from trades where sym in x; update across: (tenm > fifm) <> (prev tenm > fifm) from t}
+
+across[`YHOO]
+
+time                   |  tenm  |  fifm  | across
+-------------------------------------------------
+2023-11-02T08:02:47.09 | 36.338 | 36.338 |  false
+2023-11-02T08:03:10.60 | 36.338 | 36.311 |   true
+2023-11-02T08:03:18.69 | 37.479 | 36.918 |  false
+2023-11-02T08:03:25.24 | 35.873 | 36.025 |   true
+2023-11-02T08:03:29.47 | 36.575 | 36.027 |   true
+```
 
 
-**🔵 QSQL Problem Set  (HARD)**
+
+
+**🔵 QSQL Problem Set (HARD)**
 
 ```q
 / load the trades.q script
