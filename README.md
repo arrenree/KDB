@@ -1693,6 +1693,35 @@ type
 s,:`ooo
 ```
 
+**🔵 3.6 KX Academy Problem Set**
+
+```q
+/ 1. What is the current timestamp?
+
+.z.p
+2024-01-12T05:28:02.671597p
+
+/ 1b. What datatype is this?
+
+type .z.p
+-12h
+
+/ neg means atom
+/ 12 h = timestamp
+```
+
+```q
+/ 2. Show a null long
+
+show nulllong:0Nj
+0N
+
+/ 2b. Show a null float
+
+show nullfloat: 0Nf
+0n
+```
+
 <hr>
 
 <a name="lists_header"></a>
